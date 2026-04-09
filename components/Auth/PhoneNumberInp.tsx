@@ -1,18 +1,20 @@
-import React, { useState } from 'react';
-import { View } from 'react-native';
-import PhoneInput, { ICountry } from 'react-native-international-phone-number';
+import React, { useState } from "react";
+import { View } from "react-native";
+import PhoneInput, { ICountry } from "react-native-international-phone-number";
 
 interface PhoneNumberInpProps {
   onPhoneNumberChange: (phoneNumber: string) => void;
 }
 
-export default function PhoneNumberInp({ onPhoneNumberChange }: PhoneNumberInpProps) {
+export default function PhoneNumberInp({
+  onPhoneNumberChange,
+}: PhoneNumberInpProps) {
   const [selectedCountry, setSelectedCountry] = useState<null | ICountry>(null);
-  const [inputValue, setInputValue] = useState<string>('');
+  const [inputValue, setInputValue] = useState<string>("");
 
   function handleInputValue(phoneNumber: string) {
     setInputValue(phoneNumber);
-    onPhoneNumberChange(phoneNumber); // Pass the value to the main component
+    onPhoneNumberChange(phoneNumber);
   }
 
   function handleSelectedCountry(country: ICountry) {
@@ -26,27 +28,28 @@ export default function PhoneNumberInp({ onPhoneNumberChange }: PhoneNumberInpPr
         onChangePhoneNumber={handleInputValue}
         selectedCountry={selectedCountry}
         onChangeSelectedCountry={handleSelectedCountry}
-        defaultCountry='KE'
+        defaultCountry="KE"
         phoneInputStyles={{
           container: {
-            borderWidth: 1,
-            borderStyle: 'solid',
-            borderColor: '#D1D5DB',
+            borderWidth: 0,
+            backgroundColor: "transparent",
+            height: 54,
           },
           flagContainer: {
-            borderTopLeftRadius: 7,
-            borderBottomLeftRadius: 7,
-            backgroundColor: '#F8F9FA',
-            justifyContent: 'center',
+            backgroundColor: "transparent",
+            justifyContent: "center",
           },
-          flag: {},
           caret: {
-            color: '#000',
+            color: "#6B7280",
             fontSize: 16,
           },
           divider: {
-            backgroundColor: '#D1D5DB',
-          }
+            backgroundColor: "#E5E7EB",
+          },
+          input: {
+            color: "#111827",
+            fontSize: 16,
+          },
         }}
       />
     </View>

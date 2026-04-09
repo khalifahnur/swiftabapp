@@ -33,8 +33,6 @@ export function usePaymentHook() {
       router.push("/(tabs)");
     },
     onError: (error) => {
-      // Handle errors
-      console.error("Failed to initiate payment:", error.message);
       Toast.show({
         type: "error",
         text2: "Payment initiation error : Please try again.",

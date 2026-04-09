@@ -1,35 +1,47 @@
-import { color } from '@/constants/Colors';
-import { useCartStore } from '@/store/useOrderStore';
-import { MenuItem } from '@/types';
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
 import {
-  FlatList, Image,
+  FlatList,
+  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+  View,
+} from "react-native";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
+import { useCartStore } from "@/store/useOrderStore";
+import { MenuItem } from "@/types";
 
-const formatCurrency = (amount: number) => 
-  `KES ${amount.toLocaleString()}`;
+const formatCurrency = (amount: number) => `KES ${amount.toLocaleString()}`;
 
-
-const MenuTabs = ({ activeTab, setActiveTab }: { activeTab: string, setActiveTab: (t: string) => void }) => {
-  const tabs = ['breakfast', 'lunch', 'dinner'];
+const MenuTabs = ({
+  activeTab,
+  setActiveTab,
+}: {
+  activeTab: string;
+  setActiveTab: (t: string) => void;
+}) => {
+  const tabs = ["breakfast", "lunch", "dinner"];
   return (
-    <View style={styles.tabContainer}>
+    <View className="flex-row bg-gray-200/60 p-1 rounded-2xl mx-6 mb-6">
       {tabs.map((tab) => (
         <TouchableOpacity
           key={tab}
           onPress={() => setActiveTab(tab)}
-          style={[styles.tab, activeTab === tab && styles.activeTab]}
+          style={[
+            styles.tabBase,
+            activeTab === tab ? styles.tabActive : styles.tabInactive,
+          ]}
         >
-          <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+          <Text
+            className={`font-bold capitalize ${activeTab === tab ? "text-teal-600" : "text-gray-500"}`}
+          >
+            {tab}
           </Text>
         </TouchableOpacity>
       ))}
@@ -37,37 +49,61 @@ const MenuTabs = ({ activeTab, setActiveTab }: { activeTab: string, setActiveTab
   );
 };
 
-
 const FoodCard = ({ item }: { item: MenuItem }) => {
   const { addToCart, removeFromCart, getItemQuantity } = useCartStore();
   const quantity = getItemQuantity(item._id);
 
   return (
-    <View style={styles.card}>
-      <Image source={{ uri: item.image }} style={styles.cardImage} />
-      
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{item.name}</Text>
-        <Text style={styles.cardDesc} numberOfLines={2}>{item.description}</Text>
-        <Text style={styles.cardPrice}>{formatCurrency(item.cost)}</Text>
+    <View className="flex-row bg-white rounded-3xl p-3 mb-4 shadow-sm border border-gray-100 mx-6 items-center">
+      <Image
+        source={{ uri: item.image }}
+        className="w-24 h-24 rounded-2xl bg-gray-100 mr-4"
+        resizeMode="cover"
+      />
+
+      <View className="flex-1 justify-center py-1">
+        <Text
+          className="font-bold text-gray-900 text-base mb-1"
+          numberOfLines={1}
+        >
+          {item.name}
+        </Text>
+        <Text
+          className="font-regular text-gray-500 text-xs leading-4 mb-2"
+          numberOfLines={2}
+        >
+          {item.description}
+        </Text>
+        <Text className="font-bold text-teal-600 text-sm">
+          {formatCurrency(item.cost)}
+        </Text>
       </View>
 
-      <View style={styles.controls}>
+      <View className="ml-2">
         {quantity > 0 ? (
-          <>
-            <TouchableOpacity onPress={() => removeFromCart(item._id)} style={styles.btnMinus}>
-              <Ionicons name="remove" size={18} color={color.green} />
+          <View className="flex-col items-center bg-gray-50 rounded-full border border-gray-200 py-1">
+            <TouchableOpacity
+              onPress={() => addToCart(item)}
+              className="w-8 h-8 items-center justify-center bg-teal-600 rounded-full shadow-sm"
+            >
+              <Ionicons name="add" size={16} color="#fff" />
             </TouchableOpacity>
-            
-            <Text style={styles.qtyText}>{quantity}</Text>
-            
-            <TouchableOpacity onPress={() => addToCart(item)} style={styles.btnPlus}>
-              <Ionicons name="add" size={18} color="white" />
+
+            <Text className="font-bold text-gray-900 my-1">{quantity}</Text>
+
+            <TouchableOpacity
+              onPress={() => removeFromCart(item._id)}
+              className="w-8 h-8 items-center justify-center"
+            >
+              <Ionicons name="remove" size={16} color="#0d9488" />
             </TouchableOpacity>
-          </>
+          </View>
         ) : (
-          <TouchableOpacity onPress={() => addToCart(item)} style={styles.btnAdd}>
-            <Ionicons name="add" size={20} color={color.white} />
+          <TouchableOpacity
+            onPress={() => addToCart(item)}
+            className="w-10 h-10 bg-teal-50 rounded-full items-center justify-center border border-teal-100"
+          >
+            <Ionicons name="add" size={20} color="#0d9488" />
           </TouchableOpacity>
         )}
       </View>
@@ -75,45 +111,92 @@ const FoodCard = ({ item }: { item: MenuItem }) => {
   );
 };
 
+export default function MenuScreen({
+  menuData,
+  restaurantId,
+  userId,
+  reservationId,
+  tableNumber,
+}: {
+  menuData: any;
+  restaurantId: string;
+  userId: string;
+  reservationId: string;
+  tableNumber: string;
+}) {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const [activeTab, setActiveTab] = useState("breakfast");
 
-export default function MenuScreen({menuData}) {
-  const [activeTab, setActiveTab] = useState('breakfast');
-  
   const totalPrice = useCartStore((state) => state.getTotalPrice());
   const cartItemCount = useCartStore((state) => state.items.length);
 
   const currentItems = menuData[activeTab] || [];
-  const router = useRouter();
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1 bg-gray-50" edges={["top"]}>
+      <View className="flex-row items-center px-6 py-4 bg-gray-50">
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="w-10 h-10 bg-white rounded-full items-center justify-center shadow-sm border border-gray-200"
+        >
+          <Ionicons name="arrow-back" size={20} color="#111827" />
+        </TouchableOpacity>
+        <Text className="flex-1 text-center font-bold text-xl text-gray-900 mr-10">
+          Pre-Order
+        </Text>
+      </View>
+
       <MenuTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <FlatList
         data={currentItems}
         keyExtractor={(item) => item._id}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={{ paddingBottom: cartItemCount > 0 ? 120 : 40 }}
         renderItem={({ item }) => <FoodCard item={item} />}
         showsVerticalScrollIndicator={false}
-      />
-      {cartItemCount > 0 && (
-        <View style={styles.cartContainer}>
-          <View style={styles.cartInfo}>
-            <View style={styles.cartBadge}>
-              <Text style={styles.cartBadgeText}>{cartItemCount}</Text>
-            </View>
-            <View>
-              <Text style={styles.cartLabel}>Total</Text>
-              <Text style={styles.cartTotal}>{formatCurrency(totalPrice)}</Text>
-            </View>
+        ListEmptyComponent={
+          <View className="items-center justify-center py-20 px-6">
+            <Ionicons name="restaurant-outline" size={48} color="#D1D5DB" />
+            <Text className="text-gray-500 font-medium mt-4 text-center">
+              No items available for {activeTab}.
+            </Text>
           </View>
+        }
+      />
 
-          <TouchableOpacity 
-            style={styles.checkoutBtn} 
-            onPress={() => router.navigate('/cart')}
+      {cartItemCount > 0 && (
+        <View
+          className="absolute bottom-0 mb-5 w-full bg-white border-t border-gray-100 px-6 pt-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]"
+          style={{ paddingBottom: Math.max(insets.bottom, 20) }}
+        >
+          <TouchableOpacity
+            className="flex-row items-center bg-teal-600 rounded-lg p-4 shadow-sm"
+            onPress={() =>
+              router.navigate({
+                pathname: "/screens/cart",
+                params: {
+                  restaurantId,
+                  userId,
+                  reservationId,
+                  tableNumber,
+                },
+              })
+            }
           >
-            <Text style={styles.checkoutText}>View Cart</Text>
-            <Ionicons name="arrow-forward" size={20} color="white" />
+            <View className="bg-teal-700/50 rounded-full w-8 h-8 items-center justify-center border border-teal-500">
+              <Text className="text-white font-bold text-xs">
+                {cartItemCount}
+              </Text>
+            </View>
+
+            <Text className="flex-1 text-center text-white font-bold text-lg">
+              View Cart
+            </Text>
+
+            <Text className="text-white font-bold text-base">
+              {formatCurrency(totalPrice)}
+            </Text>
           </TouchableOpacity>
         </View>
       )}
@@ -122,179 +205,21 @@ export default function MenuScreen({menuData}) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F8F9FA',
-  },
-  header: {
-    paddingHorizontal: 20,
-    backgroundColor: '#fff',
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#333',
-  },
-  
-  tabContainer: {
-    flexDirection: 'row',
-    marginBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  tab: {
+  tabBase: {
     flex: 1,
     paddingVertical: 12,
-    alignItems: 'center',
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-  },
-  activeTab: {
-    borderBottomColor: color.green,
-  },
-  tabText: {
-    color: '#888',
-    fontWeight: '600',
-  },
-  activeTabText: {
-    color: color.green,
-  },
-
-  listContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 100,
-  },
-
-  card: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    marginBottom: 16,
-    padding: 12,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  cardImage: {
-    width: 80,
-    height: 80,
     borderRadius: 12,
-    backgroundColor: '#eee',
+    alignItems: "center",
   },
-  cardContent: {
-    flex: 1,
-    marginLeft: 15,
-    marginRight: 10,
+  tabActive: {
+    backgroundColor: "#FFFFFF",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 4,
-  },
-  cardDesc: {
-    fontSize: 12,
-    color: '#888',
-    marginBottom: 8,
-  },
-  cardPrice: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: color.green,
-  },
-
-  controls: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  btnAdd: {
-    width: 35,
-    height: 35,
-    borderRadius: 18,
-    backgroundColor: color.green,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  btnPlus: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#000',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  btnMinus: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#000',
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  qtyText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginVertical: 6,
-  },
-  cartContainer: {
-    position: 'absolute',
-    bottom: 30,
-    left: 20,
-    right: 20,
-    backgroundColor: color.green,
-    borderRadius: 50,
-    paddingVertical: 15,
-    paddingHorizontal: 25,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 10,
-  },
-  cartInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  cartBadge: {
-    backgroundColor: '#FF4500',
-    width: 25,
-    height: 25,
-    borderRadius: 12.5,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  cartBadgeText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 12,
-  },
-  cartLabel: {
-    color: '#aaa',
-    fontSize: 10,
-    textTransform: 'uppercase',
-  },
-  cartTotal: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  checkoutBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  checkoutText: {
-    color: '#fff',
-    fontWeight: '600',
-    marginRight: 5,
-    fontSize: 16,
+  tabInactive: {
+    backgroundColor: "transparent",
   },
 });

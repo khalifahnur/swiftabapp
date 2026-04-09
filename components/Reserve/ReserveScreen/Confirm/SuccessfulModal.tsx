@@ -1,118 +1,106 @@
-import { color } from '@/constants/Colors';
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
-import React from 'react';
-import {
-  Dimensions,
-  Modal,
-  Platform,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
-} from 'react-native';
+import React from "react";
+import { Modal, Text, TouchableOpacity, View } from "react-native";
 
 interface SuccessModalProps {
   visible: boolean;
   handleModalVisible: () => void;
-  reservationDetails: {
-    responseData: {
-      reservationId: string;
-      name: string;
-      date: string;
-      time: string;
-      duration: string;
-      guest: number;
-      tableNumber: string;
-    }
-  } | null;
+  reservationDetails: any;
 }
 
-const { width } = Dimensions.get('window');
-
 const SuccessModal: React.FC<SuccessModalProps> = ({
-  visible, 
-  handleModalVisible, 
-  reservationDetails 
+  visible,
+  handleModalVisible,
+  reservationDetails,
 }) => {
   const router = useRouter();
 
   if (!reservationDetails) return null;
+  const resData = reservationDetails.responseData;
 
-  const handleViewTicket = () => {
-    router.replace('/(tabs)');
-    handleModalVisible();
-  }
+  // const handleViewTicket = () => {
+  //   handleModalVisible();
+  //   router.replace({
+  //     pathname: "/modal",
+  //     params: { restaurantId: resData.restaurantId },
+  //   });
+  // };
 
   const handleViewBookings = () => {
-    router.replace('/(tabs)/(toptabs)');
     handleModalVisible();
-  }
+    router.replace("/(tabs)/(toptabs)");
+  };
 
   return (
     <Modal
-      animationType="slide"
+      animationType="fade"
       transparent={true}
       visible={visible}
       onRequestClose={handleModalVisible}
     >
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <TouchableOpacity 
-            style={styles.closeButton} 
-            onPress={handleModalVisible}
-          >
-            <Ionicons name="close" size={24} color="#2C3E50" />
-          </TouchableOpacity>
-
+      <View className="flex-1 justify-center items-center bg-black/60 px-4">
+        <View className="w-full max-w-sm bg-white rounded-3xl p-6 items-center shadow-xl">
           {/* Success Animation */}
-          <View style={styles.iconContainer}>
+          <View className="w-32 h-32 mb-2">
             <LottieView
               source={require("@/assets/images/lottie/success.json")}
               autoPlay
               loop={false}
-              style={styles.lottieAnimation}
+              style={{ width: "100%", height: "100%" }}
             />
           </View>
 
-          <Text style={styles.title}>Reservation Confirmed!</Text>
-          <Text style={styles.subtitle}>
+          <Text className="text-2xl font-bold text-gray-900 mb-2 text-center">
+            Confirmed!
+          </Text>
+          <Text className="text-base text-gray-500 mb-6 text-center leading-5">
             Your table has been successfully reserved.
           </Text>
-          
-          {/* Reservation Details */}
-          <View style={styles.detailsContainer}>
-            {[
-              { label: "Reservation ID", value: reservationDetails.responseData.reservationId },
-              { label: "Name", value: reservationDetails.responseData.name },
-              { label: "Date", value: reservationDetails.responseData.date },
-              { label: "Time", value: reservationDetails.responseData.time },
-              { label: "Duration", value: `${reservationDetails.responseData.duration} Hrs` },
-              { label: "Guests", value: reservationDetails.responseData.guest.toString() },
-              { label: "Table Number", value: reservationDetails.responseData.tableNumber },
-            ].map((detail, index) => (
-              <DetailRow 
-                key={index} 
-                label={detail.label} 
-                value={detail.value} 
-              />
-            ))}
-          </View>
 
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity 
-              style={styles.primaryButton} 
+          <View className="w-full bg-gray-50 rounded-2xl p-4 mb-6 border border-gray-100">
+            <View className="flex-row justify-between mb-2">
+              <Text className="text-gray-500 font-medium text-xs">Date</Text>
+              <Text className="text-gray-900 font-bold text-xs">
+                {resData.date}
+              </Text>
+            </View>
+            <View className="flex-row justify-between mb-2">
+              <Text className="text-gray-500 font-medium text-xs">Time</Text>
+              <Text className="text-gray-900 font-bold text-xs">
+                {resData.time}
+              </Text>
+            </View>
+            <View className="flex-row justify-between mb-2">
+              <Text className="text-gray-500 font-medium text-xs">Guests</Text>
+              <Text className="text-gray-900 font-bold text-xs">
+                {resData.guest} People
+              </Text>
+            </View>
+            <View className="flex-row justify-between">
+              <Text className="text-gray-500 font-medium text-xs">Table</Text>
+              <Text className="text-teal-700 font-bold text-xs">
+                #{resData.tableNumber}
+              </Text>
+            </View>
+          </View>
+          <View className="w-full gap-3">
+            {/* <TouchableOpacity
+              className="w-full bg-teal-600 py-4 rounded-xl items-center"
               onPress={handleViewTicket}
             >
-              <Text style={styles.buttonText}>Pre-Order Menu</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={styles.secondaryButton}
+              <Text className="text-white text-base font-bold">
+                Pre-Order Food
+              </Text>
+            </TouchableOpacity> */}
+
+            <TouchableOpacity
+              className="w-full bg-teal-50 border border-teal-100 py-4 rounded-xl items-center"
               onPress={handleViewBookings}
             >
-              <Text style={styles.secondaryButtonText}>View Bookings</Text>
+              <Text className="text-teal-700 text-base font-bold">
+                View My Bookings
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -120,120 +108,5 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
     </Modal>
   );
 };
-
-const DetailRow: React.FC<{ label: string; value: string }> = ({ label, value }) => (
-  <View style={styles.detailRow}>
-    <Text style={styles.label}>{label}</Text>
-    <Text style={styles.value}>{value}</Text>
-  </View>
-);
-
-const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 25,
-    width: width * 0.9,
-    alignItems: 'center',
-    position: 'relative',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 5,
-      },
-      android: {
-        elevation: 8,
-      },
-    }),
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 15,
-    right: 15,
-    zIndex: 10,
-  },
-  iconContainer: {
-    marginBottom: 20,
-    width: 150,
-    height: 150,
-  },
-  lottieAnimation: {
-    width: '100%',
-    height: '100%',
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#2C3E50',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#7F8C8D',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  detailsContainer: {
-    width: '100%',
-    marginBottom: 20,
-    backgroundColor: '#F7F7F7',
-    borderRadius: 12,
-    padding: 15,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
-  },
-  label: {
-    color: '#2C3E50',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  value: {
-    color: '#34495E',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  buttonContainer: {
-    width: '100%',
-    gap: 15,
-  },
-  primaryButton: {
-    backgroundColor: color.green,
-    padding: 15,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  secondaryButton: {
-    backgroundColor: 'transparent',
-    borderWidth: 2,
-    borderColor: color.green,
-    padding: 15,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  secondaryButtonText: {
-    color: color.green,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});
 
 export default SuccessModal;

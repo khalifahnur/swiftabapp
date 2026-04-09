@@ -1,13 +1,7 @@
-import { color } from "@/constants/Colors";
 import useStore from "@/store/useStore";
-import { AntDesign } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function GuestTab() {
   const { guestCount, setGuestCount } = useStore();
@@ -17,73 +11,64 @@ export default function GuestTab() {
     setGuestCount(guestCount > 1 ? guestCount - 1 : guestCount);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Total Guests</Text>
-      <View style={styles.subContainer}>
-        <TouchableOpacity
-          style={[
-            styles.minBtn,
-            { backgroundColor: guestCount > 1 ? color.green : color.gray },
-          ]}
-          activeOpacity={0.5}
-          onPress={handleSub}
-        >
-          <AntDesign
-            name="minus"
-            size={20}
-            color={guestCount > 1 ? color.white : color.gray}
-          />
-        </TouchableOpacity>
-        <View style={styles.holder}>
-          <Text style={styles.txt}>{guestCount}</Text>
+    <View className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 mb-6">
+      <View className="flex-row justify-between items-center">
+        <View>
+          <Text className="text-lg font-bold text-gray-900">Guests</Text>
+          <Text className="text-sm font-medium text-gray-500 mt-1">
+            Number of people
+          </Text>
         </View>
 
-        <TouchableOpacity
-          style={styles.addBtn}
-          activeOpacity={0.5}
-          onPress={handleAdd}
-        >
-          <AntDesign name="plus" size={20} color={"#fff"} />
-        </TouchableOpacity>
+        <View className="flex-row items-center bg-gray-50 rounded-2xl p-1 border border-gray-200">
+          <TouchableOpacity
+            style={[
+              styles.buttonBase,
+              guestCount > 1 ? styles.buttonActive : styles.buttonInactive,
+            ]}
+            onPress={handleSub}
+            disabled={guestCount <= 1}
+          >
+            <Ionicons
+              name="remove"
+              size={20}
+              color={guestCount > 1 ? "#111827" : "#9CA3AF"}
+            />
+          </TouchableOpacity>
+
+          <Text className="w-10 text-center font-bold text-lg text-gray-900">
+            {guestCount}
+          </Text>
+
+          <TouchableOpacity
+            className="w-10 h-10 rounded-xl items-center justify-center bg-white shadow-sm"
+            onPress={handleAdd}
+          >
+            <Ionicons name="add" size={20} color="#111827" />
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 10,
-    marginTop: 5,
-
+  buttonBase: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  subContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  buttonActive: {
+    backgroundColor: "#FFFFFF",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  minBtn: {
-    padding: 10,
-    borderRadius: 4,
-  },
-  addBtn: {
-    backgroundColor: color.green,
-    padding: 10,
-    borderRadius: 4,
-  },
-  holder: {
-    backgroundColor: color.gray,
-    padding: 10,
-    borderRadius: 4,
-    width: "50%",
-  },
-  txt: {
-    textAlign: "center",
-    fontSize: 15,
-    fontWeight: "500",
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 4,
+  buttonInactive: {
+    backgroundColor: "transparent",
   },
 });

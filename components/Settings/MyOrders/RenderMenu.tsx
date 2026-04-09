@@ -1,121 +1,105 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React from 'react'
-import { calculateTotal, formatCurrency, formatDate, getPaymentColor, getStatusColor } from '@/lib/helpers';
-import { Ionicons } from '@expo/vector-icons';
+import { FetchOrder } from "@/types";
+import { Ionicons } from "@expo/vector-icons";
+import React from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 
-export default function RenderMenu({ item, setSelectedOrder, setIsViewingDetails }) {
-  if (!item) return null; // Prevent crashes if item is undefined
-
-  const total = calculateTotal(item.menu || []); // Ensure menu is an array
-  return (
-    <TouchableOpacity
-      style={styles.orderCard}
-      onPress={() => {
-        setSelectedOrder(item);
-        setIsViewingDetails(true);
-      }}
-    >
-      <View style={styles.orderCardHeader}>
-        <Text style={styles.orderCardId}>{item.orderId}</Text>
-        <Text style={styles.orderCardDate}>{formatDate(item.createdAt)}</Text>
-      </View>
-
-      <View style={styles.orderCardInfo}>
-        <View>
-          <Text style={styles.orderCardInfoLabel}>Table</Text>
-          <Text style={styles.orderCardInfoValue}>{item.tableNumber}</Text>
-        </View>
-        <View>
-          <Text style={styles.orderCardInfoLabel}>Items</Text>
-          <Text style={styles.orderCardInfoValue}>{item.menu ? item.menu.length : 0}</Text>
-        </View>
-        <View>
-          <Text style={styles.orderCardInfoLabel}>Total</Text>
-          <Text style={styles.orderCardInfoValue}>{formatCurrency(total)}</Text>
-        </View>
-      </View>
-
-      <View style={styles.orderCardStatus}>
-        <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
-          <Ionicons
-            name={item.status === "Served" ? "checkmark-circle" : "time-outline"}
-            size={16}
-            color="#fff"
-          />
-          <Text style={styles.statusText}>{item.status}</Text>
-        </View>
-        <View style={[styles.statusBadge, { backgroundColor: getPaymentColor(item.paid) }]}>
-          <Ionicons
-            name={item.paid === "Paid" ? "wallet-outline" : "time-outline"}
-            size={16}
-            color="#fff"
-          />
-          <Text style={styles.statusText}>{item.paid}</Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
+interface RenderMenuProps {
+  item: FetchOrder;
+  activeTab: string;
+  onOpenPayment: (orderId: string) => void;
 }
 
+const getStatusBadge = (status: string) => {
+  switch (status) {
+    case "placed":
+      return {
+        bg: "bg-orange-100",
+        text: "text-orange-600",
+        label: "In Kitchen",
+      };
+    case "served":
+      return { bg: "bg-blue-100", text: "text-blue-600", label: "Served" };
+    case "ready_to_pay":
+      return {
+        bg: "bg-purple-100",
+        text: "text-purple-600",
+        label: "Awaiting Payment",
+      };
+    case "completed":
+      return { bg: "bg-green-100", text: "text-green-600", label: "Completed" };
+    case "cancelled":
+      return { bg: "bg-red-100", text: "text-red-600", label: "Cancelled" };
+    default:
+      return { bg: "bg-gray-100", text: "text-gray-600", label: status };
+  }
+};
 
-const styles = StyleSheet.create({
-    orderCard: {
-        backgroundColor: "#fff",
-        margin: 16,
-        marginBottom: 12,
-        borderRadius: 16,
-        padding: 16,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-        elevation: 3,
-      },
-      orderCardHeader: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        marginBottom: 12,
-      },
-      orderCardId: {
-        fontSize: 16,
-        fontWeight: "bold",
-        color: "#212529",
-      },
-      orderCardDate: {
-        fontSize: 14,
-        color: "#6c757d",
-      },
-      orderCardInfo: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        marginBottom: 16,
-      },
-      orderCardInfoLabel: {
-        fontSize: 12,
-        color: "#6c757d",
-        marginBottom: 4,
-      },
-      orderCardInfoValue: {
-        fontSize: 15,
-        fontWeight: "600",
-        color: "#212529",
-      },
-      orderCardStatus: {
-        flexDirection: "row",
-      },
-      statusBadge: {
-        paddingVertical: 6,
-        paddingHorizontal: 12,
-        borderRadius: 20,
-        marginRight: 8,
-        flexDirection: "row",
-        alignItems: "center",
-      },
-      statusText: {
-        color: "#fff",
-        fontWeight: "bold",
-        fontSize: 12,
-        marginLeft: 4,
-      },
-      
-})
+export default function RenderMenu({
+  item,
+  activeTab,
+  onOpenPayment,
+}: RenderMenuProps) {
+  const currentStatus = item.status;
+  const badge = getStatusBadge(currentStatus);
+  const isServed = currentStatus === "served";
+
+  return (
+    <View className="bg-white p-5 rounded-lg mb-4 shadow-sm border border-gray-100 mx-5">
+      <View className="flex-row justify-between items-start mb-3">
+        <View className="flex-1 mr-2">
+          <Text className="text-lg font-bold text-gray-800" numberOfLines={1}>
+            {item.restaurantName || "Restaurant"}
+          </Text>
+          <Text className="text-gray-500 text-sm mt-1">
+            Table: {item.tableNumber} • ID: #{item._id?.substring(0, 8)}
+          </Text>
+        </View>
+        <View className={`px-3 py-1.5 rounded-xl ${badge.bg}`}>
+          <Text className={`text-xs font-bold ${badge.text}`}>
+            {badge.label}
+          </Text>
+        </View>
+      </View>
+
+      <View className="h-px bg-gray-100 my-2" />
+
+      <View className="my-2">
+        {item.menu?.map((menuItem: any, idx: number) => (
+          <View key={idx} className="flex-row justify-between mb-1">
+            <Text className="text-gray-600 flex-1 mr-4" numberOfLines={1}>
+              {menuItem.quantity} x {menuItem.name}
+            </Text>
+            <Text className="text-gray-800 font-medium">
+              Ksh. {(menuItem.cost * menuItem.quantity).toLocaleString()}
+            </Text>
+          </View>
+        ))}
+      </View>
+
+      <View className="h-px bg-gray-100 my-2" />
+
+      <View className="flex-row justify-between items-center mt-2">
+        <Text className="text-gray-500 font-medium">Total</Text>
+        <Text className="text-lg font-bold text-gray-900">
+          Ksh. {item.totalAmount?.toLocaleString()}
+        </Text>
+      </View>
+      {isServed && activeTab === "active" && (
+        <TouchableOpacity
+          onPress={() => onOpenPayment(item._id)}
+          className="bg-teal-600 mt-4 py-3 rounded-lg flex-row justify-center items-center shadow-sm"
+        >
+          <Ionicons
+            name="wallet-outline"
+            size={20}
+            color="white"
+            className="mr-2"
+          />
+          <Text className="text-white font-bold text-base ml-2">
+            Complete Order
+          </Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+}

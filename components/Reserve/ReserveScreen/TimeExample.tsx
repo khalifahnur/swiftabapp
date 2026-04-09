@@ -1,31 +1,22 @@
-import { color } from "@/constants/Colors";
 import useStore from "@/store/useStore";
-import React, { useCallback, useState } from "react";
-import { Alert, Button, StyleSheet, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import React, { useState } from "react";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 
-const PICKER_MODE = {
-  START: "start",
-  END: "end",
-};
+const PICKER_MODE = { START: "start", END: "end" };
 
-const formatTime = (isoString) => {
-  if (!isoString) return "--:--";
-  const date = new Date(isoString);
+const formatTime = (date: Date) => {
   const hours = date.getHours().toString().padStart(2, "0");
   const minutes = date.getMinutes().toString().padStart(2, "0");
   return `${hours}:${minutes}`;
 };
 
-const getTimeOnly = (date) => {
-  return date.getHours() * 60 + date.getMinutes();
-};
-
-const TimeExample = () => {
+export default function TimeExample() {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [pickerMode, setPickerMode] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
+  const [startObj, setStartObj] = useState<Date | null>(null);
+
   const {
     selectedStartTime,
     setSelectedStartTime,
@@ -33,104 +24,95 @@ const TimeExample = () => {
     setSelectedEndTime,
   } = useStore();
 
-  const showDatePicker = useCallback((mode) => {
+  const showDatePicker = (mode: string) => {
     setPickerMode(mode);
     setDatePickerVisibility(true);
-  }, []);
+  };
 
-  const hideDatePicker = useCallback(() => {
-    setDatePickerVisibility(false);
-  }, []);
-
-  const handleConfirm = useCallback(
-    (time) => {
-      const newTime = time.toISOString();
-      const newTimeMinutes = getTimeOnly(time);
-      
-      if (pickerMode === PICKER_MODE.START) {
-        const endTimeMinutes = endTime ? getTimeOnly(new Date(endTime)) : null;
-        if (endTime && newTimeMinutes >= endTimeMinutes) {
-          Alert.alert("Invalid Time", "Start time must be before end time.");
-          hideDatePicker();
-          return;
-        }
-        setStartTime(newTime);
-        setSelectedStartTime(formatTime(newTime));
-      } else {
-        const startTimeMinutes = startTime ? getTimeOnly(new Date(startTime)) : null;
-        if (startTime && newTimeMinutes <= startTimeMinutes) {
-          Alert.alert("Invalid Time", "End time must be after start time.");
-          hideDatePicker();
-          return;
-        }
-        setEndTime(newTime);
-        setSelectedEndTime(formatTime(newTime));
+  const handleConfirm = (time: Date) => {
+    if (pickerMode === PICKER_MODE.START) {
+      setStartObj(time);
+      setSelectedStartTime(formatTime(time));
+      // Auto-clear end time if it's invalid now
+      setSelectedEndTime("");
+    } else {
+      if (startObj && time <= startObj) {
+        Alert.alert("Invalid Time", "End time must be after start time.");
+        setDatePickerVisibility(false);
+        return;
       }
-      hideDatePicker();
-    },
-    [pickerMode, startTime, endTime, setSelectedStartTime, setSelectedEndTime, hideDatePicker]
-  );
-
-  const clearTimes = useCallback(() => {
-    setStartTime(null);
-    setEndTime(null);
-    setSelectedStartTime(null);
-    setSelectedEndTime(null);
-  }, [setSelectedStartTime, setSelectedEndTime]);
+      setSelectedEndTime(formatTime(time));
+    }
+    setDatePickerVisibility(false);
+  };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.buttonContainer}>
-        <Button
-          title="Pick Start Time"
+    <View className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 mb-6">
+      <View className="flex-row justify-between items-center mb-4">
+        <Text className="text-lg font-bold text-gray-900">Time</Text>
+        {(selectedStartTime || selectedEndTime) && (
+          <TouchableOpacity
+            onPress={() => {
+              setSelectedStartTime("");
+              setSelectedEndTime("");
+              setStartObj(null);
+            }}
+          >
+            <Text className="text-teal-600 font-medium text-sm">Clear</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
+      <View className="flex-row gap-4">
+        <TouchableOpacity
+          className={`flex-1 flex-row items-center justify-between p-4 rounded-2xl border ${selectedStartTime ? "border-teal-600 bg-teal-50" : "border-gray-200 bg-gray-50"}`}
           onPress={() => showDatePicker(PICKER_MODE.START)}
-          accessibilityLabel="Pick start time"
-          color={color.green}
-        />
-        <Button
-          title="Pick End Time"
+        >
+          <View>
+            <Text className="text-xs font-medium text-gray-500 mb-1">
+              Start Time
+            </Text>
+            <Text
+              className={`font-bold ${selectedStartTime ? "text-teal-700" : "text-gray-900"}`}
+            >
+              {selectedStartTime || "--:--"}
+            </Text>
+          </View>
+          <Ionicons
+            name="time-outline"
+            size={20}
+            color={selectedStartTime ? "#0d9488" : "#9CA3AF"}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          className={`flex-1 flex-row items-center justify-between p-4 rounded-2xl border ${selectedEndTime ? "border-teal-600 bg-teal-50" : "border-gray-200 bg-gray-50"}`}
           onPress={() => showDatePicker(PICKER_MODE.END)}
-          accessibilityLabel="Pick end time"
-          color={color.green}
-        />
+        >
+          <View>
+            <Text className="text-xs font-medium text-gray-500 mb-1">
+              End Time
+            </Text>
+            <Text
+              className={`font-bold ${selectedEndTime ? "text-teal-700" : "text-gray-900"}`}
+            >
+              {selectedEndTime || "--:--"}
+            </Text>
+          </View>
+          <Ionicons
+            name="time-outline"
+            size={20}
+            color={selectedEndTime ? "#0d9488" : "#9CA3AF"}
+          />
+        </TouchableOpacity>
       </View>
-      <View style={{flexDirection:'row',justifyContent:'space-between',gap:8}}>
-        <Text style={styles.text}>Start Time: {selectedStartTime}</Text>
-        <Text style={styles.text}>End Time: {selectedEndTime}</Text>
-      </View>
-      <Button
-        title="Clear Times"
-        onPress={clearTimes}
-        accessibilityLabel="Clear selected times"
-        color={color.gray}
-      />
+
       <DateTimePickerModal
         isVisible={isDatePickerVisible}
         mode="time"
         onConfirm={handleConfirm}
-        onCancel={hideDatePicker}
-        is24Hour={true}
+        onCancel={() => setDatePickerVisibility(false)}
       />
     </View>
   );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    justifyContent: "center",
-    alignItems: "center",
-    
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    gap: 8,
-    marginBottom: 4,
-  },
-  text: {
-    marginVertical: 10,
-    fontSize: 14,
-    fontWeight:'500'
-  },
-});
-
-export default TimeExample;
+}

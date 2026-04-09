@@ -1,24 +1,23 @@
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import {
-  View,
+  ActivityIndicator,
+  Keyboard,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
-  Image,
-  StyleSheet,
   TouchableWithoutFeedback,
-  Keyboard,
-  ActivityIndicator,
-  ScrollView,
+  View,
 } from "react-native";
-import { useRouter } from "expo-router";
-import PhoneNumberInp from "@/components/Auth/PhoneNumberInp";
-import { color } from "@/constants/Colors";
-import { Formik } from "formik";
-import { signUpSchema } from "@/validation/auth/ValidationSchema";
-import { useSignUp } from "@/hooks/authhooks/authhooks";
-import Toast from "react-native-toast-message";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
+
+import PhoneNumberInp from "@/components/Auth/PhoneNumberInp";
+import { useSignUp } from "@/hooks/authhooks/authhooks";
+import { signUpSchema } from "@/validation/auth/ValidationSchema";
 
 const SignUpScreen = () => {
   const [keyboardStatus, setKeyboardStatus] = useState<boolean>(false);
@@ -26,17 +25,16 @@ const SignUpScreen = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const router = useRouter();
-
   const signUpMutation = useSignUp();
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
-      () => setKeyboardStatus(true)
+      () => setKeyboardStatus(true),
     );
     const keyboardDidHideListener = Keyboard.addListener(
       "keyboardDidHide",
-      () => setKeyboardStatus(false)
+      () => setKeyboardStatus(false),
     );
     return () => {
       keyboardDidShowListener.remove();
@@ -53,29 +51,27 @@ const SignUpScreen = () => {
       });
 
       setTimeout(() => {
-        router.navigate("/(auth)/signin");
-      }, 2000);
+        router.navigate("/(auth)");
+      }, 500);
     } else if (signUpMutation.isError) {
       Toast.show({
         type: "error",
         text1: signUpMutation.error.message,
       });
-    } else return;
-  }, [signUpMutation]);
+    }
+  }, [signUpMutation, router]);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView style={styles.container}>
-        <ScrollView>
-          <View style={styles.header}>
-            {/* <TouchableOpacity
-              onPress={() => router.back()}
-              style={styles.backButton}
-            >
-              <Text style={styles.backText}>←</Text>
-            </TouchableOpacity> */}
-
-            <Text style={styles.title}>Sign Up</Text>
+      <SafeAreaView className="flex-1 bg-gray-50">
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ padding: 24, paddingBottom: 40 }}
+        >
+          <View className="flex-row items-center justify-center mb-8 mt-2">
+            <Text className="text-2xl font-bold text-gray-900 tracking-tight">
+              Create Account
+            </Text>
           </View>
 
           <Formik
@@ -89,7 +85,6 @@ const SignUpScreen = () => {
             validationSchema={signUpSchema}
             onSubmit={(values) => {
               signUpMutation.mutate(values);
-              console.log(values);
             }}
           >
             {({
@@ -100,152 +95,181 @@ const SignUpScreen = () => {
               errors,
               touched,
             }) => (
-              <>
-                <View style={styles.inputContainer}>
-                  <View>
-                    <View>
-                      <Text style={styles.labelTxt}>Full Name</Text>
-                      <TextInput
-                        placeholder="full names"
-                        value={values.name}
-                        onChangeText={handleChange("name")}
-                        style={styles.input}
-                        keyboardType="default"
-                      />
-                      {errors.name && touched.name && (
-                        <Text style={styles.errorText}>{errors.name}</Text>
-                      )}
-                    </View>
-
-                    <View>
-                      <Text style={styles.labelTxt}>Email</Text>
-                      <TextInput
-                        placeholder="example@gmail.com"
-                        value={values.email}
-                        onChangeText={handleChange("email")}
-                        style={styles.input}
-                        keyboardType="email-address"
-                      />
-                      {errors.email && touched.email && (
-                        <Text style={styles.errorText}>{errors.email}</Text>
-                      )}
-                    </View>
-
-                    <View>
-                      <Text style={styles.labelTxt}>Phone number</Text>
-                      <PhoneNumberInp
-                        onPhoneNumberChange={handleChange("phoneNumber")}
-                      />
-                      {errors.phoneNumber && touched.phoneNumber && (
-                        <Text style={styles.errorText}>
-                          {errors.phoneNumber}
-                        </Text>
-                      )}
-                    </View>
-
-                    <View>
-                      <Text style={styles.labelTxt}>Password</Text>
-                      <View style={styles.passwordContainer}>
-                        <TextInput
-                          placeholder="must be 8 characters"
-                          value={values.password}
-                          onChangeText={handleChange("password")}
-                          secureTextEntry={!showPassword}
-                          style={styles.passwordInput}
-                        />
-                        <TouchableOpacity
-                          onPress={() => setShowPassword(!showPassword)}
-                        >
-                          <Text style={styles.eyeIcon}>
-                            {showPassword ? "👁" : "👁‍🗨"}
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-                      {errors.password && touched.password && (
-                        <Text style={styles.errorText}>{errors.password}</Text>
-                      )}
-                    </View>
-
-                    <View>
-                      <Text style={styles.labelTxt}>Confirm Password</Text>
-                      <View style={styles.passwordContainer}>
-                        <TextInput
-                          placeholder="confirm password"
-                          value={values.confirmPassword}
-                          onChangeText={handleChange("confirmPassword")}
-                          secureTextEntry={!showConfirmPassword}
-                          style={styles.passwordInput}
-                        />
-                        <TouchableOpacity
-                          onPress={() =>
-                            setShowConfirmPassword(!showConfirmPassword)
-                          }
-                        >
-                          <Text style={styles.eyeIcon}>
-                            {showConfirmPassword ? "👁" : "👁‍🗨"}
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-                      {errors.confirmPassword && touched.confirmPassword && (
-                        <Text style={styles.errorText}>
-                          {errors.confirmPassword}
-                        </Text>
-                      )}
-                    </View>
-                  </View>
+              <View className="space-y-4">
+                <View>
+                  <Text className="text-sm font-medium text-gray-700 mb-1.5">
+                    Full Name
+                  </Text>
+                  <TextInput
+                    placeholderTextColor="#9CA3AF"
+                    value={values.name}
+                    onChangeText={handleChange("name")}
+                    onBlur={handleBlur("name")}
+                    className={`bg-white border rounded-xl p-4 text-base text-gray-900 ${
+                      errors.name && touched.name
+                        ? "border-red-500"
+                        : "border-gray-200"
+                    }`}
+                  />
+                  {errors.name && touched.name && (
+                    <Text className="text-red-500 text-xs mt-1.5 ml-1">
+                      {errors.name}
+                    </Text>
+                  )}
                 </View>
+                <View>
+                  <Text className="text-sm font-medium text-gray-700 mb-1.5">
+                    Email
+                  </Text>
+                  <TextInput
+                    placeholderTextColor="#9CA3AF"
+                    value={values.email}
+                    onChangeText={handleChange("email")}
+                    onBlur={handleBlur("email")}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    className={`bg-white border rounded-xl p-4 text-base text-gray-900 ${
+                      errors.email && touched.email
+                        ? "border-red-500"
+                        : "border-gray-200"
+                    }`}
+                  />
+                  {errors.email && touched.email && (
+                    <Text className="text-red-500 text-xs mt-1.5 ml-1">
+                      {errors.email}
+                    </Text>
+                  )}
+                </View>
+
+                <View>
+                  <Text className="text-sm font-medium text-gray-700 mb-1.5">
+                    Phone Number
+                  </Text>
+                  <View
+                    className={`bg-white border rounded-xl overflow-hidden ${
+                      errors.phoneNumber && touched.phoneNumber
+                        ? "border-red-500"
+                        : "border-gray-200"
+                    }`}
+                  >
+                    <PhoneNumberInp
+                      onPhoneNumberChange={handleChange("phoneNumber")}
+                    />
+                  </View>
+                  {errors.phoneNumber && touched.phoneNumber && (
+                    <Text className="text-red-500 text-xs mt-1.5 ml-1">
+                      {errors.phoneNumber}
+                    </Text>
+                  )}
+                </View>
+
+                <View>
+                  <Text className="text-sm font-medium text-gray-700 mb-1.5">
+                    Password
+                  </Text>
+                  <View
+                    className={`flex-row items-center bg-white border rounded-xl pr-4 ${
+                      errors.password && touched.password
+                        ? "border-red-500"
+                        : "border-gray-200"
+                    }`}
+                  >
+                    <TextInput
+                      placeholderTextColor="#9CA3AF"
+                      value={values.password}
+                      onChangeText={handleChange("password")}
+                      onBlur={handleBlur("password")}
+                      secureTextEntry={!showPassword}
+                      className="flex-1 p-4 text-base text-gray-900"
+                    />
+                    <TouchableOpacity
+                      onPress={() => setShowPassword(!showPassword)}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      <Ionicons
+                        name={showPassword ? "eye-outline" : "eye-off-outline"}
+                        size={22}
+                        color="#6B7280"
+                      />
+                    </TouchableOpacity>
+                  </View>
+                  {errors.password && touched.password && (
+                    <Text className="text-red-500 text-xs mt-1.5 ml-1">
+                      {errors.password}
+                    </Text>
+                  )}
+                </View>
+                <View>
+                  <Text className="text-sm font-medium text-gray-700 mb-1.5">
+                    Confirm Password
+                  </Text>
+                  <View
+                    className={`flex-row items-center bg-white border rounded-xl pr-4 ${
+                      errors.confirmPassword && touched.confirmPassword
+                        ? "border-red-500"
+                        : "border-gray-200"
+                    }`}
+                  >
+                    <TextInput
+                      placeholderTextColor="#9CA3AF"
+                      value={values.confirmPassword}
+                      onChangeText={handleChange("confirmPassword")}
+                      onBlur={handleBlur("confirmPassword")}
+                      secureTextEntry={!showConfirmPassword}
+                      className="flex-1 p-4 text-base text-gray-900"
+                    />
+                    <TouchableOpacity
+                      onPress={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      <Ionicons
+                        name={
+                          showConfirmPassword
+                            ? "eye-outline"
+                            : "eye-off-outline"
+                        }
+                        size={22}
+                        color="#6B7280"
+                      />
+                    </TouchableOpacity>
+                  </View>
+                  {errors.confirmPassword && touched.confirmPassword && (
+                    <Text className="text-red-500 text-xs mt-1.5 ml-1">
+                      {errors.confirmPassword}
+                    </Text>
+                  )}
+                </View>
+
+                {/* Updated Button to Teal */}
                 <TouchableOpacity
-                  style={styles.signupButton}
+                  className={`rounded-xl p-4 items-center mt-6 shadow-sm ${
+                    signUpMutation.status === "pending"
+                      ? "bg-teal-400"
+                      : "bg-teal-600"
+                  }`}
                   onPress={() => handleSubmit()}
                   disabled={signUpMutation.status === "pending"}
                 >
                   {signUpMutation.status === "pending" ? (
                     <ActivityIndicator color="#FFF" />
                   ) : (
-                    <Text style={styles.signupButtonText}>Sign up</Text>
+                    <Text className="text-white text-base font-semibold">
+                      Create Account
+                    </Text>
                   )}
                 </TouchableOpacity>
-              </>
+              </View>
             )}
           </Formik>
 
-          <View style={styles.separatorContainer}>
-            <View style={styles.separator} />
-            <Text style={styles.separatorText}>Or Register with</Text>
-            <View style={styles.separator} />
-          </View>
-
-          <View style={styles.socialButtonsContainer}>
-            <TouchableOpacity style={styles.socialButton}>
-              <Image
-                source={{
-                  uri: "https://img.icons8.com/?size=100&id=118497&format=png&color=000000",
-                }}
-                style={styles.socialIcon}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.socialButton}>
-              <Image
-                source={{
-                  uri: "https://img.icons8.com/?size=100&id=17949&format=png&color=000000",
-                }}
-                style={styles.socialIcon}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.socialButton}>
-              <Image
-                source={{
-                  uri: "https://img.icons8.com/ios-filled/50/mac-os.png",
-                }}
-                style={styles.socialIcon}
-              />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.signInContainer}>
-            <Text style={styles.signInText}>Already have an account? </Text>
-            <TouchableOpacity onPress={() => router.navigate("/(auth)/signin")}>
-              <Text style={styles.signInLink}>Log In</Text>
+          <View className="flex-row justify-center items-center mt-8 pb-6">
+            <Text className="text-gray-600 font-medium text-base">
+              Already have an account?{" "}
+            </Text>
+            <TouchableOpacity onPress={() => router.navigate("/(auth)")}>
+              <Text className="text-teal-600 font-bold text-base">Log In</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -255,121 +279,3 @@ const SignUpScreen = () => {
 };
 
 export default SignUpScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F8F9FA",
-    padding: 24,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 20,
-    paddingHorizontal: 10,
-  },
-  backButton: {
-    marginRight: 10,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: "bold",
-    flex: 1,
-    textAlign: "center",
-    color: "#000",
-  },
-  inputContainer: {
-    marginBottom: 10,
-  },
-  labelTxt: {
-    fontSize: 14,
-    fontWeight: "500",
-    paddingVertical: 9,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#D1D5DB",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 4,
-  },
-  passwordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#D1D5DB",
-    borderRadius: 8,
-  },
-  passwordInput: {
-    flex: 1,
-    padding: 10,
-  },
-  eyeIcon: {
-    paddingRight: 16,
-    fontSize: 20,
-  },
-  checkboxContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  checkboxText: {
-    marginLeft: 8,
-    color: "#6B7280",
-  },
-  signupButton: {
-    backgroundColor: color.green,
-    borderRadius: 8,
-    padding: 16,
-    alignItems: "center",
-  },
-  signupButtonText: {
-    color: "#FFF",
-    fontWeight: "600",
-  },
-  separatorContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 24,
-  },
-  separator: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#E5E7EB",
-  },
-  separatorText: {
-    marginHorizontal: 12,
-    color: "#6B7280",
-  },
-  socialButtonsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginBottom: 24,
-  },
-  socialButton: {
-    borderWidth: 1,
-    borderColor: "#D1D5DB",
-    borderRadius: 8,
-    padding: 12,
-  },
-  socialIcon: {
-    width: 24,
-    height: 24,
-  },
-  signInContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-  },
-  signInText: {
-    color: "#6B7280",
-  },
-  signInLink: {
-    color: "#2563EB",
-  },
-  errorText: {
-    color: "red",
-    fontSize: 12,
-    marginTop: 4,
-  },
-});

@@ -1,89 +1,48 @@
-import { color } from "@/constants/Colors";
-import { FontAwesome6 } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
-} from "react-native";
-
+import { Text, TouchableOpacity, View } from "react-native";
 
 export default function Header() {
   const [greeting, setGreeting] = useState<string>("");
-  const [userData, setUserData] = useState({});
-
+  const [userData, setUserData] = useState<any>({});
   const route = useRouter();
 
   useEffect(() => {
-    const FetchData = async () => {
-      const userObj = JSON.parse(
-        (await AsyncStorage.getItem("userObj")) || "{}"
-      );
-      setUserData(userObj.user);
+    const fetchUser = async () => {
+      const userString = await AsyncStorage.getItem("userObj");
+      if (userString) {
+        const userObj = JSON.parse(userString);
+        setUserData(userObj.user);
+      }
     };
-    FetchData();
-  }, []);
+    fetchUser();
 
-  useEffect(() => {
     const hour = moment().hour();
-    let greetingText = "";
-    if (hour >= 5 && hour < 12) {
-      greetingText = "Good Morning";
-    } else if (hour >= 12 && hour < 17) {
-      greetingText = "Good Afternoon";
-    } else {
-      greetingText = "Good Evening";
-    }
-
-    setGreeting(greetingText);
+    if (hour >= 5 && hour < 12) setGreeting("Good Morning");
+    else if (hour >= 12 && hour < 17) setGreeting("Good Afternoon");
+    else setGreeting("Good Evening");
   }, []);
+
   return (
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>{greeting},</Text>
-          <Text style={styles.username}>{userData?.name}</Text>
-        </View>
-        <TouchableOpacity
-          style={styles.cartButton}
-          onPress={() => route.replace("/settings")}
-        >
-          <FontAwesome6 name="user" size={20} color="black" />
-          
-        </TouchableOpacity>
+    <View className="flex-row justify-between items-center px-6 pt-4 pb-2 bg-gray-50">
+      <View>
+        <Text className="text-gray-500 text-sm font-medium mb-1">
+          {greeting} 👋
+        </Text>
+        <Text className="text-gray-900 text-2xl font-bold tracking-tight">
+          {userData?.name ? userData.name.split(" ")[0] : "Guest"}
+        </Text>
       </View>
+
+      <TouchableOpacity
+        onPress={() => route.push("/settings")}
+        className="w-12 h-12 bg-white rounded-full items-center justify-center shadow-sm border border-gray-100"
+      >
+        <Ionicons name="person-outline" size={22} color="#0d9488" />
+      </TouchableOpacity>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-  },
-
-  
-  header: {
-    backgroundColor: color.green,
-    padding: 20,
-    paddingTop: 10,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  greeting: {
-    color: color.black,
-    fontSize: 16,
-  },
-  username: {
-    color: color.black,
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  cartButton: {
-    backgroundColor: "rgba(255,255,255,0.2)",
-    padding: 12,
-    borderRadius: 50,
-  },
-});

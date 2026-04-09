@@ -1,72 +1,56 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  ScrollView,
-  Modal,
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import Mpesa from "./Mpesa";
-import Cash from "./Cash";
-import { router } from "expo-router";
+import { router, Stack, useLocalSearchParams } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import React, { useState } from "react";
+import {
+  Image,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
-const color = {
-  green: "#4CAF50",
-  gray: "#757575",
-  lightGray: "#f0f0f0",
-  white: "#FFFFFF",
-  black: "#333333",
-  blue: "#2196F3",
-  red: "#F44336",
-};
+import Cash from "@/components/Payment/Cash";
+import Mpesa from "@/components/Payment/Mpesa";
 
-const usePaymentHook = () => {
-  return {
-    mutate: (data) => {
-      console.log("Initiating payment with:", data);
-      // In a real app, this would make an API call
-      return new Promise((resolve) =>
-        setTimeout(() => resolve({ success: true }), 1000)
-      );
-    },
-  };
-};
+export default function PaymentScreen() {
+  const insets = useSafeAreaInsets();
+  const params = useLocalSearchParams();
+  const totalAmount = Number(params.subTotal) || 0;
 
-const PaymentMethodScreen = ({ navigation, route }) => {
-  const [selectedPayment, setSelectedPayment] = useState(null);
+  const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
   const [showMpesaModal, setShowMpesaModal] = useState(false);
   const [showCashModal, setShowCashModal] = useState(false);
-  const { totalAmount = 2450 } = route?.params || {};
 
   const paymentOptions = [
-    {
-      key: "cash",
-      label: "Cash",
-      icon: "https://img.icons8.com/color/48/cash.png",
-    },
     {
       key: "mpesa",
       label: "M-Pesa",
       icon: "https://img.icons8.com/color/48/mpesa.png",
     },
     {
+      key: "bank_card",
+      label: "Credit / Debit Card",
+      icon: "https://img.icons8.com/dusk/64/bank-cards.png",
+    },
+    {
       key: "airtel",
-      label: "Airtel",
+      label: "Airtel Money",
       icon: "https://www.airtelkenya.com/favicon-16x16.png",
     },
     {
-      key: "bank_card",
-      label: "Bank Card",
-      icon: "https://img.icons8.com/dusk/64/bank-cards.png",
+      key: "cash",
+      label: "Pay in Cash",
+      icon: "https://img.icons8.com/color/48/cash.png",
     },
   ];
-
-  const handlePaymentSelect = (key) => {
-    setSelectedPayment(key);
-  };
 
   const handleContinue = () => {
     if (!selectedPayment) return;
@@ -80,63 +64,92 @@ const PaymentMethodScreen = ({ navigation, route }) => {
   };
 
   return (
-    <View style={styles.safeArea}>
-      {/* Header */}
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
+      <StatusBar style="dark" />
+      <Stack.Screen options={{ headerShown: false }} />
+
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <Ionicons name="arrow-back" size={24} color="#333" />
+          <Ionicons name="arrow-back" size={20} color="#111827" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Choose Payment Method</Text>
+        <Text style={styles.headerTitle}>Checkout</Text>
         <View style={styles.placeholder} />
       </View>
 
-      <ScrollView style={styles.container}>
-        <View style={styles.amountContainer}>
-          <Text style={styles.amountLabel}>Total Amount</Text>
-          <Text style={styles.amount}>KSh {totalAmount.toLocaleString()}</Text>
+      <ScrollView
+        style={styles.container}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Premium Amount Card */}
+        <View style={styles.amountCard}>
+          <Text style={styles.amountLabel}>Total to Pay</Text>
+          <Text style={styles.amountValue}>
+            KSh {totalAmount.toLocaleString()}
+          </Text>
         </View>
 
-        <View style={styles.optionsContainer}>
-          <Text style={styles.sectionTitle}>Payment Methods</Text>
+        <Text style={styles.sectionTitle}>Payment Method</Text>
 
-          {paymentOptions.map((option) => (
-            <TouchableOpacity
-              key={option.key}
-              style={[
-                styles.paymentOption,
-                selectedPayment === option.key && styles.selectedOption,
-              ]}
-              onPress={() => handlePaymentSelect(option.key)}
-            >
-              <View style={styles.optionContent}>
-                <Image
-                  source={{ uri: option.icon }}
-                  style={styles.optionIcon}
-                  resizeMode="contain"
-                />
-                <Text style={styles.optionLabel}>{option.label}</Text>
-              </View>
-              <View style={styles.radioButton}>
-                {selectedPayment === option.key && (
-                  <View style={styles.radioButtonInner} />
-                )}
-              </View>
-            </TouchableOpacity>
-          ))}
+        {/* Payment Options */}
+        <View style={styles.optionsContainer}>
+          {paymentOptions.map((option) => {
+            const isSelected = selectedPayment === option.key;
+            return (
+              <TouchableOpacity
+                key={option.key}
+                activeOpacity={0.8}
+                style={[
+                  styles.paymentOption,
+                  isSelected && styles.selectedOption,
+                ]}
+                onPress={() => setSelectedPayment(option.key)}
+              >
+                <View style={styles.optionContent}>
+                  <View style={styles.iconWrapper}>
+                    <Image
+                      source={{ uri: option.icon }}
+                      style={styles.optionIcon}
+                      resizeMode="contain"
+                    />
+                  </View>
+                  <Text
+                    style={[
+                      styles.optionLabel,
+                      isSelected && styles.selectedOptionLabel,
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                </View>
+
+                {/* Modern Radio Button */}
+                <View
+                  style={[
+                    styles.radioOutline,
+                    isSelected && styles.radioOutlineSelected,
+                  ]}
+                >
+                  {isSelected && <View style={styles.radioInner} />}
+                </View>
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         <View style={styles.infoContainer}>
-          <Ionicons name="information-circle-outline" size={20} color="#666" />
+          <Ionicons name="shield-checkmark" size={20} color="#0d9488" />
           <Text style={styles.infoText}>
-            Your payment will be processed securely. No additional fees apply.
+            Payments are secure and encrypted. No hidden fees apply.
           </Text>
         </View>
       </ScrollView>
-
-      <View style={styles.bottomContainer}>
+      <View
+        style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) }]}
+      >
         <TouchableOpacity
           style={[
             styles.continueButton,
@@ -144,8 +157,10 @@ const PaymentMethodScreen = ({ navigation, route }) => {
           ]}
           onPress={handleContinue}
           disabled={!selectedPayment}
+          activeOpacity={0.8}
         >
-          <Text style={styles.continueButtonText}>Continue</Text>
+          <Text style={styles.continueButtonText}>Confirm Payment</Text>
+          <Ionicons name="arrow-forward" size={20} color="#fff" />
         </TouchableOpacity>
       </View>
 
@@ -156,7 +171,7 @@ const PaymentMethodScreen = ({ navigation, route }) => {
         onRequestClose={() => setShowMpesaModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.mpesaModalContainer}>
+          <View style={styles.modalContainer}>
             <Mpesa
               visibilityModal={() => setShowMpesaModal(false)}
               totalAmount={totalAmount}
@@ -172,169 +187,243 @@ const PaymentMethodScreen = ({ navigation, route }) => {
         onRequestClose={() => setShowCashModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.cashModalContainer}>
+          <View style={styles.modalContainerSmall}>
             <Cash
               visibilityModal={() => setShowCashModal(false)}
               totalAmount={totalAmount}
-              navigation={navigation}
             />
           </View>
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#F9FAFB", // gray-50
   },
   container: {
     flex: 1,
-    padding: 16,
+  },
+  scrollContent: {
+    paddingHorizontal: 24,
+    paddingBottom: 120, // Leave room for sticky footer
+    paddingTop: 10,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    backgroundColor: "#F9FAFB",
   },
   backButton: {
-    padding: 8,
+    width: 40,
+    height: 40,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#F3F4F6",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+      },
+      android: { elevation: 2 },
+    }),
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
+    fontWeight: "700",
+    color: "#111827",
   },
   placeholder: {
     width: 40,
   },
-  amountContainer: {
-    marginTop: 16,
-    marginBottom: 24,
-    padding: 20,
-    backgroundColor: "#f8f9fa",
-    borderRadius: 12,
+  amountCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 24,
+    padding: 24,
     alignItems: "center",
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: "#F3F4F6",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+      },
+      android: { elevation: 3 },
+    }),
   },
   amountLabel: {
     fontSize: 14,
-    color: "#666",
-    marginBottom: 4,
+    color: "#6B7280", // gray-500
+    fontWeight: "500",
+    marginBottom: 8,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
-  amount: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#333",
-  },
-  optionsContainer: {
-    marginBottom: 24,
+  amountValue: {
+    fontSize: 32,
+    fontWeight: "800",
+    color: "#0F766E", // teal-700
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 12,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 16,
+    marginLeft: 4,
+  },
+  optionsContainer: {
+    marginBottom: 24,
   },
   paymentOption: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     padding: 16,
-    backgroundColor: "#fff",
-    borderRadius: 12,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: "#e0e0e0",
+    borderColor: "#E5E7EB", // gray-200
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.03,
+        shadowRadius: 2,
+      },
+      android: { elevation: 1 },
+    }),
   },
   selectedOption: {
-    borderColor: color.green,
-    backgroundColor: "#f0fff0",
+    borderColor: "#0d9488", // teal-600
+    backgroundColor: "#F0FDFA", // teal-50
   },
   optionContent: {
     flexDirection: "row",
     alignItems: "center",
   },
+  iconWrapper: {
+    width: 40,
+    height: 40,
+    backgroundColor: "#F3F4F6",
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 16,
+  },
   optionIcon: {
-    width: 32,
-    height: 32,
-    marginRight: 12,
+    width: 24,
+    height: 24,
   },
   optionLabel: {
     fontSize: 16,
-    color: "#333",
+    fontWeight: "600",
+    color: "#374151", // gray-700
   },
-  radioButton: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+  selectedOptionLabel: {
+    color: "#0F766E", // teal-700
+  },
+  radioOutline: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     borderWidth: 2,
-    borderColor: "#757575",
+    borderColor: "#D1D5DB", // gray-300
     justifyContent: "center",
     alignItems: "center",
   },
-  radioButtonInner: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: color.green,
+  radioOutlineSelected: {
+    borderColor: "#0d9488", // teal-600
+  },
+  radioInner: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "#0d9488", // teal-600
   },
   infoContainer: {
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
-    backgroundColor: "#f0f7ff",
-    borderRadius: 12,
-    marginBottom: 24,
+    backgroundColor: "#F0FDFA", // teal-50
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#CCFBF1", // teal-100
   },
   infoText: {
-    fontSize: 14,
-    color: "#555",
-    marginLeft: 8,
+    fontSize: 13,
+    color: "#0F766E", // teal-700
+    marginLeft: 12,
     flex: 1,
+    fontWeight: "500",
+    lineHeight: 18,
   },
-  bottomContainer: {
-    padding: 16,
+  footer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#FFFFFF",
     borderTopWidth: 1,
-    borderTopColor: "#f0f0f0",
-    backgroundColor: "#fff",
+    borderTopColor: "#F3F4F6",
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.05,
+        shadowRadius: 6,
+      },
+      android: { elevation: 10 },
+    }),
   },
   continueButton: {
-    backgroundColor: color.green,
-    borderRadius: 12,
+    backgroundColor: "#0d9488", // teal-600
+    borderRadius: 16,
     paddingVertical: 16,
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
   },
   disabledButton: {
-    backgroundColor: "#a0d8a2",
+    backgroundColor: "#99F6E4", // teal-200
   },
   continueButtonText: {
-    color: "#fff",
+    color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "bold",
   },
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "flex-end",
   },
-  mpesaModalContainer: {
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+  modalContainer: {
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     height: "80%",
   },
-  cashModalContainer: {
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    height: "70%",
+  modalContainerSmall: {
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    height: "50%",
   },
 });
-
-export default PaymentMethodScreen;

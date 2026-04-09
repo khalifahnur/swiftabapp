@@ -41,7 +41,7 @@ export default function TimeTab() {
 
 const styles = StyleSheet.create({
   timeSlots: {
-    marginBottom:10
+    marginBottom: 10,
   },
   title: {
     fontSize: 16,

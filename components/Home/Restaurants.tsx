@@ -1,30 +1,13 @@
-import { Menu, RestaurantData } from "@/types";
-import { useFocusEffect, useRouter } from "expo-router";
-import React, { useCallback } from "react";
+import { RestaurantData } from "@/types";
+import { useRouter } from "expo-router";
+import React from "react";
 import {
-  BackHandler,
-  Platform,
   ScrollView,
-  StyleSheet,
+  Text,
   useWindowDimensions,
   View
 } from "react-native";
 import Card from "../Card";
-import NewSubHeader from "./NewSubHeader";
-
-type RestaurantProps = {
-  _id: string;
-  about: object[];
-  image: string;
-  latitude: number;
-  location: string;
-  longitude: number;
-  menu: Menu;
-  rate: number;
-  restaurantId: string;
-  restaurantName: string;
-  review: object[];
-};
 
 interface Section {
   title: string;
@@ -36,45 +19,33 @@ export default function Restaurants({
   data,
 }: {
   title: string;
-  data: SectionData[];
+  data: Section[];
 }) {
-  const window = useWindowDimensions();
-  const item_width =
-    Platform.OS === "ios" ? window.width * 0.89 : window.width ;
   const route = useRouter();
+  const { width } = useWindowDimensions();
 
-  useFocusEffect(
-    useCallback(() => {
-      const onBackPress = () => {
-
-        return true; 
-      };
-
-      const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
-      return () => subscription.remove();
-    }, [])
-  );
-
-  const NavigateHandler = (RestaurantData: RestaurantData) => {
-    return route.push({
+  const handleNavigate = (restaurantData: RestaurantData) => {
+    route.push({
       pathname: "/screens/restaurantdetails",
-      params: { data: JSON.stringify(RestaurantData) },
+      params: { data: JSON.stringify(restaurantData) },
     });
   };
 
-  // const sectionRestaurants = data.filter((item) => item.title === title);
-
   return (
-    <View style={styles.section}>
-      <View style={styles.headerWrapper}>
-        <NewSubHeader headerTitle={title} />
+    <View className="mt-6">
+      <View className="flex-row justify-between items-end px-6 mb-4">
+        <Text className="text-xl font-bold text-gray-900 tracking-tight">
+          {title}
+        </Text>
+        <Text className="text-teal-600 font-medium text-sm">See all</Text>
       </View>
+
       <ScrollView
-      horizontal
+        horizontal
         showsHorizontalScrollIndicator={false}
-        snapToAlignment="center"
-        decelerationRate={Platform.OS === "ios" ? 0 : 0}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={{ paddingHorizontal: 24, gap: 16 }}
+        decelerationRate="fast"
+        snapToInterval={width * 0.75 + 16}
       >
         {data.map((restaurant) =>
           restaurant.data.map((item: RestaurantData) => (
@@ -83,26 +54,12 @@ export default function Restaurants({
               restaurantName={item.restaurantName}
               location={item.location}
               rate={item.rate}
-              handlePress={() => NavigateHandler(item)}
+              handlePress={() => handleNavigate(item)}
               image={item.image}
             />
-          ))
+          )),
         )}
       </ScrollView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  section: {
-    marginVertical: 12,
-  },
-  headerWrapper: {
-    paddingHorizontal: 10,
-    marginBottom: 10,
-  },
-  scrollContent: {
-    paddingHorizontal: 10, // Adds padding to start/end of list
-    paddingBottom: 10,     // Adds space for the shadow to show
-  },
-});

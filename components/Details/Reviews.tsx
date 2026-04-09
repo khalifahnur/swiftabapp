@@ -1,110 +1,66 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { color } from "@/constants/Colors";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 
-export default function Reviews({ reviews }) {
+export default function Reviews({ reviews }: { reviews: any[] }) {
+  // Flatten the nested arrays so we just have one clean array of review objects
+  const allReviews = reviews?.flatMap((item) => item.review) || [];
+
   return (
-    <View>
-      <Text
-        style={{
-          color: "#000",
-          fontSize: 20,
-          fontWeight: "700",
-          paddingBottom: 15,
-        }}
-      >
-        Reviews
-      </Text>
-      {reviews.map((item) =>
-        item.review.map((item, index) => (
-          <>
-            <View
-              key={index}
-              style={styles.reviewcard}
-            >
-              {/* User Profile Image */}
-              <Image
-                source={require("@/assets/images/user.jpeg")}
-                style={{
-                  width: 50,
-                  height: 50,
-                  borderRadius: 25,
-                  marginRight: 15,
-                }}
-              />
+    <View className="pt-4 pb-6">
+      {/* We slice to 3 so the screen isn't overwhelmed, forcing them to click "See All" */}
+      {allReviews.slice(0, 3).map((item, index) => (
+        <View
+          key={index}
+          className="bg-white rounded-2xl p-4 mb-4 border border-gray-100 shadow-sm"
+        >
+          {/* User Header */}
+          <View className="flex-row items-center mb-3">
+            <Image
+              source={require("@/assets/images/user.jpeg")}
+              className="w-10 h-10 rounded-full bg-gray-200 mr-3"
+            />
+            <View className="flex-1">
+              <Text className="font-bold text-gray-900 text-base">
+                {item.name}
+              </Text>
 
-              {/* Review Details */}
-              <View style={{ flex: 1 }}>
-                {/* Username */}
-                <Text
-                  style={{
-                    fontSize: 16,
-                    fontWeight: "bold",
-                    color: "#333",
-                  }}
-                >
-                  {item.name}
-                </Text>
-
-                {/* Rating Stars */}
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginVertical: 5,
-                  }}
-                >
-                  {[...Array(5)].map((_, index) => (
-                    <Text
-                      key={index}
-                      style={{
-                        fontSize: 18,
-                        color: index < item.rating ? "#FFD700" : "#CCC",
-                      }}
-                    >
-                      ★
-                    </Text>
-                  ))}
-                </View>
-
-                {/* Review Text */}
-                <Text style={{ fontSize: 14, color: "#666" }}>
-                  {item.reviewTxt}
-                </Text>
+              {/* Dynamic Star Rating using Icons */}
+              <View className="flex-row items-center mt-0.5">
+                {[...Array(5)].map((_, i) => (
+                  <Ionicons
+                    key={i}
+                    name={i < item.rating ? "star" : "star-outline"}
+                    size={14}
+                    color={i < item.rating ? "#f5a623" : "#D1D5DB"} // Yellow if active, gray if not
+                  />
+                ))}
               </View>
             </View>
-            <TouchableOpacity
-              style={{
-                padding: 15,
-                borderWidth:2,
-                borderColor: color.navy,
-                borderRadius: 10,
-              }}
-            >
-              <Text
-                style={{ color: "#1e1e1e", fontSize: 15, textAlign: "center" }}
-              >
-                See All Reviews
-              </Text>
-            </TouchableOpacity>
-          </>
-        ))
+          </View>
+
+          {/* Review Body */}
+          <Text className="text-gray-600 font-regular text-sm leading-5 text-justify">
+            {item.reviewTxt}
+          </Text>
+        </View>
+      ))}
+
+      {/* Button placed OUTSIDE the map loop */}
+      {allReviews.length > 0 ? (
+        <TouchableOpacity className="w-full py-4 rounded-xl border border-teal-600 items-center mt-2 bg-teal-50/50">
+          <Text className="text-teal-600 font-bold text-base">
+            Read All Reviews
+          </Text>
+        </TouchableOpacity>
+      ) : (
+        <View className="py-10 items-center">
+          <Ionicons name="chatbubbles-outline" size={40} color="#9CA3AF" />
+          <Text className="text-gray-500 font-medium mt-3">
+            No reviews yet.
+          </Text>
+        </View>
       )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  reviewcard:{
-    backgroundColor: "#fff",
-                borderRadius: 10,
-                padding: 15,
-                marginVertical: 10,
-                flexDirection: "row",
-                alignItems: "center",
-                shadowColor: "#000",
-                shadowOpacity: 0.2,
-                shadowRadius: 5,
-                elevation: 3,
-  }
-});

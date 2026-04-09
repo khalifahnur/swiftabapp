@@ -1,266 +1,62 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React from "react";
+import { formatDate } from "@/lib/helpers";
 import { Ionicons } from "@expo/vector-icons";
-import { formatDate, getPaymentColor, getStatusColor } from "@/lib/helpers";
-import NewSubHeader from "@/components/Home/NewSubHeader";
+import React from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 
-export default function OrderDetailHeader({ selectedOrder, setIsViewingDetails }) {
-  if (!selectedOrder) return null; // Ensure selectedOrder is valid
+export default function OrderDetailHeader({
+  selectedOrder,
+  setIsViewingDetails,
+}: any) {
+  if (!selectedOrder) return null;
 
   return (
-    <>
-      <View style={styles.header}>
+    <View className="px-6 pt-2 pb-4">
+      {/* Top Nav */}
+      <View className="flex-row items-center justify-between mb-6">
         <TouchableOpacity
-          style={styles.backButton}
+          className="w-10 h-10 bg-white rounded-full items-center justify-center shadow-sm border border-gray-200"
           onPress={() => setIsViewingDetails(false)}
         >
-          <Ionicons name="arrow-back" size={24} color="#000" />
+          <Ionicons name="arrow-back" size={20} color="#111827" />
         </TouchableOpacity>
-        <NewSubHeader headerTitle="Order Details" />
-        <View>
-          <Text style={styles.headerTitle}>{selectedOrder.orderId}</Text>
-        </View>
+        <Text className="font-bold text-lg text-gray-900">Order Details</Text>
+        <View className="w-10" /> {/* Empty view for flex balancing */}
       </View>
 
-      <View style={styles.detailCard}>
-        <View style={styles.orderInfoRow}>
-          <View style={styles.orderInfoItem}>
-            <Text style={styles.label}>Reservation</Text>
-            <Text style={styles.value}>{selectedOrder.reservationId}</Text>
-          </View>
-          <View style={styles.orderInfoItem}>
-            <Text style={styles.label}>Table</Text>
-            <Text style={styles.value}>{selectedOrder.tableNumber}</Text>
-          </View>
-        </View>
+      {/* Info Card */}
+      <View className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 mb-6">
+        <Text className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">
+          Order #{selectedOrder.orderId?.slice(-6).toUpperCase()}
+        </Text>
 
-        <View style={styles.orderInfoRow}>
-          <View style={styles.orderInfoItem}>
-            <Text style={styles.label}>Date</Text>
-            <Text style={styles.value}>
-              {formatDate(selectedOrder.createdAt)}
+        <View className="flex-row mb-4">
+          <View className="flex-1">
+            <Text className="text-xs font-medium text-gray-500 mb-1">
+              Reservation ID
+            </Text>
+            <Text className="text-base font-bold text-gray-900">
+              {selectedOrder.reservationId}
+            </Text>
+          </View>
+          <View className="flex-1">
+            <Text className="text-xs font-medium text-gray-500 mb-1">
+              Table No.
+            </Text>
+            <Text className="text-base font-bold text-gray-900">
+              {selectedOrder.tableNumber}
             </Text>
           </View>
         </View>
 
-        <View style={styles.statusRow}>
-          <View
-            style={[
-              styles.statusBadge,
-              { backgroundColor: getStatusColor(selectedOrder.status) },
-            ]}
-          >
-            <Ionicons
-              name={selectedOrder.status === "Served" ? "checkmark-circle" : "time-outline"}
-              size={16}
-              color="#fff"
-            />
-            <Text style={styles.statusText}>{selectedOrder.status}</Text>
-          </View>
-          <View
-            style={[
-              styles.statusBadge,
-              { backgroundColor: getPaymentColor(selectedOrder.paid) },
-            ]}
-          >
-            <Ionicons
-              name={selectedOrder.paid === "Paid" ? "wallet-outline" : "time-outline"}
-              size={16}
-              color="#fff"
-            />
-            <Text style={styles.statusText}>{selectedOrder.paid}</Text>
-          </View>
+        <View>
+          <Text className="text-xs font-medium text-gray-500 mb-1">Date</Text>
+          <Text className="text-base font-bold text-gray-900">
+            {formatDate(selectedOrder.createdAt)}
+          </Text>
         </View>
       </View>
 
-      <Text style={styles.sectionTitle}>Order Items</Text>
-    </>
+      <Text className="text-lg font-bold text-gray-900 mb-2">Order Items</Text>
+    </View>
   );
 }
-
-
-const styles = StyleSheet.create({
-  header: {
-    padding: 16,
-    paddingTop: 20,
-    backgroundColor: "#fff",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-  },
-  headerSmallText: {
-    fontSize: 14,
-    color: "#6c757d",
-  },
-  headerTitle: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#212529",
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#f0f0f0",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  // Order Card Styles (main list)
-  orderCard: {
-    backgroundColor: "#fff",
-    margin: 16,
-    marginBottom: 12,
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  orderCardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 12,
-  },
-  orderCardId: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#212529",
-  },
-  orderCardDate: {
-    fontSize: 14,
-    color: "#6c757d",
-  },
-  orderCardInfo: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  orderCardInfoLabel: {
-    fontSize: 12,
-    color: "#6c757d",
-    marginBottom: 4,
-  },
-  orderCardInfoValue: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#212529",
-  },
-  orderCardStatus: {
-    flexDirection: "row",
-  },
-  detailCard: {
-    backgroundColor: "#fff",
-    margin: 16,
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  orderInfoRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  orderInfoItem: {
-    flex: 1,
-  },
-  label: {
-    fontSize: 12,
-    color: "#6c757d",
-    marginBottom: 4,
-  },
-  value: {
-    fontSize: 15,
-    color: "#212529",
-    fontWeight: "600",
-  },
-  statusRow: {
-    flexDirection: "row",
-    marginTop: 8,
-  },
-  statusBadge: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    marginRight: 8,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  statusText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 12,
-    marginLeft: 4,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#212529",
-    marginTop: 8,
-    marginBottom: 12,
-    paddingHorizontal: 16,
-  },
-  menuItem: {
-    flexDirection: "row",
-    backgroundColor: "#fff",
-    padding: 16,
-    marginHorizontal: 16,
-    marginBottom: 12,
-    borderRadius: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    elevation: 2,
-  },
-  menuImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 12,
-    backgroundColor: "#f0f0f0",
-  },
-  menuItemInfo: {
-    flex: 1,
-    marginLeft: 16,
-    justifyContent: "space-between",
-  },
-  menuItemName: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#212529",
-    marginBottom: 4,
-  },
-  menuItemDescription: {
-    fontSize: 14,
-    color: "#6c757d",
-    marginBottom: 8,
-  },
-  priceRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  quantityContainer: {
-    backgroundColor: "#f0f0f0",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  quantityText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#212529",
-  },
-  menuItemTotal: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#212529",
-  },
-});

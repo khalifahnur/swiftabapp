@@ -3,6 +3,13 @@ import { color } from "@/constants/Colors";
 import { useAppPermissions } from "@/hooks/usePermissionHook";
 import { useAuthStore } from "@/lib/authStore";
 import { Store } from "@/redux/store/Store";
+import {
+  PlusJakartaSans_400Regular,
+  PlusJakartaSans_500Medium,
+  PlusJakartaSans_600SemiBold,
+  PlusJakartaSans_700Bold,
+  useFonts,
+} from "@expo-google-fonts/plus-jakarta-sans";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -13,6 +20,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast, { BaseToast, ErrorToast } from "react-native-toast-message";
 import { Provider } from "react-redux";
+import "../global.css";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -20,6 +28,12 @@ export default function RootLayout() {
   const [client] = useState(() => new QueryClient());
   const { isLoggedIn, hasCompletedOnboarding, _hasHydrated } = useAuthStore();
   const insets = useSafeAreaInsets();
+  const [fontsLoaded, fontError] = useFonts({
+    "Jakarta-Regular": PlusJakartaSans_400Regular,
+    "Jakarta-Medium": PlusJakartaSans_500Medium,
+    "Jakarta-SemiBold": PlusJakartaSans_600SemiBold,
+    "Jakarta-Bold": PlusJakartaSans_700Bold,
+  });
 
   const toastConfig = useCallback(
     () => ({
@@ -36,16 +50,16 @@ export default function RootLayout() {
         />
       ),
     }),
-    []
+    [],
   );
 
   useEffect(() => {
-    if (_hasHydrated) {
+    if (_hasHydrated || fontsLoaded || fontError) {
       SplashScreen.hideAsync();
     }
-  }, [_hasHydrated]);
+  }, [_hasHydrated, fontsLoaded, fontError]);
 
-  if (!_hasHydrated) {
+  if (!_hasHydrated && !fontsLoaded && !fontError) {
     return null;
   }
 
@@ -90,15 +104,15 @@ export default function RootLayout() {
                     options={{
                       presentation: "modal",
                       title: "Pre-Order",
-                      headerShown: false
+                      headerShown: false,
                     }}
                   />
                   <Stack.Screen
-                    name="cart"
+                    name="order"
                     options={{
-                      presentation: "modal",
-                      title: "My Cart",
-                      headerShown: false
+                      // presentation: "modal",
+                      title: "Orders",
+                      headerShown: false,
                     }}
                   />
                 </Stack.Protected>

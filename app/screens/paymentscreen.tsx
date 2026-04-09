@@ -1,10 +1,10 @@
-import { StyleSheet, Text, View } from "react-native";
-import React from "react";
 import PaymentMethodScreen from "@/components/Payment/Payment";
-import { useLocalSearchParams } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { color } from "@/constants/Colors";
+import { useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import React from "react";
+import { StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function paymentscreen() {
   const param = useLocalSearchParams();
@@ -31,7 +31,6 @@ export default function paymentscreen() {
     },
   };
 
-  // Mock navigation object
   const navigationProps = {
     navigate: navigateTo,
     goBack: goBack,

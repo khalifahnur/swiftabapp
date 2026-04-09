@@ -1,40 +1,52 @@
 import React from "react";
-import { FlatList, RefreshControl } from "react-native";
-//import { FlashList } from "@shopify/flash-list";
-import { color } from "@/constants/Colors";
-//import { FlashList } from "@shopify/flash-list/src";
+import { FlatList, RefreshControl, Text, View } from "react-native";
 import ReservationCard from "./ReservationCard";
 import SpaceBelow from "./SpaceBelow";
 
-interface dataprops {
+interface DataProps {
   date: string;
-  time: number;
+  time: string;
   location: string;
   rate: string;
   image: string;
   restaurantName: string;
-  restaurantId:string;
-  reservationId:string;
-  id:string;
+  restaurantId: string;
+  reservationId: string;
+  id: string;
 }
-interface prop {
-  data: dataprops[] | undefined;
+
+interface Props {
+  data: DataProps[] | undefined;
   refreshing: boolean;
   onRefresh: () => void;
 }
 
-
-export default function Container({ data, refreshing, onRefresh }: prop) {
+export default function Container({ data, refreshing, onRefresh }: Props) {
   return (
-    <FlatList
-      data={data}
-      renderItem={({ item }) => <ReservationCard items={item} />}
-     // estimatedItemSize={50}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[color.green]} />
-      }
-      ListFooterComponent={()=><SpaceBelow />}
-      showsVerticalScrollIndicator={false}
-    />
+    <View className="flex-1 bg-gray-50">
+      <FlatList
+        data={data}
+        keyExtractor={(item, index) => item.id || index.toString()}
+        renderItem={({ item }) => <ReservationCard items={item} />}
+        contentContainerStyle={{ paddingTop: 16, paddingBottom: 24 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#0d9488"
+            colors={["#0d9488"]}
+          />
+        }
+        ListEmptyComponent={
+          <View className="flex-1 items-center justify-center pt-20">
+            <Text className="text-gray-500 font-medium">
+              No active reservations.
+            </Text>
+          </View>
+        }
+        ListFooterComponent={() => <SpaceBelow />}
+        showsVerticalScrollIndicator={false}
+      />
+    </View>
   );
 }

@@ -1,14 +1,14 @@
-import { fetchAllRes } from "@/api/api";
-import Container from "@/components/Home/Container";
-import { color } from "@/constants/Colors";
-import { Restaurant } from "@/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery } from "@tanstack/react-query";
-//import { StatusBar } from "expo-status-bar";
 import LottieView from "lottie-react-native";
-import { useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import React, { useEffect, useState } from "react";
+import { Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+import { fetchAllRes } from "@/api/api";
+import Container from "@/components/Home/Container";
+import { Restaurant } from "@/types";
+import { Ionicons } from "@expo/vector-icons";
 
 interface UserData {
   email: string;
@@ -20,18 +20,17 @@ interface UserData {
 export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [userData, setUserData] = useState<UserData>({} as UserData);
-  const insets = useSafeAreaInsets();
 
   useEffect(() => {
-    const FetchData = async () => {
-      const userObj = JSON.parse(
-        (await AsyncStorage.getItem("userObj")) || "{}"
-      );
-      setUserData(userObj.user);
+    const fetchUser = async () => {
+      const userString = await AsyncStorage.getItem("userObj");
+      if (userString) {
+        const userObj = JSON.parse(userString);
+        setUserData(userObj.user);
+      }
     };
-    FetchData();
+    fetchUser();
   }, []);
-
 
   const {
     data: restaurantsData,
@@ -45,12 +44,10 @@ export default function HomeScreen() {
     staleTime: 10 * 60 * 1000,
   });
 
-  
-
   const onRefresh = async () => {
     setRefreshing(true);
     try {
-      await Promise.all([refetchRestaurants()]);
+      await refetchRestaurants();
     } catch (error) {
       console.error("Error during refresh:", error);
     } finally {
@@ -58,94 +55,67 @@ export default function HomeScreen() {
     }
   };
 
-  useEffect(() => {
-    if (!restaurantsData ) {
-      refetchRestaurants();
-      
-    }
-  }, [restaurantsData,  refetchRestaurants]);
-
-  // Handle errors
-  if (isRestaurantsError ) {
+  if (isRestaurantsError) {
     return (
-      <View>
-        <Text>Error: {restaurantsError?.message }</Text>
+      <View className="flex-1 justify-center items-center bg-gray-50 px-6">
+        <View className="w-16 h-16 bg-red-50 rounded-full items-center justify-center mb-4">
+          <Ionicons name="alert-circle" size={32} color="#ef4444" />
+        </View>
+        <Text className="text-xl font-bold text-gray-900 mb-2">
+          Failed to load restaurants
+        </Text>
+        <Text className="text-gray-500 text-center mb-6">
+          {restaurantsError.message}
+        </Text>
+        <TouchableOpacity
+          className="bg-teal-600 px-6 py-3 rounded-lg"
+          onPress={() => onRefresh}
+        >
+          <Text className="text-white font-bold">Refresh</Text>
+        </TouchableOpacity>
       </View>
     );
   }
 
-  // Transform data for all restaurants
   const transformedRestaurants = Array.isArray(restaurantsData?.restaurants)
-  ? restaurantsData.restaurants.map((item) => ({
-      restaurantId: item._id,
-      title: item.title,
-      data:
-        Array.isArray(item.data) && item.data.length > 0
-          ? item.data.map((entry, index) => ({
-              ...entry,
-              _id: entry._id || `${item._id}-${index}`,
-              restaurantId: item._id,
-            }))
-          : [],
-    }))
-  : [];
+    ? restaurantsData.restaurants.map((item) => ({
+        restaurantId: item._id,
+        title: item.title,
+        data:
+          Array.isArray(item.data) && item.data.length > 0
+            ? item.data.map((entry, index) => ({
+                ...entry,
+                _id: entry._id || `${item._id}-${index}`,
+                restaurantId: item._id,
+              }))
+            : [],
+      }))
+    : [];
 
-  // Transform data for recently viewed restaurants
-  // const transformedRecentlyViewed = Array.isArray(recentlyViewedData?.restaurants)
-  //   ? recentlyViewedData.restaurants.map((item) => ({
-  //       restaurantId: item._id,
-  //       title: item.title,
-  //       data:
-  //         Array.isArray(item.data) && item.data.length > 0
-  //           ? item.data.map((entry) => ({
-  //               ...entry,
-  //               restaurantId: item._id,
-  //             }))
-  //           : [],
-  //     }))
-  //   : [];
-
-  // Show loading state
-  if (isRestaurantsLoading ) {
+  if (isRestaurantsLoading) {
     return (
-      <View
-        style={{
-          justifyContent: "center",
-          alignItems: "center",
-          flex: 1,
-        }}
-      >
+      <View className="flex-1 justify-center items-center bg-gray-50">
         <LottieView
           source={require("@/assets/images/lottie/loader.json")}
           autoPlay
           loop
-          style={{ width: 100, height: 100 }}
+          style={{ width: 120, height: 120 }}
         />
+        <Text className="text-gray-500 font-medium mt-2">
+          Loading restaurants...
+        </Text>
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1 bg-gray-50" edges={["top"]}>
       <Container
         allRestaurants={transformedRestaurants}
-        //recentlyViewed={recentlyViewedData}
         refreshing={refreshing}
         onRefresh={onRefresh}
-        isLoading={isRestaurantsLoading }
+        isLoading={isRestaurantsLoading}
       />
-      {/* <View style={styles.footer} /> */}
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: color.white,
-  },
-  footer: {
-    backgroundColor: color.green,
-    height: 60,
-  },
-});

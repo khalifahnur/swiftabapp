@@ -1,18 +1,10 @@
-import { color } from "@/constants/Colors";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import moment from "moment";
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  Image,
-  Switch,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
-import Icon from "react-native-vector-icons/Ionicons";
+import React from "react";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 
-interface prop {
+interface Props {
   items: {
     date: string;
     time: number;
@@ -23,171 +15,62 @@ interface prop {
   };
 }
 
-const ReservationCard = ({ items }: prop) => {
-  const [isRemind, setIsRemind] = useState(false);
-
-  const formattedTime = moment(items.time).format("MMM - DD, YYYY  HH:mm A");
-  const image = items.image;
-  const location = items.location;
-  const rate = items.rate;
-  const restaurantName = items.restaurantName;
+export default function ReserveCard({ items }: Props) {
+  const formattedTime = moment(items.time).format("MMM DD, YYYY • hh:mm A");
 
   return (
-    <View style={styles.cardContainer}>
-      {/* Date and Reminder */}
-      <View style={styles.header}>
-        <Text style={styles.dateText}>{formattedTime}</Text>
-        <View style={styles.reminder}>
-          <Text style={styles.remindText}>Remind me</Text>
-          <Switch
-            value={isRemind}
-            onValueChange={(value) => setIsRemind(value)}
-            trackColor={{ false: "#ccc", true: "#008080" }}
-            thumbColor={isRemind ? "#008080" : "#f4f3f4"}
-          />
+    <View className="bg-white mx-6 mb-4 rounded-3xl p-4 shadow-sm border border-gray-100 opacity-90">
+      <View className="flex-row justify-between items-center mb-3">
+        <Text className="text-gray-900 font-bold text-sm">{formattedTime}</Text>
+        <View className="bg-gray-100 px-2 py-1 rounded-md">
+          <Text className="text-gray-500 font-bold text-xs">Completed</Text>
         </View>
       </View>
-      <View style={styles.divider} />
-      {/* Image and Details */}
-      <View style={styles.detailsRow}>
-        <Image source={{ uri: image }} style={styles.image} />
-        <View style={styles.info}>
-          <View style={styles.nameRow}>
-            <Text style={styles.name}>{restaurantName}</Text>
-            <View style={styles.rating}>
-              <Icon name="star" size={16} color="gold" />
-              <Text style={styles.ratingText}>{rate}</Text>
+
+      <View className="h-px bg-gray-100 w-full mb-3" />
+
+      <View className="flex-row mb-4">
+        <Image
+          source={{ uri: items.image }}
+          className="w-20 h-20 rounded-2xl bg-gray-100 mr-4"
+        />
+        <View className="flex-1 justify-center">
+          <View className="flex-row justify-between items-center mb-1">
+            <Text
+              className="font-bold text-gray-900 text-base"
+              numberOfLines={1}
+            >
+              {items.restaurantName}
+            </Text>
+            <View className="flex-row items-center bg-teal-50 px-2 py-0.5 rounded-md">
+              <Ionicons name="star" size={12} color="#f5a623" />
+              <Text className="text-teal-700 font-bold text-xs ml-1">
+                {items.rate}
+              </Text>
             </View>
           </View>
-          <View style={styles.iconRow}>
-            <Icon name="time-outline" size={16} color="#6F7A8A" />
-            <Text style={styles.iconText}>15 min</Text>
-            <Icon name="restaurant-outline" size={16} color="#6F7A8A" />
-            <Text style={styles.iconText}>Italian</Text>
-          </View>
-          <View style={styles.iconRow}>
-            <Icon name="location-outline" size={16} color="#6F7A8A" />
-            <Text style={styles.iconText}>{location}</Text>
+
+          <View className="flex-row items-center mb-1">
+            <Ionicons name="location" size={14} color="#0d9488" />
+            <Text
+              className="text-gray-500 font-medium text-xs ml-1"
+              numberOfLines={1}
+            >
+              {items.location}
+            </Text>
           </View>
         </View>
       </View>
 
-      {/* Action Buttons */}
-      <View>
-        <TouchableOpacity style={styles.cancelButton} onPress={()=>router.navigate('/screens/ratescreen')}>
-          <Text style={styles.cancelText}>Rate</Text>
-        </TouchableOpacity>
-        {/* <TouchableOpacity style={styles.navigateButton}>
-          <Text style={styles.navigateText}>Navigate</Text>
-        </TouchableOpacity> */}
-      </View>
+      <TouchableOpacity
+        className="w-full bg-teal-50 border border-teal-100 py-3 rounded-xl items-center flex-row justify-center"
+        onPress={() => router.navigate("/screens/ratescreen")}
+      >
+        <Ionicons name="star-outline" size={16} color="#0d9488" />
+        <Text className="text-teal-600 font-bold text-sm ml-2">
+          Rate Your Experience
+        </Text>
+      </TouchableOpacity>
     </View>
   );
-};
-
-const styles = StyleSheet.create({
-  cardContainer: {
-    backgroundColor: "#f0f0f0",
-    borderRadius: 10,
-    padding: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    marginVertical: 10,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 10,
-    alignItems: "center",
-  },
-  dateText: {
-    fontSize: 14,
-    color: "#6F7A8A",
-  },
-  reminder: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  remindText: {
-    fontSize: 14,
-    marginRight: 5,
-  },
-  detailsRow: {
-    flexDirection: "row",
-    marginBottom: 10,
-  },
-  image: {
-    width: 80,
-    height: 80,
-    borderRadius: 10,
-    marginRight: 10,
-  },
-  info: {
-    flex: 1,
-  },
-  nameRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 5,
-  },
-  name: {
-    fontSize: 13,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  rating: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  ratingText: {
-    fontSize: 12,
-    color: "#6F7A8A",
-    marginLeft: 3,
-  },
-  iconRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 2,
-  },
-  iconText: {
-    fontSize: 12,
-    color: "#6F7A8A",
-    marginLeft: 5,
-    marginRight: 15,
-  },
-
-  cancelButton: {
-    backgroundColor: color.green,
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 5,
-    width: "40%",
-    alignSelf: "flex-end",
-  },
-  cancelText: {
-    color: "#fff",
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  navigateButton: {
-    backgroundColor: "#A19BFC",
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 5,
-  },
-  navigateText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  divider: {
-    width: "100%",
-    marginBottom: 3,
-    borderWidth: 1,
-    borderColor: "#f8f8f8",
-  },
-});
-
-export default ReservationCard;
+}

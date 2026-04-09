@@ -1,66 +1,51 @@
-import { color } from "@/constants/Colors";
 import useStore from "@/store/useStore";
 import moment from "moment";
 import React from "react";
-import { StyleSheet, Text } from "react-native";
+import { Text, View } from "react-native";
 import { Calendar } from "react-native-calendars";
+
 import GuestTab from "./GuestTab";
-import TimeTab from "./TimeTab";
+import TimeExample from "./TimeExample";
 
 export default function DateTab() {
   const { selectedDate, setSelectedDate } = useStore();
   const now = moment().format("YYYY-MM-DD");
-  const nextthirtydays = moment().add(10, "days").format("YYYY-MM-DD");
-
-  const handleDayPress = (day: { dateString: string }) => {
-    setSelectedDate(day.dateString);
-  };
+  const nextThirtyDays = moment().add(30, "days").format("YYYY-MM-DD");
 
   return (
-    <>
-      <Text style={styles.title}>Select Date</Text>
-      <Calendar
-        onDayPress={handleDayPress}
-        disableArrowLeft={true}
-        minDate={now}
-        maxDate={nextthirtydays}
-        theme={{
-          backgroundColor: "#ffffff",
-          calendarBackground: color.green,
-          textSectionTitleColor: "#b6c1cd",
-          selectedDayBackgroundColor: color.black,
-          selectedDayTextColor: "#ffffff",
-          todayTextColor: "#00adf5",
-          dayTextColor: "#2d4150",
-          textDisabledColor: color.graywhite,
-        }}
-        markedDates={{
-          [selectedDate]: {
-            selected: true,
-            disableTouchEvent: true,
-            selectedDotColor: "orange",
-          },
-        }}
-        style={{
-        borderRadius: 15,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-      }}
-      />
-      <TimeTab />
+    <View className="px-6">
+      <View className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 mb-6">
+        <Text className="text-lg font-bold text-gray-900 mb-4">
+          Select Date
+        </Text>
+        <Calendar
+          onDayPress={(day: any) => setSelectedDate(day.dateString)}
+          minDate={now}
+          maxDate={nextThirtyDays}
+          theme={{
+            backgroundColor: "#ffffff",
+            calendarBackground: "#ffffff",
+            textSectionTitleColor: "#9CA3AF",
+            selectedDayBackgroundColor: "#0d9488", // teal-600
+            selectedDayTextColor: "#ffffff",
+            todayTextColor: "#0d9488",
+            dayTextColor: "#111827",
+            textDisabledColor: "#E5E7EB",
+            arrowColor: "#0d9488",
+            monthTextColor: "#111827",
+            textMonthFontWeight: "bold",
+          }}
+          markedDates={{
+            [selectedDate]: {
+              selected: true,
+              disableTouchEvent: true,
+            },
+          }}
+        />
+      </View>
+
+      <TimeExample />
       <GuestTab />
-    </>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  title: {
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 10,
-  },
-});

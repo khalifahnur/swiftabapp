@@ -1,3 +1,9 @@
+import { color } from "@/constants/Colors";
+import { usePaymentHook } from "@/hooks/paymenthooks/paymenthook";
+import { AntDesign } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Checkbox from "expo-checkbox";
+import React, { useEffect, useState } from "react";
 import {
   Image,
   KeyboardAvoidingView,
@@ -8,12 +14,6 @@ import {
   TextInput,
   View,
 } from "react-native";
-import React, { useEffect, useState } from "react";
-import { usePaymentHook } from "@/hooks/paymenthooks/paymenthook";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { AntDesign } from "@expo/vector-icons";
-import Checkbox from "expo-checkbox";
-import { color } from "@/constants/Colors";
 
 export default function Mpesa({ visibilityModal, totalAmount }) {
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -32,7 +32,7 @@ export default function Mpesa({ visibilityModal, totalAmount }) {
     const fetchData = async () => {
       try {
         const userObj = JSON.parse(
-          (await AsyncStorage.getItem("userObj")) || "{}"
+          (await AsyncStorage.getItem("userObj")) || "{}",
         );
         setUserData(userObj.user || {});
       } catch (error) {
@@ -126,39 +126,6 @@ export default function Mpesa({ visibilityModal, totalAmount }) {
           </Text>
         </View>
       )}
-
-      {/* Instructions */}
-      <View style={styles.instructionsContainer}>
-        <Text style={styles.instructionsTitle}>Payment Instructions:</Text>
-        <View style={styles.instructionItem}>
-          <Text style={styles.instructionNumber}>1</Text>
-          <Text style={styles.instructionText}>
-            Click PAY to receive a payment prompt on your phone
-          </Text>
-        </View>
-        <View style={styles.instructionItem}>
-          <Text style={styles.instructionNumber}>2</Text>
-          <Text style={styles.instructionText}>
-            Enter your M-Pesa PIN to complete the transaction
-          </Text>
-        </View>
-      </View>
-
-      {/* Pay Button */}
-      <Pressable
-        style={[
-          styles.mpesaPayButton,
-          (!phoneNumber || isLoading) && styles.disabledPayButton,
-        ]}
-        onPress={handlePay}
-        disabled={!phoneNumber || isLoading}
-      >
-        {isLoading ? (
-          <Text style={styles.payButtonText}>PROCESSING...</Text>
-        ) : (
-          <Text style={styles.payButtonText}>PAY NOW</Text>
-        )}
-      </Pressable>
     </KeyboardAvoidingView>
   );
 }

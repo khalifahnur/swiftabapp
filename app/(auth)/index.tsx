@@ -1,21 +1,23 @@
-import { color } from "@/constants/Colors";
-import { useLogin } from "@/hooks/authhooks/authhooks";
-import { loginSchema } from "@/validation/auth/ValidationSchema";
+import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Image,
-  StyleSheet,
+  Keyboard,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
+
+import { useLogin } from "@/hooks/authhooks/authhooks";
+import { loginSchema } from "@/validation/auth/ValidationSchema";
 
 const LoginScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -27,12 +29,15 @@ const LoginScreen = () => {
       Toast.show({
         type: "success",
         text1: "Sign-in Successful!",
-        text2: "Welcome! Login successfully.",
+        text2: "Welcome back to Swiftab.",
       });
 
       const handleLogin = async () => {
         if (signInMutation.data) {
-          await AsyncStorage.setItem("userObj", JSON.stringify(signInMutation.data));
+          await AsyncStorage.setItem(
+            "userObj",
+            JSON.stringify(signInMutation.data),
+          );
           router.replace("/(tabs)");
         }
       };
@@ -40,254 +45,154 @@ const LoginScreen = () => {
       setTimeout(() => {
         handleLogin();
       }, 1000);
-      
     } else if (signInMutation.isError) {
       Toast.show({
         type: "error",
         text1: signInMutation.error.message,
       });
     }
-  }, [signInMutation.isSuccess, signInMutation.isError]);
+  }, [
+    signInMutation.isSuccess,
+    signInMutation.isError,
+    signInMutation.data,
+    router,
+  ]);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Log In</Text>
-      </View>
-      <Formik
-        initialValues={{ email: "", password: "" }}
-        validationSchema={loginSchema}
-        onSubmit={(values) => {
-          signInMutation.mutate(values);
-          console.log(values);
-        }}
-      >
-        {({
-          handleChange,
-          handleBlur,
-          handleSubmit,
-          values,
-          errors,
-          touched,
-        }) => (
-          <>
-            <View style={styles.inputContainer}>
-              <View>
-                <Text style={styles.labelTxt}>Email</Text>
-                <TextInput
-                  placeholder="example@gmail.com"
-                  value={values.email}
-                  onChangeText={handleChange("email")}
-                  style={styles.input}
-                />
-                {errors.email && touched.email && (
-                  <Text style={styles.errorText}>{errors.email}</Text>
-                )}
-              </View>
-              <View>
-                <Text style={styles.labelTxt}>Password</Text>
-                <View style={styles.passwordContainer}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <SafeAreaView className="flex-1 bg-gray-50">
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            padding: 24,
+            flexGrow: 1,
+            justifyContent: "center",
+          }}
+        >
+          <View className="mb-10 mt-4">
+            <Text className="text-3xl font-bold text-gray-900 tracking-tight text-center">
+              Welcome Back
+            </Text>
+          </View>
+
+          <Formik
+            initialValues={{ email: "", password: "" }}
+            validationSchema={loginSchema}
+            onSubmit={(values) => {
+              signInMutation.mutate(values);
+            }}
+          >
+            {({
+              handleChange,
+              handleBlur,
+              handleSubmit,
+              values,
+              errors,
+              touched,
+            }) => (
+              <View className="space-y-4">
+                <View>
+                  <Text className="text-sm font-medium text-gray-700 mb-1.5">
+                    Email
+                  </Text>
                   <TextInput
-                    placeholder="Must be 8 characters"
-                    value={values.password}
-                    onChangeText={handleChange("password")}
-                    secureTextEntry={!showPassword}
-                    style={styles.passwordInput}
+                    placeholderTextColor="#9CA3AF"
+                    value={values.email}
+                    onChangeText={handleChange("email")}
+                    onBlur={handleBlur("email")}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    className={`bg-white border rounded-xl p-4 text-base text-gray-900 ${
+                      errors.email && touched.email
+                        ? "border-red-500"
+                        : "border-gray-200"
+                    }`}
                   />
-                  <TouchableOpacity
-                    onPress={() => setShowPassword(!showPassword)}
-                  >
-                    <Text style={styles.eyeIcon}>
-                      {showPassword ? "👁" : "👁‍🗨"}
+                  {errors.email && touched.email && (
+                    <Text className="text-red-500 text-xs mt-1.5 ml-1">
+                      {errors.email}
                     </Text>
-                  </TouchableOpacity>
+                  )}
                 </View>
-                {errors.password && touched.password && (
-                  <Text style={styles.errorText}>{errors.password}</Text>
-                )}
+
+                <View>
+                  <Text className="text-sm font-medium text-gray-700 mb-1.5">
+                    Password
+                  </Text>
+                  <View
+                    className={`flex-row items-center bg-white border rounded-xl pr-4 ${
+                      errors.password && touched.password
+                        ? "border-red-500"
+                        : "border-gray-200"
+                    }`}
+                  >
+                    <TextInput
+                      placeholderTextColor="#9CA3AF"
+                      value={values.password}
+                      onChangeText={handleChange("password")}
+                      onBlur={handleBlur("password")}
+                      secureTextEntry={!showPassword}
+                      className="flex-1 p-4 text-base text-gray-900"
+                    />
+                    <TouchableOpacity
+                      onPress={() => setShowPassword(!showPassword)}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      <Ionicons
+                        name={showPassword ? "eye-outline" : "eye-off-outline"}
+                        size={22}
+                        color="#6B7280"
+                      />
+                    </TouchableOpacity>
+                  </View>
+                  {errors.password && touched.password && (
+                    <Text className="text-red-500 text-xs mt-1.5 ml-1">
+                      {errors.password}
+                    </Text>
+                  )}
+                </View>
+
+                <TouchableOpacity
+                  onPress={() => router.push("/(auth)/forgotpassword")}
+                  className="mt-2"
+                >
+                  <Text className="text-right text-teal-600 font-medium text-sm">
+                    Forgot password?
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  className={`rounded-xl p-4 items-center mt-4 shadow-sm ${
+                    signInMutation.isPending ? "bg-teal-400" : "bg-teal-600"
+                  }`}
+                  onPress={() => handleSubmit()}
+                  disabled={signInMutation.isPending}
+                >
+                  {signInMutation.isPending ? (
+                    <ActivityIndicator color="#FFF" />
+                  ) : (
+                    <Text className="text-white text-base font-semibold">
+                      Log in
+                    </Text>
+                  )}
+                </TouchableOpacity>
               </View>
-            </View>
-            <TouchableOpacity
-              onPress={() => router.push("/(auth)/forgotpassword")}
-            >
-              <Text style={styles.forgotPassword}>Forgot password?</Text>
+            )}
+          </Formik>
+
+          <View className="flex-row justify-center items-center mt-auto pb-6">
+            <Text className="text-gray-600 font-medium text-base">
+              Don't have an account?{" "}
+            </Text>
+            <TouchableOpacity onPress={() => router.navigate("/(auth)/signup")}>
+              <Text className="text-teal-600 font-bold text-base">Sign up</Text>
             </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.loginButton}
-              onPress={() => handleSubmit()}
-              disabled={signInMutation.isPending}
-            >
-              {signInMutation.isPending ? (
-                <ActivityIndicator color="#FFF" />
-              ) : (
-                <Text style={styles.loginButtonText}>Log in</Text>
-              )}
-            </TouchableOpacity>
-          </>
-        )}
-      </Formik>
-      <View style={styles.separatorContainer}>
-        <View style={styles.separator} />
-        <Text style={styles.separatorText}>Or Login with</Text>
-        <View style={styles.separator} />
-      </View>
-
-      <View style={styles.socialButtonsContainer}>
-        <TouchableOpacity style={styles.socialButton}>
-          <Image
-            source={{
-              uri: "https://img.icons8.com/?size=100&id=118497&format=png&color=000000",
-            }}
-            style={styles.socialIcon}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.socialButton}>
-          <Image
-            source={{
-              uri: "https://img.icons8.com/?size=100&id=17949&format=png&color=000000",
-            }}
-            style={styles.socialIcon}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.socialButton}>
-          <Image
-            source={{ uri: "https://img.icons8.com/ios-filled/50/mac-os.png" }}
-            style={styles.socialIcon}
-          />
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.signUpContainer}>
-        <Text style={styles.signUpText}>Don't have an account? </Text>
-        <TouchableOpacity onPress={() => router.navigate("/(auth)/signup")}>
-          <Text style={styles.signUpLink}>Sign up</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 };
 
 export default LoginScreen;
-
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor:color.graywhite,
-    padding: 24,
-  },
-  header: {
-    flexDirection: "row",    
-    alignItems: "center",      
-    justifyContent: "space-between", 
-    marginBottom: 20,          
-    paddingHorizontal: 10,     
-  },
-  backButton: {
-    marginRight: 10,           
-  },
-  backText: {
-    fontSize: 24,
-    color: "#000",             
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: "bold",
-    flex: 1,                   
-    textAlign: "center",   
-    color: "#000",            
-  },
-  labelTxt: {
-    fontSize: 14,
-    fontWeight: "500",
-    paddingVertical: 10,
-  },
-  inputContainer: {
-    marginBottom: 16,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#D1D5DB",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 8,
-    color:'#000'
-  },
-  passwordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#D1D5DB",
-    borderRadius: 8,
-    
-  },
-  passwordInput: {
-    flex: 1,
-    padding: 10,
-    color:'#000'
-  },
-  eyeIcon: {
-    paddingRight: 16,
-    fontSize: 20,
-  },
-  forgotPassword: {
-    textAlign: "right",
-    color: "#2563EB",
-    marginBottom: 24,
-  },
-  loginButton: {
-    backgroundColor: color.green,
-    borderRadius: 8,
-    padding: 16,
-    alignItems: "center",
-  },
-  loginButtonText: {
-    color: "#FFF",
-    fontWeight: "600",
-  },
-  separatorContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 24,
-  },
-  separator: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#E5E7EB",
-  },
-  separatorText: {
-    marginHorizontal: 12,
-    color: "#6B7280",
-  },
-  socialButtonsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginBottom: 24,
-  },
-  socialButton: {
-    borderWidth: 1,
-    borderColor: "#D1D5DB",
-    borderRadius: 8,
-    padding: 12,
-  },
-  socialIcon: {
-    width: 24,
-    height: 24,
-  },
-  signUpContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-  },
-  signUpText: {
-    color: "#6B7280",
-  },
-  signUpLink: {
-    color: "#2563EB",
-  },
-  errorText: {
-    color: "red",
-    fontSize: 12,
-    marginTop: 4,
-  },
-});

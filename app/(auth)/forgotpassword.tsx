@@ -55,7 +55,7 @@ const ForgotScreen = () => {
         text2: "Please check your email for the verification code.",
       });
 
-      router.push({pathname:"/(auth)/codeverify",params:{email}});
+      router.push({ pathname: "/(auth)/codeverify", params: { email } });
     } catch (error) {
       Toast.show({
         type: "error",
@@ -98,7 +98,7 @@ const ForgotScreen = () => {
 
       <View style={styles.signinContainer}>
         <Text style={styles.signinText}>Rembered password? </Text>
-        <TouchableOpacity onPress={() => router.navigate("/(auth)/signin")}>
+        <TouchableOpacity onPress={() => router.navigate("/(auth)")}>
           <Text style={styles.signinLink}>Log in</Text>
         </TouchableOpacity>
       </View>

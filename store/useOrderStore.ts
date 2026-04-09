@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 export interface MenuItem {
   _id: string;
@@ -16,9 +16,11 @@ export interface CartItem extends MenuItem {
 interface CartState {
   items: CartItem[];
   addToCart: (item: MenuItem) => void;
+  decreaseQuantity: (itemId: string) => void;
   removeFromCart: (itemId: string) => void;
   getTotalPrice: () => number;
   getItemQuantity: (itemId: string) => number;
+  clearCart: () => void;
 }
 
 export const useCartStore = create<CartState>((set, get) => ({
@@ -32,7 +34,7 @@ export const useCartStore = create<CartState>((set, get) => ({
           items: state.items.map((item) =>
             item._id === product._id
               ? { ...item, quantity: item.quantity + 1 }
-              : item
+              : item,
           ),
         };
       } else {
@@ -41,7 +43,8 @@ export const useCartStore = create<CartState>((set, get) => ({
     });
   },
 
-  removeFromCart: (itemId) => {
+  // Use this for a "-" button
+  decreaseQuantity: (itemId) => {
     set((state) => {
       const existingItem = state.items.find((item) => item._id === itemId);
       if (existingItem && existingItem.quantity > 1) {
@@ -49,16 +52,21 @@ export const useCartStore = create<CartState>((set, get) => ({
           items: state.items.map((item) =>
             item._id === itemId
               ? { ...item, quantity: item.quantity - 1 }
-              : item
+              : item,
           ),
         };
       } else {
-        // Remove completely
         return {
           items: state.items.filter((item) => item._id !== itemId),
         };
       }
     });
+  },
+
+  removeFromCart: (itemId) => {
+    set((state) => ({
+      items: state.items.filter((item) => item._id !== itemId),
+    }));
   },
 
   getTotalPrice: () => {
@@ -71,4 +79,6 @@ export const useCartStore = create<CartState>((set, get) => ({
     const item = items.find((i) => i._id === itemId);
     return item ? item.quantity : 0;
   },
+
+  clearCart: () => set({ items: [] }),
 }));

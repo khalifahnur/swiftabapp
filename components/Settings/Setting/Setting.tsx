@@ -1,31 +1,25 @@
-import { useAuthStore } from "@/lib/authStore";
 import {
-  Entypo,
-  FontAwesome5,
   Ionicons,
   MaterialCommunityIcons,
   MaterialIcons,
 } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
-import { LinearGradient } from "expo-linear-gradient";
-import { Link, useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   BackHandler,
   Image,
-  Modal,
+  ScrollView,
   StatusBar,
-  StyleSheet,
+  Switch,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import BottomModal from "./BottomModal";
-import BottomPayment from "./BottomPayment";
-import MpesaModal from "./MpesaModal";
+
+import { useAuthStore } from "@/lib/authStore";
 
 interface UserData {
   email: string;
@@ -34,63 +28,58 @@ interface UserData {
   userId: string;
 }
 
+const SettingRow = ({
+  icon,
+  iconFamily: IconComponent,
+  iconColor,
+  iconBg,
+  title,
+  onPress,
+  isLast = false,
+  showToggle = false,
+  toggleValue = false,
+  onToggle,
+}: any) => (
+  <TouchableOpacity
+    activeOpacity={0.7}
+    onPress={onPress}
+    disabled={!onPress && !showToggle}
+    className={`flex-row items-center py-4 ${!isLast ? "border-b border-gray-100" : ""}`}
+  >
+    <View
+      className="w-10 h-10 rounded-xl items-center justify-center mr-4"
+      style={{ backgroundColor: iconBg }}
+    >
+      <IconComponent name={icon} size={20} color={iconColor} />
+    </View>
+    <Text className="flex-1 text-base font-medium text-gray-800">{title}</Text>
+
+    {showToggle ? (
+      <Switch
+        value={toggleValue}
+        onValueChange={onToggle}
+        trackColor={{ false: "#E5E7EB", true: "#0d9488" }} // teal-600 when active
+        thumbColor="#ffffff"
+      />
+    ) : (
+      <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+    )}
+  </TouchableOpacity>
+);
+
 export default function Setting() {
   const router = useRouter();
-  const navigation = useNavigation();
   const [userData, setUserData] = useState<UserData>({} as UserData);
-
   const [loading, setLoading] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
   const [notOff, setNotOff] = useState(false);
-  const [paymentModal, setPaymentModal] = useState(false);
-  const [mpesaModal, setMpesaModal] = useState<boolean>(false);
+
   const { logOut } = useAuthStore();
-
-  const LogOutHandler = async () => {
-    try {
-      setLoading(true);
-      logOut();
-      await AsyncStorage.clear();
-
-      setTimeout(() => {
-        router.replace({
-          pathname: "/(auth)",
-        });
-      }, 1500);
-
-      const backAction = () => {
-        BackHandler.exitApp();
-        return true;
-      };
-
-      const subscribe = BackHandler.addEventListener(
-        "hardwareBackPress",
-        backAction
-      );
-
-      return () => subscribe.remove();
-    } catch (error) {
-      setLoading(false);
-      console.error("Logout failed:", error);
-    }
-  };
-
-  const handleVisible = () => {
-    setPaymentModal(false);
-    setMpesaModal(true);
-  };
-
-  const handleVisibleMpesaModal = () => {
-    setMpesaModal(false);
-  };
-
-  const { name, email } = userData;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const userObj = JSON.parse(
-          (await AsyncStorage.getItem("userObj")) || "{}"
+          (await AsyncStorage.getItem("userObj")) || "{}",
         );
         setUserData(userObj.user);
       } catch (error) {
@@ -100,302 +89,151 @@ export default function Setting() {
     fetchData();
   }, []);
 
-  useLayoutEffect(() => {
-    navigation.setOptions({ headerShown: false });
-  }, [navigation]);
+  const LogOutHandler = async () => {
+    try {
+      setLoading(true);
+      logOut();
+      await AsyncStorage.clear();
+
+      setTimeout(() => {
+        router.replace("/(auth)");
+      }, 1500);
+
+      const backAction = () => {
+        BackHandler.exitApp();
+        return true;
+      };
+
+      const subscribe = BackHandler.addEventListener(
+        "hardwareBackPress",
+        backAction,
+      );
+      return () => subscribe.remove();
+    } catch (error) {
+      setLoading(false);
+      console.error("Logout failed:", error);
+    }
+  };
 
   if (loading) {
     return (
-      <View style={styles.loaderContainer}>
+      <View className="flex-1 justify-center items-center bg-white">
         <LottieView
           source={require("@/assets/images/lottie/loader.json")}
           autoPlay
           loop
           style={{ width: 120, height: 120 }}
         />
-        <Text style={styles.loadingText}>Logging out...</Text>
+        <Text className="mt-4 text-base font-medium text-gray-500">
+          Logging out...
+        </Text>
       </View>
     );
   }
 
   return (
-    <>
-      <StatusBar barStyle="dark-content" backgroundColor="#f8f9fa" />
-      <SafeAreaView style={styles.safeArea}>
-        <LinearGradient
-          colors={["#f8f9fa", "#ffffff"]}
-          style={styles.container}
-        >
-          <View style={styles.profileSection}>
-            <View style={styles.profileImageContainer}>
-              <Image
-                source={require("@/assets/images/user.jpeg")}
-                style={styles.profileImage}
-                defaultSource={require("@/assets/images/user.jpeg")}
-              />
+    <SafeAreaView className="flex-1 bg-gray-50" edges={["top"]}>
+      {/* Safely hide the header using expo-router */}
+      <Stack.Screen options={{ headerShown: false }} />
+      <StatusBar barStyle="dark-content" backgroundColor="#f9fafb" />
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 40 }}
+      >
+        {/* Profile Section */}
+        <View className="items-center mt-6 mb-8">
+          <View className="relative shadow-sm">
+            <Image
+              source={require("@/assets/images/user.jpeg")}
+              className="w-24 h-24 rounded-full bg-gray-200"
+            />
+            {/* Small edit badge */}
+            <View className="absolute bottom-0 right-0 bg-teal-600 w-8 h-8 rounded-full items-center justify-center border-2 border-gray-50">
+              <Ionicons name="pencil" size={14} color="#fff" />
             </View>
-            <Text style={styles.profileName}>{name}</Text>
-            <Text style={styles.profileEmail}>{email}</Text>
+          </View>
+          <Text className="text-2xl font-bold text-gray-900 mt-4 mb-1">
+            {userData?.name || "Guest"}
+          </Text>
+          <Text className="text-sm font-regular text-gray-500">
+            {userData?.email || "No email provided"}
+          </Text>
+        </View>
+
+        <View className="px-6">
+          {/* Preferences Group */}
+          <Text className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3 ml-2">
+            Preferences
+          </Text>
+          <View className="bg-white rounded-3xl px-4 py-2 mb-6 shadow-sm border border-gray-100">
+            <SettingRow
+              icon="notifications"
+              iconFamily={Ionicons}
+              iconColor="#4F46E5" // Indigo
+              iconBg="#EEF2FF"
+              title="Push Notifications"
+              showToggle={true}
+              toggleValue={notOff}
+              onToggle={() => setNotOff(!notOff)}
+              isLast={true}
+            />
           </View>
 
-          <Text style={styles.sectionTitle}>Preferences</Text>
+          {/* Support & Legal Group */}
+          <Text className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3 ml-2">
+            Support & Legal
+          </Text>
+          <View className="bg-white rounded-3xl px-4 py-2 mb-8 shadow-sm border border-gray-100">
+            <SettingRow
+              icon="help-circle-outline"
+              iconFamily={MaterialCommunityIcons}
+              iconColor="#10B981" // Emerald
+              iconBg="#ECFDF5"
+              title="Help Center"
+              onPress={() => router.push("/screens/help")}
+            />
+            <SettingRow
+              icon="shield-checkmark-outline"
+              iconFamily={Ionicons}
+              iconColor="#3B82F6" // Blue
+              iconBg="#EFF6FF"
+              title="Privacy Policy"
+              onPress={() => router.push("/screens/PolicyScreen?type=privacy")}
+            />
+            <SettingRow
+              icon="document-text-outline"
+              iconFamily={Ionicons}
+              iconColor="#8B5CF6" // Purple
+              iconBg="#F5F3FF"
+              title="Terms & Conditions"
+              onPress={() => router.push("/screens/PolicyScreen?type=terms")}
+            />
+            <SettingRow
+              icon="information-outline"
+              iconFamily={MaterialCommunityIcons}
+              iconColor="#6B7280" // Gray
+              iconBg="#F3F4F6"
+              title="About Swiftab"
+              onPress={() => router.push("/screens/PolicyScreen?type=about")}
+              isLast={true}
+            />
+          </View>
           <TouchableOpacity
-            style={styles.card}
-            onPress={() => setNotOff(!notOff)}
+            onPress={LogOutHandler}
+            className="flex-row justify-center items-center bg-red-50 py-4 rounded-2xl border border-red-100 mb-6"
           >
-            <View style={styles.detailRow}>
-              <View
-                style={[
-                  styles.iconContainer,
-                  { backgroundColor: "rgba(82, 113, 255, 0.1)" },
-                ]}
-              >
-                <Ionicons name="notifications" size={22} color="#4A55A2" />
-              </View>
-              <Text style={styles.detailText}>Notifications</Text>
-              <FontAwesome5
-                name={notOff ? "toggle-on" : "toggle-off"}
-                size={22}
-                color={notOff ? "#4A55A2" : "#C8C8C8"}
-                style={styles.toggleIcon}
-              />
-            </View>
+            <MaterialIcons name="logout" size={20} color="#EF4444" />
+            <Text className="text-red-500 text-base font-bold ml-2">
+              Log Out
+            </Text>
           </TouchableOpacity>
 
-          {/* Payment */}
-          {/* <TouchableOpacity
-            style={styles.card}
-            onPress={() => setPaymentModal(true)}
-          >
-            <View style={styles.detailRow}>
-              <View
-                style={[
-                  styles.iconContainer,
-                  { backgroundColor: "rgba(255, 172, 28, 0.1)" },
-                ]}
-              >
-                <MaterialIcons name="payment" size={22} color="#FFAC1C" />
-              </View>
-              <Text style={styles.detailText}>Payment Methods</Text>
-              <Entypo name="chevron-right" size={22} color="#C8C8C8" />
-            </View>
-          </TouchableOpacity> */}
-
-          <Text style={styles.sectionTitle}>Help Center</Text>
-
-          <TouchableOpacity style={styles.card}>
-            <Link href="/screens/help">
-              <View style={styles.detailRow}>
-                <View
-                  style={[
-                    styles.iconContainer,
-                    { backgroundColor: "rgba(76, 175, 80, 0.1)" },
-                  ]}
-                >
-                  <MaterialCommunityIcons
-                    name="help-circle-outline"
-                    size={22}
-                    color="#4CAF50"
-                  />
-                </View>
-                <Text style={styles.detailText}>Help Center</Text>
-                <Entypo name="chevron-right" size={22} color="#C8C8C8" />
-              </View>
-            </Link>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.card}>
-            <Link href="/screens/PolicyScreen?type=privacy">
-              <View style={styles.detailRow}>
-                <View
-                  style={[
-                    styles.iconContainer,
-                    { backgroundColor: "rgba(3, 169, 244, 0.1)" },
-                  ]}
-                >
-                  <MaterialIcons name="gavel" size={22} color="#03A9F4" />
-                </View>
-                <Text style={styles.detailText}>Privacy</Text>
-                <Entypo name="chevron-right" size={22} color="#C8C8C8" />
-              </View>
-            </Link>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.card}>
-            <Link href="/screens/PolicyScreen?type=terms">
-              <View style={styles.detailRow}>
-                <View
-                  style={[
-                    styles.iconContainer,
-                    { backgroundColor: "rgba(3, 169, 244, 0.1)" },
-                  ]}
-                >
-                  <MaterialIcons name="gavel" size={22} color="#03A9F4" />
-                </View>
-                <Text style={styles.detailText}>Terms & Conditions</Text>
-                <Entypo name="chevron-right" size={22} color="#C8C8C8" />
-              </View>
-            </Link>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.card}>
-            <Link href="/screens/PolicyScreen?type=about">
-              <View style={styles.detailRow}>
-                <View
-                  style={[
-                    styles.iconContainer,
-                    { backgroundColor: "rgba(3, 169, 244, 0.1)" },
-                  ]}
-                >
-                  <MaterialCommunityIcons
-                    name="information-outline"
-                    size={20}
-                    color="#e0e0e0"
-                  />
-                </View>
-                <Text style={styles.detailText}>About</Text>
-                <Entypo name="chevron-right" size={22} color="#C8C8C8" />
-              </View>
-            </Link>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.logoutButton} onPress={LogOutHandler}>
-            <MaterialIcons name="logout" size={20} color="#FFFFFF" />
-            <Text style={styles.logoutText}>Log Out</Text>
-          </TouchableOpacity>
-        </LinearGradient>
-      </SafeAreaView>
-
-      {modalVisible && <BottomModal logOutHandle={LogOutHandler} />}
-      {paymentModal && (
-        <BottomPayment
-          visibleModal={handleVisible}
-          closeModal={() => setPaymentModal(false)}
-        />
-      )}
-
-      <Modal animationType="slide" visible={mpesaModal}>
-        <MpesaModal visibilityModal={handleVisibleMpesaModal} />
-      </Modal>
-    </>
+          <Text className="text-center text-gray-400 text-xs font-medium">
+            Swiftab App v1.0.0
+          </Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#f8f9fa",
-  },
-  container: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-
-  profileSection: {
-    alignItems: "center",
-    marginBottom: 30,
-    marginTop: 10,
-  },
-  profileImageContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: "#E1E5F2",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  profileImage: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    backgroundColor: "#E1E5F2",
-  },
-  profileName: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 5,
-    color: "#333333",
-  },
-  profileEmail: {
-    fontSize: 14,
-    color: "#666666",
-    marginBottom: 5,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginTop: 20,
-    marginBottom: 10,
-    paddingLeft: 5,
-    color: "#666666",
-  },
-  card: {
-    marginBottom: 14,
-    padding: 10,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2.5,
-    elevation: 2,
-  },
-  detailRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 15,
-  },
-  detailText: {
-    flex: 1,
-    fontSize: 16,
-    color: "#333333",
-    fontWeight: "500",
-  },
-  toggleIcon: {
-    transform: [{ scaleX: 1.5 }, { scaleY: 1.5 }],
-  },
-  logoutButton: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#FF5C5C",
-    borderRadius: 12,
-    padding: 15,
-    marginTop: 30,
-    shadowColor: "#FF5C5C",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 4,
-  },
-  logoutText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
-    marginLeft: 10,
-  },
-  loaderContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: "#666666",
-  },
-});

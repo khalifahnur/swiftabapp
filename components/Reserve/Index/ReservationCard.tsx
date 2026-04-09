@@ -1,26 +1,25 @@
-import { color } from "@/constants/Colors";
-import { userCancellationReservation } from "@/hooks/reservationhooks/reservehook";
-import useStore from "@/store/useStore";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Notifications from 'expo-notifications';
+import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import {
+  Alert,
   Image,
   Platform,
-  StyleSheet,
   Switch,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 
-interface prop {
+import { userCancellationReservation } from "@/hooks/reservationhooks/reservehook";
+
+interface Props {
   items: {
     date: string;
-    time: number;
+    time: string;
     location: string;
     rate: string;
     image: string;
@@ -28,31 +27,19 @@ interface prop {
     restaurantId: string;
     reservationId: string;
     id: string;
+    table: string;
   };
 }
 
-interface UserData {
-  email: string;
-  name: string;
-  phoneNumber: string;
-  userId: string;
-}
+export default function ReservationCard({ items }: Props) {
+  const [isRemind, setIsRemind] = useState(false);
+  const [userData, setUserData] = useState<any>({});
 
-type cancelParams = {
-  id:string;
-  userId:string;
-  restaurantId:string;
-  reservationId:string;
-}
-
-const ReservationCard = ({ items }: prop) => {
-  const { isRemind, setIsRemind } = useStore();
-  const [userData, setUserData] = useState<UserData>({} as UserData);
   const handleCancelMutate = userCancellationReservation();
   const router = useRouter();
 
   useEffect(() => {
-    const FetchData = async () => {
+    const fetchData = async () => {
       try {
         const userObjStr = await AsyncStorage.getItem("userObj");
         const userObj = JSON.parse(userObjStr || "{}");
@@ -61,113 +48,116 @@ const ReservationCard = ({ items }: prop) => {
         console.error("Failed to load user data", error);
       }
     };
-    FetchData();
-  }, []);
+    fetchData();
 
-  if (!items) {
-    return null;
-  }
+    const checkExistingReminders = async () => {
+      const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+      const isScheduled = scheduled.some(
+        (notif) => notif.identifier === items.reservationId,
+      );
+      setIsRemind(isScheduled);
+    };
+    checkExistingReminders();
+  }, [items.reservationId]);
+
+  if (!items) return null;
 
   const userId = userData?.userId || "";
-  if (!userId) {
-  }
 
-  const date = new Date(items.time);
-  const formattedTime = date.toLocaleString("en-US", {
-    month: "short",
-    day: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  });
+  const dateTimeString = `${items.date} ${items.time}`;
+  const reservationTime = moment(dateTimeString, [
+    "YYYY-MM-DD HH:mm",
+    "YYYY-MM-DD hh:mm A",
+  ]);
 
-  const reservetime = date.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  });
+  const formattedTime = reservationTime.format("MMM DD, YYYY • hh:mm A");
+  const reserveTimeStr = reservationTime.format("hh:mm A");
 
-  const {
-    image,
-    location,
-    rate,
-    restaurantName,
-    reservationId,
-    restaurantId,
-    id,
-  } = items;
-
-  const handleCancelReservation = ({
-    id,
-    userId,
-    reservationId,
-    restaurantId,
-  }: cancelParams) => {
-    if (!id || !userId || !reservationId || !restaurantId) {
-      console.log("Missing required fields for cancellation");
-      return;
-    }
-    handleCancelMutate.mutate({ id, userId, restaurantId, reservationId });
-  };
-
-
-
-  const openMenuModal = (id: string) => {
-    router.push({
-      pathname: '/modal',
-      params: { restaurantId: id }
+  const handleCancel = () => {
+    handleCancelMutate.mutate({
+      id: items.id,
+      userId,
+      restaurantId: items.restaurantId,
+      reservationId: items.reservationId,
     });
   };
 
   const setupNotificationChannel = async () => {
-    if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync('reservation-reminders', {
-        name: 'Reservation Reminders',
+    if (Platform.OS === "android") {
+      await Notifications.setNotificationChannelAsync("reservation-reminders", {
+        name: "Reservation Reminders",
         importance: Notifications.AndroidImportance.HIGH,
-        sound: 'default',
+        sound: "default",
         vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#FF231F7C',
+        lightColor: "#0d9488",
       });
     }
   };
 
   const scheduleReminderNotification = async () => {
     try {
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+
+      if (finalStatus !== "granted") {
+        Alert.alert(
+          "Permission Denied",
+          "Please enable notifications in your phone settings to receive reminders.",
+        );
+        setIsRemind(false);
+        return;
+      }
+
       await setupNotificationChannel();
-      const reservationTime = moment(items.time);
-      const reminderTime = reservationTime.subtract(1, 'hour');
+
+      const now = moment();
+      const minutesUntilReservation = reservationTime.diff(now, "minutes");
+
+      if (minutesUntilReservation <= 0) {
+        Alert.alert(
+          "Too Late",
+          "This reservation has already started or passed.",
+        );
+        setIsRemind(false);
+        return;
+      }
 
       await Notifications.cancelScheduledNotificationAsync(items.reservationId);
+
+      let triggerConfig: Notifications.NotificationTriggerInput;
+      let notificationBody = "";
+
+      if (minutesUntilReservation <= 30) {
+        triggerConfig = { seconds: 1, channelId: "reservation-reminders" };
+        notificationBody = `Hurry! Your table at ${items.restaurantName} is ready in ${minutesUntilReservation} minutes (${reserveTimeStr}).`;
+      } else {
+        const reminderTime = reservationTime.clone().subtract(30, "minutes");
+        triggerConfig = {
+          date: reminderTime.toDate(),
+          channelId: "reservation-reminders",
+        };
+        notificationBody = `Your table at ${items.restaurantName} will be ready in at ${reserveTimeStr}.`;
+      }
 
       await Notifications.scheduleNotificationAsync({
         identifier: items.reservationId,
         content: {
-          title: `📅 Upcoming Reservation at ${restaurantName}`,
-          body: `🍽️ Your reservation is at ${reservetime}. See you soon!`,
-          sound: 'default',
-          data: {
-            reservationId: items.reservationId,
-            type: 'reservation-reminder',
-          },
+          title: `⏳ Upcoming Reservation`,
+          body: notificationBody,
+          sound: "default",
+          data: { reservationId: items.reservationId },
         },
-        trigger: {
-          date: reminderTime.toDate(),
-          channelId: 'reservation-reminders',
-        },
+        trigger: triggerConfig,
       });
-      console.log('Reminder scheduled successfully');
     } catch (error) {
-      console.error('Error scheduling reminder:', error);
-    }
-  };
-
-  const cancelReminderNotification = async () => {
-    try {
-      await Notifications.cancelScheduledNotificationAsync(items.reservationId);
-      console.log('Reminder cancelled successfully');
-    } catch (error) {
-      console.error('Error cancelling reminder:', error);
+      console.error("Error scheduling reminder:", error);
+      setIsRemind(false);
     }
   };
 
@@ -176,183 +166,96 @@ const ReservationCard = ({ items }: prop) => {
     if (value) {
       await scheduleReminderNotification();
     } else {
-      await cancelReminderNotification();
+      await Notifications.cancelScheduledNotificationAsync(items.reservationId);
     }
   };
 
   return (
-    <View style={styles.cardContainer}>
-      <View style={styles.header}>
-        <Text style={styles.dateText}>{formattedTime}</Text>
-        <View style={styles.reminder}>
-          <Text style={styles.remindText}>Remind me</Text>
+    <View className="bg-white mx-6 mb-4 rounded-3xl p-4 shadow-sm border border-gray-100">
+      <View className="flex-row justify-between items-center mb-3">
+        <Text className="text-gray-900 font-bold text-sm">{formattedTime}</Text>
+        <View className="flex-row items-center bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
+          <Text className="text-gray-500 font-medium text-xs mr-2">
+            Remind me
+          </Text>
           <Switch
             value={isRemind}
             onValueChange={handleReminderToggle}
-            trackColor={{ false: "#ccc", true: "#008080" }}
-            thumbColor={isRemind ? "#008080" : "#f4f3f4"}
+            trackColor={{ false: "#E5E7EB", true: "#0d9488" }}
+            thumbColor="#fff"
+            style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }}
           />
         </View>
       </View>
-      <View style={styles.divider} />
 
-      <View style={styles.detailsRow}>
-        <Image source={{ uri: image }} style={styles.image} />
-        <View style={styles.info}>
-          <View style={styles.nameRow}>
-            <Text style={styles.name}>{restaurantName}</Text>
-            <View style={styles.rating}>
-              <Ionicons name="star" size={16} color="gold" />
-              <Text style={styles.ratingText}>{rate}</Text>
+      <View className="h-px bg-gray-100 w-full mb-3" />
+
+      <View className="flex-row mb-4">
+        <Image
+          source={{ uri: items.image }}
+          className="w-20 h-20 rounded-2xl bg-gray-100 mr-4"
+        />
+        <View className="flex-1 justify-center">
+          <View className="flex-row justify-between items-center mb-1">
+            <Text
+              className="font-bold text-gray-900 text-base"
+              numberOfLines={1}
+            >
+              {items.restaurantName}
+            </Text>
+            <View className="flex-row items-center bg-teal-50 px-2 py-0.5 rounded-md">
+              <Ionicons name="star" size={12} color="#f5a623" />
+              <Text className="text-teal-700 font-bold text-xs ml-1">
+                {items.rate}
+              </Text>
             </View>
           </View>
-          <View style={styles.iconRow}>
-            <Ionicons name="time-outline" size={16} color="#6F7A8A" />
-            <Text style={styles.iconText}>15 min</Text>
-            <Ionicons name="restaurant-outline" size={16} color="#6F7A8A" />
-            <Text style={styles.iconText}>Italian</Text>
+
+          <View className="flex-row items-center mb-1">
+            <Ionicons name="location" size={14} color="#0d9488" />
+            <Text
+              className="text-gray-500 font-medium text-xs ml-1"
+              numberOfLines={1}
+            >
+              {items.location}
+            </Text>
           </View>
-          <View style={styles.iconRow}>
-            <Ionicons name="location-outline" size={16} color="#6F7A8A" />
-            <Text style={styles.iconText}>{location}</Text>
+          <View className="flex-row items-center">
+            <Ionicons name="restaurant" size={14} color="#9CA3AF" />
+            <Text className="text-gray-400 font-medium text-xs ml-1">
+              {items.table}
+            </Text>
           </View>
         </View>
       </View>
 
-<View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center'}}>
+      <View className="flex-row gap-3">
         <TouchableOpacity
-        style={{backgroundColor: color.green,
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 5,
-    width: "40%",
-    alignSelf: "flex-start",}}
-        onPress={() =>
-          openMenuModal( restaurantId )
-        }
-        disabled={!userId}
-      >
-        <Text style={styles.cancelText}>Pre-Order</Text>
-      </TouchableOpacity>
+          className="flex-1 bg-teal-600 py-3 rounded-lg items-center"
+          onPress={() =>
+            router.push({
+              pathname: "/modal",
+              params: {
+                restaurantId: items.restaurantId,
+                userId,
+                reservationId: items.reservationId,
+                tableNumber: items.table,
+              },
+            })
+          }
+          disabled={!userId}
+        >
+          <Text className="text-white font-bold text-sm">Pre-Order Food</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.cancelButton}
-        onPress={() =>
-          handleCancelReservation({ id, userId, reservationId, restaurantId })
-        }
-        disabled={!userId}
-      >
-        <Text style={styles.cancelText}>Cancel</Text>
-      </TouchableOpacity>
-</View>
-
+        <TouchableOpacity
+          className="flex-1 bg-red-50 border border-red-100 py-3 rounded-lg items-center"
+          onPress={handleCancel}
+          disabled={!userId}
+        >
+          <Text className="text-red-500 font-bold text-sm">Cancel</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
-};
-
-const styles = StyleSheet.create({
-  cardContainer: {
-    backgroundColor: '#f0f0f0',
-    borderRadius: 10,
-    padding: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    marginVertical: 10,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 10,
-    alignItems: "center",
-  },
-  dateText: {
-    fontSize: 14,
-    color: "#6F7A8A",
-  },
-  reminder: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  remindText: {
-    fontSize: 14,
-    marginRight: 5,
-  },
-  detailsRow: {
-    flexDirection: "row",
-    marginBottom: 10,
-  },
-  image: {
-    width: 80,
-    height: 80,
-    borderRadius: 10,
-    marginRight: 10,
-  },
-  info: {
-    flex: 1,
-  },
-  nameRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 5,
-  },
-  name: {
-    fontSize: 13,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  rating: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  ratingText: {
-    fontSize: 12,
-    color: "#6F7A8A",
-    marginLeft: 3,
-  },
-  iconRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 2,
-  },
-  iconText: {
-    fontSize: 12,
-    color: "#6F7A8A",
-    marginLeft: 5,
-    marginRight: 15,
-  },
-
-  cancelButton: {
-    backgroundColor: color.green,
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 5,
-    width: "40%",
-    alignSelf: "flex-end",
-  },
-  cancelText: {
-    color: "#fff",
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  navigateButton: {
-    backgroundColor: "#A19BFC",
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 5,
-  },
-  navigateText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  divider: {
-    width: "100%",
-    marginBottom: 3,
-    borderWidth: 1,
-    borderColor: "#f8f8f8",
-  },
-});
-
-export default ReservationCard;
+}

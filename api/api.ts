@@ -1,9 +1,11 @@
 import {
   AuthData,
   AuthResponse,
+  CompleteOrder,
+  CreateOrder,
   MenuResponse,
   NearbyRestaurantsResponse,
-  paymentVariables,
+  OrderResponse,
   Reservation,
   ReservationResponse,
   Restaurant,
@@ -12,7 +14,7 @@ import {
 import axios from "axios";
 
 const api = axios.create({
-  baseURL:"https://f40356e44346.ngrok-free.app/swiftab", //"https://server-production-2ee7.up.railway.app/swiftab",
+  baseURL: "https://a23f-105-164-128-63.ngrok-free.app/swiftab", //https://api.swiftab.co.ke/swiftab", //"https://server-production-2ee7.up.railway.app/swiftab",
   headers: {
     "Content-Type": "application/json",
   },
@@ -33,14 +35,10 @@ export const signUpUser = async (data: AuthData): Promise<AuthResponse> => {
     return response.data;
   } catch (error: any) {
     if (error?.response) {
-      console.error("Sign-up error details:", error.response);
-      // Show a more specific error message
       const errorMessage =
         error?.response?.data?.message || "An error occurred during sign up.";
       throw new Error(errorMessage);
     } else {
-      // response (network issues, etc.)
-      console.error("Network error or no response:", error);
       throw new Error("Network error or no response from server.");
     }
   }
@@ -56,13 +54,7 @@ export const forgotPassword = async (email: string) => {
     const response = await api.post("/auth/user/forgot-password", { email });
     return response.data.message;
   } catch (error) {
-    if (error) {
-      console.error("forgot password error details:", error);
-    } else {
-      // response (network issues, etc.)
-      console.error("Network error or no response:", error);
-      throw new Error("Network error or no response from server.");
-    }
+    throw new Error("Network error or no response from server.");
   }
 };
 
@@ -82,13 +74,7 @@ export const verifyCode = async ({
     });
     return response.data;
   } catch (error) {
-    if (error) {
-      console.error("Code verification error details:", error);
-    } else {
-      // response (network issues, etc.)
-      console.error("Network error or no response:", error);
-      throw new Error("Network error or no response from server.");
-    }
+    throw new Error("Network error or no response from server.");
   }
 };
 
@@ -107,13 +93,7 @@ export const newPassword = async ({
     });
     return response.data;
   } catch (error) {
-    if (error) {
-      console.error("reset psswd error details:", error);
-    } else {
-      // response (network issues, etc.)
-      console.error("Network error or no response:", error);
-      throw new Error("Network error or no response from server.");
-    }
+    throw new Error("Network error or no response from server.");
   }
 };
 
@@ -124,20 +104,19 @@ export const fetchAllRes = async () => {
     return response.data;
   } catch (error: any) {
     if (error?.response) {
-      console.error("Error fetching all restaurants:", error.response);
       const errorMessage =
         error?.response?.data?.message ||
         "An error occurred during fetching all res.";
       throw new Error(errorMessage);
     } else {
-      // response (network issues, etc.)
-      console.error("Network error or no response:", error);
       throw new Error("Network error or no response from server.");
     }
   }
 };
 
-export const fetchMenu = async (restaurantId: string): Promise<MenuResponse> => {
+export const fetchMenu = async (
+  restaurantId: string,
+): Promise<MenuResponse> => {
   try {
     const response = await api.get(`/restaurant/menu/${restaurantId}`);
     return response.data;
@@ -154,21 +133,21 @@ export const fetchMenu = async (restaurantId: string): Promise<MenuResponse> => 
   }
 };
 
-export const fetchRecentlyRes = async (userId: string): Promise<{ message: string; restaurants: Restaurant[] }> => {
-  
+export const fetchRecentlyRes = async (
+  userId: string,
+): Promise<{ message: string; restaurants: Restaurant[] }> => {
   try {
-    const response = await api.get(`/restaurant/fetch-recently-viewed-restaurants/${userId}`);
-    return response.data; // Ensure the response matches the expected structure
+    const response = await api.get(
+      `/restaurant/fetch-recently-viewed-restaurants/${userId}`,
+    );
+    return response.data;
   } catch (error: any) {
     if (error?.response) {
-      console.error("Error fetching recently viewed restaurants:", error.response);
       const errorMessage =
         error?.response?.data?.message ||
         "An error occurred while fetching recently viewed restaurants.";
       throw new Error(errorMessage);
     } else {
-      // Handle network errors or cases where there's no response
-      console.error("Network error or no response:", error);
       throw new Error("Network error or no response from server.");
     }
   }
@@ -176,7 +155,7 @@ export const fetchRecentlyRes = async (userId: string): Promise<{ message: strin
 
 export const fetchNearMeRes = async (
   latitude: number,
-  longitude: number
+  longitude: number,
 ): Promise<NearbyRestaurantsResponse[]> => {
   try {
     const response = await api.post("/restaurant/fetch-restaurants-near-me", {
@@ -186,13 +165,11 @@ export const fetchNearMeRes = async (
     return response.data;
   } catch (error: any) {
     if (error?.response) {
-      console.error("Error fetching nearby restaurants:", error.response);
       const errorMessage =
         error?.response?.data?.message ||
         "An error occurred while fetching nearby restaurants.";
       throw new Error(errorMessage);
     } else {
-      console.error("Network error or no response:", error);
       throw new Error("Network error or no response from server.");
     }
   }
@@ -201,19 +178,16 @@ export const fetchNearMeRes = async (
 export const fetchResTable = async (restaurantId: string) => {
   try {
     const response = await api.get(
-      `/table/fetch-restaurant-table/${restaurantId}`
+      `/table/fetch-restaurant-table/${restaurantId}`,
     );
     return response.data;
   } catch (error: any) {
     if (error?.response) {
-      console.error("Error fetching restaurant table:", error.response);
       const errorMessage =
         error?.response?.data?.message ||
         "An error occurred during fetching restaurant table.";
       throw new Error(errorMessage);
     } else {
-      // response (network issues, etc.)
-      console.error("Network error or no response:", error);
       throw new Error("Network error or no response from server.");
     }
   }
@@ -222,7 +196,7 @@ export const fetchResTable = async (restaurantId: string) => {
 export const fetchActiveResTable = async (
   restaurantId: string,
   bookingFor: string | null,
-  endTime: string | null
+  endTime: string | null,
 ) => {
   try {
     const response = await api.post("/reservation/fetched-active", {
@@ -233,13 +207,11 @@ export const fetchActiveResTable = async (
     return response.data;
   } catch (error: any) {
     if (error?.response) {
-      console.error("Error fetching restaurant active table:", error.response);
       const errorMessage =
         error?.response?.data?.message ||
         "An error occurred during fetching restaurant active table.";
       throw new Error(errorMessage);
     } else {
-      console.error("Network error or no response:", error);
       throw new Error("Network error or no response from server.");
     }
   }
@@ -248,24 +220,21 @@ export const fetchActiveResTable = async (
 export const createReservation = async (
   userId: string,
   restaurantId: string,
-  fcmToken:string,
-  data: Reservation
+  data: Reservation,
 ): Promise<ReservationResponse> => {
   try {
     const response = await api.post<ReservationResponse>(
-      `/reservation/${userId}/reserve/${restaurantId}/${fcmToken}`,
-      { data }
+      `/reservation/${userId}/reserve/${restaurantId}/`,
+      { data },
     );
     return response.data;
   } catch (error: any) {
     if (error?.response) {
-      console.error("Failed to create reservation:", error.response);
       const errorMessage =
         error?.response?.data?.message ||
         "An error occurred during reservation.";
       throw new Error(errorMessage);
     } else {
-      console.error("Network error or no response:", error);
       throw new Error("Network error or no response from server.");
     }
   }
@@ -277,14 +246,11 @@ export const fetchActiveReservation = async (userId: string) => {
     return response.data;
   } catch (error: any) {
     if (error?.response) {
-      console.error("Error fetching active reservation:", error.response);
       const errorMessage =
         error?.response?.data?.message ||
         "An error occurred during fetching active reservation.";
       throw new Error(errorMessage);
     } else {
-      // response (network issues, etc.)
-      console.error("Network error or no response:", error);
       throw new Error("Network error or no response from server.");
     }
   }
@@ -296,14 +262,11 @@ export const fetchCancelReservation = async (userId: string) => {
     return response.data;
   } catch (error: any) {
     if (error?.response) {
-      console.error("Error fetching cancelled reservation:", error.response);
       const errorMessage =
         error?.response?.data?.message ||
         "An error occurred during fetching cancelled reservation.";
       throw new Error(errorMessage);
     } else {
-      // response (network issues, etc.)
-      console.error("Network error or no response:", error);
       throw new Error("Network error or no response from server.");
     }
   }
@@ -315,42 +278,11 @@ export const fetchCompletedReservation = async (userId: string) => {
     return response.data;
   } catch (error: any) {
     if (error?.response) {
-      console.error("Error fetching completed reservation:", error.response);
       const errorMessage =
         error?.response?.data?.message ||
         "An error occurred during fetching completed reservation.";
       throw new Error(errorMessage);
     } else {
-      // response (network issues, etc.)
-      console.error("Network error or no response:", error);
-      throw new Error("Network error or no response from server.");
-    }
-  }
-};
-
-/**
- * @ payment api
- */
-
-
-export const makePayment = async ({
-  phone,
-  amount,
-  email,
-}: paymentVariables) => {
-  try {
-    const response = await api.post("/payment/initiate-payment", {
-      phone,
-      amount,
-      email,
-    });
-    return response.data;
-  } catch (error) {
-    if (error) {
-      console.error("Error initiating payment:", error);
-    } else {
-      // response (network issues, etc.)
-      console.error("Network error or no response:", error);
       throw new Error("Network error or no response from server.");
     }
   }
@@ -359,25 +291,28 @@ export const makePayment = async ({
 /**
  * @api for cancellation
  * desc :user manually cancel reservation
- * @ response 200 
+ * @ response 200
  */
 
-
-
-export const userCancelReservation = async ({userId,restaurantId,reservationId,id}:userCancelReservationParams) => {
+export const userCancelReservation = async ({
+  userId,
+  restaurantId,
+  reservationId,
+  id,
+}: userCancelReservationParams) => {
   try {
-    const response = await api.patch(`/reservation/user-cancel-reservation/${userId}`,{id,restaurantId,reservationId});
+    const response = await api.patch(
+      `/reservation/user-cancel-reservation/${userId}`,
+      { id, restaurantId, reservationId },
+    );
     return response.data;
   } catch (error: any) {
     if (error?.response) {
-      console.error("Error cancel reservation:", error.response);
       const errorMessage =
         error?.response?.data?.message ||
         "An error occurred during cancellation reservation.";
       throw new Error(errorMessage);
     } else {
-      // response (network issues, etc.)
-      console.error("Network error or no response:", error);
       throw new Error("Network error or no response from server.");
     }
   }
@@ -388,20 +323,69 @@ export const userCancelReservation = async ({userId,restaurantId,reservationId,i
  */
 export const fetchAllOrders = async (userId: string) => {
   try {
-    const response = await api.get(`/orders/fetch-all-user-order/${userId}`);
+    const response = await api.get(`/orders/user/fetch-user-order/${userId}`);
     return response.data;
   } catch (error: any) {
     if (error?.response) {
-      console.error("Error fetch-all-order:", error.response);
       const errorMessage =
         error?.response?.data?.message ||
         "An error occurred during fetch-all-order.";
       throw new Error(errorMessage);
     } else {
-      // response (network issues, etc.)
-      console.error("Network error or no response:", error);
       throw new Error("Network error or no response from server.");
     }
   }
 };
 
+/**
+ * create order
+ */
+export const createOrder = async (
+  data: CreateOrder,
+): Promise<OrderResponse> => {
+  try {
+    const response = await api.post<OrderResponse>(
+      "/orders/user/create-order",
+      data,
+    );
+    return response.data;
+  } catch (error: any) {
+    if (error?.response) {
+      const errorMessage =
+        error?.response?.data?.message ||
+        "An error occurred during order creation.";
+      throw new Error(errorMessage);
+    } else {
+      throw new Error("Network error or no response from server.");
+    }
+  }
+};
+
+/**
+ * complete order
+ */
+
+export const completeOrder = async ({
+  data,
+  orderId,
+}: {
+  data: CompleteOrder;
+  orderId: string;
+}): Promise<OrderResponse> => {
+  try {
+    const response = await api.put<OrderResponse>(
+      `/orders/user/complete-order/${orderId}`,
+      data,
+    );
+    return response.data;
+  } catch (error: any) {
+    if (error?.response) {
+      const errorMessage =
+        error?.response?.data?.message ||
+        "An error occurred during order completion.";
+      throw new Error(errorMessage);
+    } else {
+      throw new Error("Network error or no response from server.");
+    }
+  }
+};

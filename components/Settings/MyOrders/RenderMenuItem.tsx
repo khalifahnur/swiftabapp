@@ -1,175 +1,44 @@
 import { formatCurrency } from "@/lib/helpers";
 import React from "react";
-import {
-  Image,
-  Platform,
-  StyleSheet,
-  Text,
-  View
-} from "react-native";
+import { Image, Text, View } from "react-native";
 
-interface MenuItem {
-  _id?: string;
-  name: string;
-  description: string;
-  image: string;
-  cost: number;
-  quantity: number;
-}
-
-interface RenderMenuItemProps {
-  items: MenuItem[];
-}
-
-const RenderMenuItem: React.FC<RenderMenuItemProps> = ({ items }) => {
-  if (!items || items.length === 0) return null;
+export default function RenderMenuItem({ item }: { item: any }) {
+  if (!item) return null;
 
   return (
-    <View style={styles.container}>
-      {items.map((menuItem, index) => (
-        <View 
-          key={menuItem._id || `menu-item-${index}`} 
-          style={styles.menuItemWrapper}
-        >
-          <View style={styles.menuItem}>
-            <View style={styles.imageContainer}>
-              <Image
-                source={{ uri: menuItem.image }}
-                style={styles.menuImage}
-                resizeMode="cover"
-              />
-              {menuItem.quantity > 1 && (
-                <View style={styles.quantityOverlay}>
-                  <Text style={styles.quantityOverlayText}>
-                    {menuItem.quantity}x
-                  </Text>
-                </View>
-              )}
-            </View>
-            <View style={styles.menuItemInfo}>
-              <View style={styles.textContainer}>
-                <Text style={styles.menuItemName} numberOfLines={1}>
-                  {menuItem.name}
-                </Text>
-                <Text 
-                  style={styles.menuItemDescription}
-                  numberOfLines={2}
-                  ellipsizeMode="tail"
-                >
-                  {menuItem.description}
-                </Text>
-              </View>
-              
-              <View style={styles.priceRow}>
-                <View style={styles.priceDetailsContainer}>
-                  <Text style={styles.priceLabel}>Item Price</Text>
-                  <Text style={styles.menuItemPrice}>
-                    {formatCurrency(menuItem.cost)}
-                  </Text>
-                </View>
-              </View>
-            </View>
+    <View className="flex-row bg-white p-3 rounded-2xl mx-6 mb-3 shadow-sm border border-gray-100 items-center">
+      <View className="relative w-20 h-20 bg-gray-100 rounded-xl mr-4 overflow-hidden">
+        <Image
+          source={{ uri: item.image }}
+          className="w-full h-full"
+          resizeMode="cover"
+        />
+        {item.quantity > 1 && (
+          <View className="absolute top-1 right-1 bg-black/70 px-1.5 py-0.5 rounded-md">
+            <Text className="text-white text-xs font-bold">
+              {item.quantity}x
+            </Text>
           </View>
-        </View>
-      ))}
+        )}
+      </View>
+
+      <View className="flex-1 justify-center py-1">
+        <Text
+          className="font-bold text-gray-900 text-lg mb-1"
+          numberOfLines={1}
+        >
+          {item.name}
+        </Text>
+        <Text
+          className="font-regular text-gray-500 text-sm leading-5 mb-2"
+          numberOfLines={1}
+        >
+          {item.description}
+        </Text>
+        <Text className="font-bold text-teal-600 text-base">
+          {formatCurrency(item.cost)}
+        </Text>
+      </View>
     </View>
   );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#F7F9FC',
-    paddingVertical: 10,
-  },
-  menuItemWrapper: {
-    paddingHorizontal: 16,
-    marginBottom: 12,
-  },
-  menuItem: {
-    flexDirection: "row",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    overflow: 'hidden',
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 6,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
-  },
-  imageContainer: {
-    width: 120,
-    height: 120,
-    position: 'relative',
-    backgroundColor: '#F0F3F4',
-  },
-  menuImage: {
-    width: '100%',
-    height: '100%',
-  },
-  quantityOverlay: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  quantityOverlayText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  menuItemInfo: {
-    flex: 1,
-    padding: 16,
-    justifyContent: "space-between",
-  },
-  textContainer: {
-    marginBottom: 12,
-  },
-  menuItemName: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#2C3E50",
-    marginBottom: 6,
-  },
-  menuItemDescription: {
-    fontSize: 14,
-    color: "#7F8C8D",
-    lineHeight: 20,
-  },
-  priceRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    alignContent:'flex-end'
-    
-  },
-  priceDetailsContainer: {
-    alignItems: 'flex-start',
-  },
-  priceLabel: {
-    fontSize: 12,
-    color: "#7F8C8D",
-    marginBottom: 4,
-  },
-  menuItemPrice: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#34495E",
-  },
-  menuItemTotal: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#2980B9",
-  },
-});
-
-export default RenderMenuItem;
+}

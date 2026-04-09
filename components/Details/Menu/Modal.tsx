@@ -1,12 +1,19 @@
-import ModalLoader from "@/components/ModalLoader";
-import { color } from "@/constants/Colors";
-import { ReservationResponse } from "@/types";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
-import { ImageBackground, Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  Image,
+  Modal,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { ReservationResponse } from "@/types";
 import DetailsTabs from "./DetailsTab";
 
-type modalLoaderProps = {
+type ModalLoaderProps = {
   modalVisible: boolean;
   data: {
     _id: string;
@@ -17,193 +24,88 @@ type modalLoaderProps = {
     name: string;
   };
   setModalVisible: (visible: boolean) => void;
-  restaurantId:string;
-  reservationData:ReservationResponse,
-  userId:string
+  restaurantId: string;
+  reservationData: ReservationResponse;
+  userId: string;
 };
+
 export default function ModalScreen({
   modalVisible,
   setModalVisible,
   data,
-  restaurantId,
-  reservationData,
-  userId
-}: modalLoaderProps) {
-  const [selectedValue, setSelectedValue] = useState<string>("Reviews");
-  const [cost, setCost] = useState<number>(1);
-  const [btnLoading,setBtnLoading] = useState(false);
-
-
+}: ModalLoaderProps) {
+  const [selectedValue, setSelectedValue] = useState<string>("Description");
+  const [btnLoading, setBtnLoading] = useState(false);
+  const insets = useSafeAreaInsets(); // To handle bottom padding on modern iPhones safely
 
   return (
     <Modal
-      animationType="fade"
+      animationType="slide"
       transparent={true}
       visible={modalVisible}
-      statusBarTranslucent={false}
+      statusBarTranslucent={true}
     >
-      <>
-        <View style={styles.overlay}>
-          <ImageBackground source={{uri:data?.image}} resizeMode="cover"
-                  imageStyle={styles.upperContainer} style={{flex:1}}>
-            <View style={styles.header}>
-              <Pressable
-                style={styles.iconButton}
-                onPress={() => setModalVisible(false)}
-              >
-                <Ionicons name="close" size={20} color="black" />
-              </Pressable>
-            </View>
-            {/* <View style={styles.img}>
-              <Image source={{uri:data?.image}} style={styles.image} />
-            </View> */}
-          </ImageBackground>
+      <View className="flex-1 bg-white">
+        <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+          <View className="relative w-full h-50 bg-gray-200">
+            <Image
+              source={{ uri: data?.image }}
+              className="w-full h-full"
+              resizeMode="cover"
+            />
+            <TouchableOpacity
+              onPress={() => setModalVisible(false)}
+              className="absolute top-14 left-6 w-10 h-10 bg-white/90 rounded-full items-center justify-center shadow-sm"
+            >
+              <Ionicons name="close" size={24} color="#111827" />
+            </TouchableOpacity>
+          </View>
 
-          <View style={styles.bottomContainer}>
-            <View style={styles.productDetails}>
-              <View>
-                <Text style={styles.productName}>{data?.name}</Text>
-              </View>
-              <Text style={styles.productPrice}>
-                Ksh.{data?.cost * cost}.00
+          <View className="bg-white -mt-8 rounded-t-3xl px-6 pt-8 pb-32">
+            <View className="flex-row justify-between items-start mb-6">
+              <Text className="font-bold text-xl text-gray-900 flex-1 pr-4 leading-tight">
+                {data?.name}
+              </Text>
+              <Text className="font-bold text-xl text-teal-600">
+                Ksh.{data?.cost}
               </Text>
             </View>
+
             <DetailsTabs
               selectedTab={selectedValue}
               setSelectedTab={setSelectedValue}
-              tabsName={["Reviews", "Ratings"]}
+              tabsName={["Description", "Reviews"]}
             >
-              {selectedValue === "Reviews" ? (
-                <Text>
+              {selectedValue === "Description" ? (
+                <Text className="font-regular text-gray-500 text-base leading-6 text-justify">
                   {data?.description}
-                  {/* <Text style={styles.seeMore}>See more.</Text> */}
                 </Text>
               ) : (
-                <Text>{data?.rate}</Text>
+                <View className="flex-row items-center space-x-2 mt-2">
+                  <Ionicons name="star" size={20} color="#f5a623" />
+                  <Text className="font-medium text-gray-700 text-lg">
+                    {data?.rate} Rating
+                  </Text>
+                </View>
               )}
             </DetailsTabs>
           </View>
+        </ScrollView>
+
+        {/* <View
+          className="absolute bottom-0 w-full bg-white border-t border-gray-100 px-6 pt-4"
+          style={{ paddingBottom: Math.max(insets.bottom, 20) }}
+        >
+          <TouchableOpacity
+            className="bg-teal-600 py-4 rounded-2xl items-center shadow-sm"
+            onPress={() => console.log("Add to cart pressed")}
+          >
+            <Text className="font-bold text-white text-lg">Add to Order</Text>
+          </TouchableOpacity>
         </View>
 
-        {
-          btnLoading && (
-            <ModalLoader loading={btnLoading} />
-          )
-        }
-      </>
+        {btnLoading && <ModalLoader loading={btnLoading} />} */}
+      </View>
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "#F2F4F7",
-  },
-  upperContainer: {
-    //backgroundColor: color.green,
-    borderBottomLeftRadius: 200,
-    borderBottomRightRadius: 200,
-    paddingBottom: 20,
-    flex: 1,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingTop: 40,
-  },
-  iconButton: {
-    backgroundColor: "#f8f8f8",
-    padding: 10,
-    borderRadius: 20,
-  },
-  imageContainer: {
-    position: "absolute",
-    bottom: -40,
-    left: 0,
-    right: 0,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  image: {
-    width: 120,
-    height: 120,
-    borderRadius: 20,
-  },
-  bottomContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 70,
-    flex: 0.4,
-  },
-  productDetails: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginVertical: 10,
-  },
-  productName: {
-    fontSize: 15,
-    fontWeight: "500",
-    textAlign: "center",
-  },
-  productCategory: {
-    fontSize: 14,
-    color: "#666",
-  },
-  productPrice: {
-    fontSize: 17,
-    fontWeight: "400",
-    color: "red",
-    textAlign: "center",
-  },
-  seeMore: {
-    color: "red",
-  },
-  cartContainer: {
-    backgroundColor: "#F2F4F7",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingBottom: 100,
-    paddingHorizontal: 20,
-  },
-  quantityContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    padding: 10,
-    borderRadius: 20,
-  },
-  quantityButton: {
-    padding: 10,
-    paddingHorizontal: 20,
-    backgroundColor: "#cce9d5",
-    borderRadius: 20,
-  },
-  quantityText: {
-    fontSize: 20,
-    fontWeight: "500",
-    marginHorizontal: 10,
-  },
-  addToCartButton: {
-    backgroundColor: color.green,
-    paddingVertical: 20,
-    paddingHorizontal: 30,
-    borderRadius: 12,
-  },
-  addToCartText: {
-    color: "#fff",
-    fontSize: 15,
-    fontWeight: "500",
-  },
-  img:{
-    position:'absolute',
-    bottom:0,
-    right:0,
-    top:330,
-    left:0,
-    alignItems:'center',
-    justifyContent:'center',
-  },
-});

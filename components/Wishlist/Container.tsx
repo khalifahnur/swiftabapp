@@ -1,25 +1,106 @@
+import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import LottieView from "lottie-react-native";
+import React, { useRef } from "react";
+import {
+  Animated,
+  FlatList,
+  Image,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useDispatch, useSelector } from "react-redux";
+
 import { RootState } from "@/redux/store/Store";
 import { removeToWishlist } from "@/redux/WishlistSlice";
 import { RestaurantParam } from "@/types";
-import { AntDesign, Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import LottieView from "lottie-react-native";
-import React from "react";
-import {
-  FlatList,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { useDispatch, useSelector } from "react-redux";
 
-const Container = () => {
+const WishlistCard = ({
+  item,
+  onPress,
+  onRemove,
+}: {
+  item: RestaurantParam;
+  onPress: () => void;
+  onRemove: (id: string) => void;
+}) => {
+  const scale = useRef(new Animated.Value(1)).current;
+
+  const animateIn = () =>
+    Animated.spring(scale, { toValue: 0.96, useNativeDriver: true }).start();
+  const animateOut = () =>
+    Animated.spring(scale, {
+      toValue: 1,
+      bounciness: 8,
+      useNativeDriver: true,
+    }).start();
+
+  const locationText =
+    item.about?.map((loc) => loc.location).join(", ") || item.location;
+
+  return (
+    <TouchableWithoutFeedback
+      onPressIn={animateIn}
+      onPressOut={animateOut}
+      onPress={onPress}
+    >
+      <Animated.View
+        style={{ transform: [{ scale }] }}
+        className="flex-row bg-white rounded-2xl p-3 mb-4 shadow-sm border border-gray-100 mx-6 items-center"
+      >
+        <Image
+          source={{ uri: item.image }}
+          className="w-24 h-24 rounded-xl bg-gray-100"
+          resizeMode="cover"
+        />
+
+        <View className="flex-1 ml-4 justify-center">
+          <View className="flex-row justify-between items-start mb-1">
+            <Text
+              className="font-bold text-gray-900 text-lg flex-1 mr-2"
+              numberOfLines={1}
+            >
+              {item.restaurantName}
+            </Text>
+            <TouchableOpacity
+              onPress={() => onRemove(item._id)}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              className="bg-red-50 p-2 rounded-full"
+            >
+              <AntDesign name="heart" size={16} color="#ef4444" />
+            </TouchableOpacity>
+          </View>
+
+          <View className="flex-row items-center mb-2">
+            <Ionicons name="location" size={14} color="#0d9488" />
+            <Text
+              className="font-medium text-gray-500 text-sm ml-1 flex-1"
+              numberOfLines={1}
+            >
+              {locationText}
+            </Text>
+          </View>
+          <View className="flex-row items-center">
+            <Ionicons name="star" size={14} color="#f5a623" />
+            <Text className="font-bold text-gray-700 text-sm ml-1">
+              {item.rate}
+            </Text>
+          </View>
+        </View>
+      </Animated.View>
+    </TouchableWithoutFeedback>
+  );
+};
+
+export default function Container() {
   const wishlistData = useSelector(
-    (state: RootState) => state.wishlist.wishlist
+    (state: RootState) => state.wishlist.wishlist,
   );
   const dispatch = useDispatch();
+  const router = useRouter();
 
   const handleRemoveFromWishlist = (_id: string) => {
     dispatch(removeToWishlist(_id));
@@ -32,148 +113,54 @@ const Container = () => {
     });
   };
 
-  const renderItem = ({ item }) => (
-    <>
-
-      <TouchableOpacity
-        style={styles.card}
-        onPress={() => NavigateHandler(item)}
-      >
-        <Image source={{ uri: item.image }} style={styles.image} />
-        <View style={styles.details}>
-          <Text style={styles.restaurantName}>{item.restaurantName}</Text>
-          <TouchableOpacity
-            style={styles.heartIcon}
-            onPress={() => handleRemoveFromWishlist(item._id)}
-          >
-            <AntDesign name="heart" size={20} color={"red"} />
-          </TouchableOpacity>
-
-          <Text style={styles.location} ellipsizeMode="tail" numberOfLines={1}>
-            <Ionicons name="location-outline" size={12} color="#6F7A8A" />
-            {item.about.map((loc) => loc.location).join(", ")} {item.location}
-          </Text>
-
-          <View style={styles.ratingContainer}>
-            <Ionicons name="star" size={14} color="orange" />
-            <Text style={styles.ratingText}>{item.rate}</Text>
-          </View>
-        </View>
-      </TouchableOpacity>
-      <View style={styles.divider} />
-    </>
-  );
-
   return (
-    <>
-     
+    <SafeAreaView className="flex-1 bg-gray-50" edges={["top"]}>
+      <View className="px-6 py-4 bg-gray-50 mb-2">
+        <Text className="text-3xl font-bold text-gray-900 tracking-tight">
+          Favourites
+        </Text>
+      </View>
+
       {wishlistData.length > 0 ? (
         <FlatList
           data={wishlistData}
-          renderItem={renderItem}
-          ListHeaderComponent={() => (
-            <View style={styles.header}>
-        <Text style={styles.headerTitle}>Favourites</Text>
-      </View>
+          keyExtractor={(item) => item._id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 40 }}
+          renderItem={({ item }) => (
+            <WishlistCard
+              item={item}
+              onPress={() => NavigateHandler(item)}
+              onRemove={handleRemoveFromWishlist}
+            />
           )}
-          ListHeaderComponentStyle={{marginBottom:10}}
-          //estimatedItemSize={200}
         />
       ) : (
-        <View style={styles.emptyContainer}>
+        <View className="flex-1 justify-center items-center px-6 pb-20">
           <LottieView
             source={require("@/assets/images/lottie/emptywishlist.json")}
             autoPlay
             loop
-            style={{ width: 100, height: 100 }}
+            style={{ width: 180, height: 180 }}
           />
-          <Text>Wishlist is empty</Text>
+          <Text className="text-xl font-bold text-gray-900 mt-6 mb-2">
+            No favourites yet
+          </Text>
+          <Text className="text-base font-medium text-gray-500 text-center px-4 leading-6">
+            Tap the heart icon on any restaurant to save it here for quick
+            access later.
+          </Text>
+
+          <TouchableOpacity
+            className="mt-8 bg-teal-600 px-8 py-4 rounded-lg shadow-sm"
+            onPress={() => router.navigate("/(tabs)")}
+          >
+            <Text className="text-white font-bold text-base">
+              Explore Restaurants
+            </Text>
+          </TouchableOpacity>
         </View>
       )}
-    </>
+    </SafeAreaView>
   );
-};
-
-const styles = StyleSheet.create({
-  card: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    borderRadius: 15,
-    marginBottom: 10,
-    paddingHorizontal:20
-  },
-  header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingHorizontal: 20,
-      paddingTop: 10,
-      paddingBottom: 15,
-    },
-    headerTitle: {
-      fontSize: 24,
-      fontWeight: '700',
-      marginTop: 2,
-    },
-  image: {
-    width: 70,
-    height: 80,
-    borderRadius:20
-  },
-  heartIcon: {
-    position: "absolute",
-    top: 0,
-    right: 5,
-    padding: 5,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth:1,
-    borderColor:"transparent",
-    width: 40,
-    height: 40,
-  },
-  details: {
-    padding: 5,
-    flex: 0.9,
-  },
-  restaurantName: {
-    fontSize: 14,
-    fontWeight: "bold",
-    marginBottom: 2,
-  },
-  location: {
-    color: "#6F7A8A",
-    fontSize: 12,
-    marginBottom: 5,
-  },
-  ratingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  ratingText: {
-    marginLeft: 5,
-    color: "#6F7A8A",
-    fontSize: 14,
-  },
-  divider: {
-    width: "100%",
-    borderColor: "#d8d8d8",
-    borderWidth: 1,
-    marginBottom: 10,
-  },
-  emptyContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    flex: 1,
-  },
-  header: {
-    fontSize: 16,
-    color: "#000",
-    textAlign: "left",
-    fontWeight: "500",
-  },
-});
-
-export default Container;
+}

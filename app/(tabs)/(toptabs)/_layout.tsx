@@ -1,56 +1,43 @@
-import { color } from "@/constants/Colors";
-import {
-  createMaterialTopTabNavigator,
-  MaterialTopTabNavigationEventMap,
-  MaterialTopTabNavigationOptions,
-} from "@react-navigation/material-top-tabs";
-import { ParamListBase, TabNavigationState } from "@react-navigation/native";
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { withLayoutContext } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const { Navigator } = createMaterialTopTabNavigator();
 
-export const MaterialTopTabs = withLayoutContext<
-  MaterialTopTabNavigationOptions,
-  typeof Navigator,
-  TabNavigationState<ParamListBase>,
-  MaterialTopTabNavigationEventMap
->(Navigator);
+export const MaterialTopTabs = withLayoutContext(Navigator);
 
 const TopTabLayout = () => {
   return (
-    <SafeAreaView style={{flex:1}}>
-    <MaterialTopTabs
-      screenOptions={{
-        animationEnabled: true,
-        lazy: false,
-        tabBarStyle: {
-          backgroundColor: "transparent",
-          elevation: 0,
-          shadowOpacity: 0,
-          borderBottomWidth: 0,
-        },
-        tabBarPressColor: "transparent",
-
-        tabBarActiveTintColor: color.green,
-        tabBarInactiveTintColor: "#1E1E1E",
-
-        tabBarIndicatorStyle: {
-          backgroundColor: color.green,
-          height: 3,
-          borderRadius: 2,
-        },
-
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: "600",
-          textTransform: "capitalize",
-        },
-      }}
-    >
-      <MaterialTopTabs.Screen name="index" options={{ title: "Active" }} />
-      <MaterialTopTabs.Screen name="history" options={{ title: "History" }} />
-    </MaterialTopTabs>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }} edges={["top"]}>
+      <MaterialTopTabs
+        screenOptions={{
+          animationEnabled: true,
+          lazy: false,
+          tabBarStyle: {
+            backgroundColor: "#fff",
+            elevation: 0,
+            shadowOpacity: 0,
+            borderBottomWidth: 1,
+            borderBottomColor: "#F3F4F6",
+          },
+          tabBarPressColor: "transparent",
+          tabBarActiveTintColor: "#0d9488",
+          tabBarInactiveTintColor: "#6B7280",
+          tabBarIndicatorStyle: {
+            backgroundColor: "#0d9488",
+            height: 3,
+            borderRadius: 3,
+          },
+          tabBarLabelStyle: {
+            fontSize: 14,
+            fontWeight: "bold",
+            textTransform: "capitalize",
+          },
+        }}
+      >
+        <MaterialTopTabs.Screen name="index" options={{ title: "Active" }} />
+        <MaterialTopTabs.Screen name="history" options={{ title: "History" }} />
+      </MaterialTopTabs>
     </SafeAreaView>
   );
 };

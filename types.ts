@@ -118,16 +118,16 @@ interface ReservationInfo {
   name: string;
   email: string;
   phoneNumber: string;
-  bookingDate: Date;
-  bookingFor: Date;
-  endTime: Date;
-  guest: number;
+  bookingDate: string;
+  bookingFor: string;
+  endTime: string;
+  guests: number;
   tableNumber: string | null;
   diningArea: string;
+  restaurantName: string;
 }
 
 export interface Reservation {
-  restaurantInfo: RestaurantInfo;
   reservationInfo: ReservationInfo;
   status?: "active" | "cancelled" | "completed";
 }
@@ -216,26 +216,33 @@ export interface paymentVariables {
 }
 
 export interface userCancelReservationParams {
-  id:string
+  id: string;
   userId: string;
   restaurantId: string;
   reservationId: string;
 }
 
-export interface CreateOrder{
-menu:MenuItem[];
-userId:string,
-restaurantId  :string;
-reservationId:string;
-//diningArea:string;
-tableNumber:string;
+export interface orderItem {
+  _id: string;
+  name: string;
+  cost: number;
+  quantity: number;
+}
+
+export interface CreateOrder {
+  menu: orderItem[];
+  userId: string;
+  restaurantId: string;
+  reservationId: string;
+  //diningArea:string;
+  tableNumber: string;
 }
 
 export interface OrderResponse {
-message: string;
+  message: string;
 }
 
-export interface FetchOrder{
+export interface FetchOrder {
   __v: number;
   _id: string;
   createdAt: string;
@@ -244,14 +251,21 @@ export interface FetchOrder{
   paid: "Paid" | "Unpaid";
   reservationId: string;
   restaurantId: string;
-  status: "Served" | "Not-served";
+  status: "placed" | "served" | "ready_to_pay" | "completed" | "cancelled";
   tableNumber: string;
   takenBy: string;
   userId: string;
+  restaurantName: string;
+  totalAmount: number;
 }
 
 export interface MenuResponse {
   breakfast: MenuItem[];
   lunch: MenuItem[];
   dinner: MenuItem[];
+}
+
+export interface CompleteOrder {
+  status: string;
+  paymentMethod: string;
 }

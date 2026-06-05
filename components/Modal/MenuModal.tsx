@@ -117,8 +117,10 @@ export default function MenuScreen({
   userId,
   reservationId,
   tableNumber,
+  restaurantName,
 }: {
   menuData: any;
+  restaurantName: string;
   restaurantId: string;
   userId: string;
   reservationId: string;
@@ -176,6 +178,7 @@ export default function MenuScreen({
               router.navigate({
                 pathname: "/screens/cart",
                 params: {
+                  restaurantName,
                   restaurantId,
                   userId,
                   reservationId,

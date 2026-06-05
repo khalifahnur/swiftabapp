@@ -234,7 +234,7 @@ export interface CreateOrder {
   userId: string;
   restaurantId: string;
   reservationId: string;
-  //diningArea:string;
+  restaurantName: string;
   tableNumber: string;
 }
 

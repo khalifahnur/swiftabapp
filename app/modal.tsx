@@ -8,8 +8,9 @@ import { Text, TouchableOpacity, View } from "react-native";
 
 export default function MenuModal() {
   const router = useRouter();
-  const { restaurantId, userId, reservationId, tableNumber } =
+  const { restaurantName, restaurantId, userId, reservationId, tableNumber } =
     useLocalSearchParams<{
+      restaurantName: string;
       restaurantId: string;
       userId: string;
       reservationId: string;
@@ -75,6 +76,7 @@ export default function MenuModal() {
       <Stack.Screen options={{ headerShown: false }} />
       <MenuScreen
         menuData={menu}
+        restaurantName={restaurantName}
         restaurantId={restaurantId}
         userId={userId}
         reservationId={reservationId}

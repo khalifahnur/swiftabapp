@@ -10,18 +10,18 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { useCartStore } from "@/store/useOrderStore";
+// import { useCartStore } from "@/store/useOrderStore";
 
 const CustomTabBar = ({ state, descriptors, navigation }: any) => {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const cart = useCartStore((state) => state.items);
+  // const cart = useCartStore((state) => state.items);
 
   const bottomPadding = Math.max(insets.bottom, 16);
 
   return (
     <View
-      className="absolute left-0 right-0 flex-row items-center justify-center px-4"
+      className="absolute left-0 right-0 flex-row items-center justify-center px-4 mb-5"
       style={{ bottom: bottomPadding, backgroundColor: "transparent" }}
     >
       <View
@@ -103,17 +103,17 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
 
       <TouchableOpacity
         activeOpacity={0.8}
-        onPress={() => router.navigate("/order")}
+        onPress={() => router.navigate("/Order")}
         className="w-14 h-14 rounded-full bg-teal-600 items-center justify-center border-2 border-white"
         style={styles.shadowPremium}
       >
-        {cart?.length > 0 && (
+        {/* {cart?.length > 0 && (
           <View className="absolute -top-1 -right-1 bg-red-500 h-5 min-w-[20px] rounded-full items-center justify-center px-1 border border-white z-10">
             <Text className="text-white text-[10px] font-bold leading-none">
               {cart.length > 9 ? "9+" : cart.length}
             </Text>
           </View>
-        )}
+        )} */}
         <Ionicons
           name="cart"
           size={24}

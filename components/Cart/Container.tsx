@@ -64,11 +64,13 @@ export default function CartScreen({
   userId,
   reservationId,
   tableNumber,
+  restaurantName,
 }: {
   restaurantId: string;
   userId: string;
   reservationId: string;
   tableNumber: string;
+  restaurantName: string;
 }) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -88,6 +90,7 @@ export default function CartScreen({
       restaurantId,
       reservationId,
       tableNumber,
+      restaurantName,
       menu: cartItems.map((item) => ({
         _id: item._id,
         name: item.name,
@@ -99,7 +102,7 @@ export default function CartScreen({
     submitOrder(orderPayload, {
       onSuccess: (data: OrderResponse) => {
         if (clearCart) clearCart();
-        router.replace("/order");
+        router.replace("/Order");
       },
       onError: (error: any) => {
         Alert.alert("Order Failed", error.message || "Something went wrong.");

@@ -14,7 +14,7 @@ import {
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://a23f-105-164-128-63.ngrok-free.app/swiftab", //https://api.swiftab.co.ke/swiftab", //"https://server-production-2ee7.up.railway.app/swiftab",
+  baseURL: "https://api.swiftab.co.ke/swiftab",
   headers: {
     "Content-Type": "application/json",
   },
@@ -373,7 +373,7 @@ export const completeOrder = async ({
   orderId: string;
 }): Promise<OrderResponse> => {
   try {
-    const response = await api.put<OrderResponse>(
+    const response = await api.patch<OrderResponse>(
       `/orders/user/complete-order/${orderId}`,
       data,
     );

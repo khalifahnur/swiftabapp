@@ -108,7 +108,7 @@ export default function RootLayout() {
                     }}
                   />
                   <Stack.Screen
-                    name="order"
+                    name="Order"
                     options={{
                       // presentation: "modal",
                       title: "Orders",

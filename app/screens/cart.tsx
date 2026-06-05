@@ -3,8 +3,9 @@ import { useLocalSearchParams } from "expo-router";
 import React from "react";
 
 export default function CartScreen() {
-  const { restaurantId, userId, reservationId, tableNumber } =
+  const { restaurantName, restaurantId, userId, reservationId, tableNumber } =
     useLocalSearchParams<{
+      restaurantName: string;
       restaurantId: string;
       userId: string;
       reservationId: string;
@@ -16,6 +17,7 @@ export default function CartScreen() {
       userId={userId}
       reservationId={reservationId}
       tableNumber={tableNumber}
+      restaurantName={restaurantName}
     />
   );
 }

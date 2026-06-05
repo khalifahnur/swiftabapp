@@ -236,6 +236,7 @@ export default function ReservationCard({ items }: Props) {
             router.push({
               pathname: "/modal",
               params: {
+                resturantName: items.restaurantName,
                 restaurantId: items.restaurantId,
                 userId,
                 reservationId: items.reservationId,

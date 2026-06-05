@@ -1,11 +1,12 @@
 import { completeOrder, createOrder } from "@/api/api";
 import {
-    CompleteOrder,
-    CreateOrder,
-    ErrorResponse,
-    OrderResponse,
+  CompleteOrder,
+  CreateOrder,
+  ErrorResponse,
+  OrderResponse,
 } from "@/types";
 import { useMutation, UseMutationResult } from "@tanstack/react-query";
+import { useCallback } from "react";
 import Toast from "react-native-toast-message";
 
 export function useCreateOrder(): UseMutationResult<
@@ -18,21 +19,15 @@ export function useCreateOrder(): UseMutationResult<
   });
 }
 
-export function userCompleteOrder() {
+export function useCompleteOrder() {
   return useMutation({
     mutationFn: ({ data, orderId }: { data: CompleteOrder; orderId: string }) =>
       completeOrder({ data, orderId }),
-    onSuccess: () => {
-      Toast.show({
-        type: "success",
-        text1: "Order Completion",
-      });
-    },
-    onError: () => {
-      Toast.show({
-        type: "error",
-        text2: "Please try again.",
-      });
-    },
+    onSuccess: useCallback(() => {
+      Toast.show({ type: "success", text1: "Order Completion" });
+    }, []),
+    onError: useCallback(() => {
+      Toast.show({ type: "error", text2: "Please try again." });
+    }, []),
   });
 }

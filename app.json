@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "swiftab",
+    "name": "Swiftab",
     "slug": "swiftabapp",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "swiftabapp",
@@ -16,7 +16,6 @@
       "adaptiveIcon": {
         "backgroundColor": "#008080",
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundImage": "./assets/images/adaptive-icon.png",
         "monochromeImage": "./assets/images/adaptive-icon.png"
       },
       "edgeToEdgeEnabled": true,
@@ -41,16 +40,14 @@
           "icon": "./assets/images/notification.png",
           "color": "#ffffff",
           "defaultChannel": "default",
-          "sounds": [
-            "./assets/notification_sound.wav"
-          ],
+          "sounds": ["./assets/notification_sound.wav"],
           "enableBackgroundRemoteNotifications": false
         }
       ],
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/adaptive-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#008080",

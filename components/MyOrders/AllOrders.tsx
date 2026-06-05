@@ -1,12 +1,15 @@
-import { userCompleteOrder } from "@/hooks/orderhooks/orderhooks";
+import { useCompleteOrder } from "@/hooks/orderhooks/orderhooks";
 import { FetchOrder } from "@/types";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Image,
   Modal,
   RefreshControl,
+  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -19,12 +22,16 @@ interface OrdersProps {
   onRefresh: () => void;
 }
 
-export default function Orders({ data, refreshing, onRefresh }: OrdersProps) {
+export default function AllOrders({
+  data,
+  refreshing,
+  onRefresh,
+}: OrdersProps) {
   const [activeTab, setActiveTab] = useState<"active" | "history">("active");
   const [isPaymentModalVisible, setPaymentModalVisible] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
-  const { mutate: completeOrderMutate, isPending } = userCompleteOrder();
+  const { mutate: completeOrderMutate, isPending } = useCompleteOrder();
 
   const activeOrders = data.filter((o) =>
     ["placed", "served", "ready_to_pay", "completed", "cancelled"].includes(
@@ -58,20 +65,26 @@ export default function Orders({ data, refreshing, onRefresh }: OrdersProps) {
   return (
     <View className="flex-1 bg-gray-50 pt-4">
       <View className="px-5 mb-2">
-        <View className="flex-row items-center justify-between mb-6">
+        <View className="flex-row gap-10 items-center py-4">
+          <TouchableOpacity onPress={() => router.replace("/(tabs)")}>
+            <View className="w-10 h-10 bg-white rounded-full items-center justify-center shadow-sm border border-gray-200">
+              <Ionicons name="close" size={24} />
+            </View>
+          </TouchableOpacity>
           <Text className="text-2xl font-bold text-gray-900">My Orders</Text>
         </View>
 
         <View className="flex-row bg-gray-200 p-1 rounded-xl mb-4">
           <TouchableOpacity
             onPress={() => setActiveTab("active")}
-            className={`flex-1 py-2.5 rounded-lg items-center ${
-              activeTab === "active" ? "bg-white shadow-sm" : ""
-            }`}
+            style={[
+              styles.tabButton,
+              activeTab === "active" && styles.activeTabButton,
+            ]}
           >
             <Text
               className={`font-semibold ${
-                activeTab === "active" ? "text-gray-900" : "text-gray-500"
+                activeTab === "active" ? "text-white" : "text-gray-500"
               }`}
             >
               Active
@@ -79,9 +92,10 @@ export default function Orders({ data, refreshing, onRefresh }: OrdersProps) {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setActiveTab("history")}
-            className={`flex-1 py-2.5 rounded-lg items-center ${
-              activeTab === "history" ? "bg-white shadow-sm" : ""
-            }`}
+            style={[
+              styles.tabButton,
+              activeTab === "history" && styles.activeTabButton,
+            ]}
           >
             <Text
               className={`font-semibold ${
@@ -155,16 +169,15 @@ export default function Orders({ data, refreshing, onRefresh }: OrdersProps) {
               be notified.
             </Text>
 
-            {/* Payment Options */}
             <TouchableOpacity
               onPress={() => handlePayment("mpesa")}
               disabled={isPending}
               className="flex-row items-center bg-green-50 p-4 rounded-xl border border-green-200 mb-3"
             >
-              <MaterialCommunityIcons
-                name="phone-classic"
-                size={24}
-                color="#10b981"
+              <Image
+                source={{ uri: "https://img.icons8.com/color/48/mpesa.png" }}
+                style={styles.mpesaLogo}
+                resizeMode="contain"
               />
               <Text className="text-green-800 font-bold text-lg ml-3">
                 M-Pesa
@@ -176,7 +189,7 @@ export default function Orders({ data, refreshing, onRefresh }: OrdersProps) {
               disabled={isPending}
               className="flex-row items-center bg-blue-50 p-4 rounded-xl border border-blue-200 mb-3"
             >
-              <Ionicons name="card" size={24} color="#3b82f6" />
+              <Ionicons name="card" size={20} color="#3b82f6" />
               <Text className="text-blue-800 font-bold text-lg ml-3">
                 Credit / Debit Card
               </Text>
@@ -187,11 +200,10 @@ export default function Orders({ data, refreshing, onRefresh }: OrdersProps) {
               disabled={isPending}
               className="flex-row items-center bg-gray-100 p-4 rounded-xl border border-gray-300"
             >
-              <Ionicons name="cash" size={24} color="#4b5563" />
+              <Ionicons name="cash" size={20} color="#4b5563" />
               <Text className="text-gray-700 font-bold text-lg ml-3">Cash</Text>
             </TouchableOpacity>
 
-            {/* Loading Indicator for API call */}
             {isPending && (
               <View className="flex-row items-center justify-center mt-6">
                 <ActivityIndicator size="small" color="#0d9488" />
@@ -206,3 +218,26 @@ export default function Orders({ data, refreshing, onRefresh }: OrdersProps) {
     </View>
   );
 }
+const styles = StyleSheet.create({
+  tabButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  activeTabButton: {
+    backgroundColor: "#008080",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  mpesaLogo: {
+    width: 28,
+    height: 28,
+  },
+});

@@ -1,5 +1,5 @@
 import { fetchAllOrders } from "@/api/api";
-import Orders from "@/components/Settings/MyOrders/Orders";
+import AllOrders from "@/components/MyOrders/AllOrders";
 import { color } from "@/constants/Colors";
 import { FetchOrder } from "@/types";
 import { Ionicons } from "@expo/vector-icons";
@@ -19,11 +19,12 @@ interface UserData {
   userId: string;
 }
 
-export default function orders() {
+export default function OrderScreen() {
   const [userData, setUserData] = useState<UserData>({} as UserData);
   const [refreshing, setRefreshing] = useState(false);
 
   const { userId } = userData;
+  const enabled = !!userId;
 
   const {
     data: allOrders,
@@ -33,12 +34,13 @@ export default function orders() {
     queryKey: ["allOrders", userId],
     queryFn: () => fetchAllOrders(userId),
     staleTime: 10 * 60 * 1000,
+    enabled,
   } as UseQueryOptions<FetchOrder[], Error>);
 
   useFocusEffect(
     useCallback(() => {
-      refetch();
-    }, [refetch]),
+      if (enabled) refetch();
+    }, [refetch, enabled]),
   );
 
   const onRefresh = async () => {
@@ -53,12 +55,6 @@ export default function orders() {
   };
 
   useEffect(() => {
-    if (!allOrders) {
-      refetch();
-    }
-  }, [allOrders, refetch]);
-
-  useEffect(() => {
     const FetchData = async () => {
       const userObj = JSON.parse(
         (await AsyncStorage.getItem("userObj")) || "{}",
@@ -68,7 +64,13 @@ export default function orders() {
     FetchData();
   }, []);
 
-  const isLoading = isLoadingAll || refreshing;
+  useEffect(() => {
+    if (!allOrders) {
+      refetch();
+    }
+  }, [allOrders, refetch]);
+
+  const isLoading = isLoadingAll || refreshing || !enabled;
 
   if (isLoading) {
     return (
@@ -83,7 +85,7 @@ export default function orders() {
     );
   }
 
-  if (!allOrders) {
+  if (!allOrders || allOrders.length === 0) {
     return (
       <SafeAreaView className="flex-1 bg-gray-50" edges={["top"]}>
         <Stack.Screen options={{ headerShown: false }} />
@@ -117,7 +119,7 @@ export default function orders() {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={color.green} />
-      <Orders
+      <AllOrders
         data={allOrders || []}
         refreshing={refreshing}
         onRefresh={onRefresh}

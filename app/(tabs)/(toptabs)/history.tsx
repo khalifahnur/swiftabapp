@@ -105,12 +105,12 @@ export default function HistoryTab() {
           source={require("@/assets/images/lottie/cancelled.json")}
           autoPlay
           loop
-          style={{ width: 180, height: 180 }}
+          style={{ width: 100, height: 100 }}
         />
-        <Text className="text-xl font-bold text-gray-900 mt-6 mb-2 text-center">
+        <Text className="text-lg font-bold text-gray-900 mt-6 mb-2 text-center">
           No Past Reservations
         </Text>
-        <Text className="text-base font-medium text-gray-500 text-center px-4 leading-6">
+        <Text className="text-sm font-medium text-gray-500 text-center px-4 leading-6">
           Your completed and cancelled reservations will appear here for your
           records.
         </Text>

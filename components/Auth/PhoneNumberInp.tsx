@@ -32,8 +32,8 @@ export default function PhoneNumberInp({
         phoneInputStyles={{
           container: {
             borderWidth: 0,
-            backgroundColor: "transparent",
-            height: 54,
+            backgroundColor: "transparent", // Ensures it uses the gray background from the parent
+            height: 52, // Sized slightly under the parent's 56px (h-14) to prevent overlap
           },
           flagContainer: {
             backgroundColor: "transparent",
@@ -44,7 +44,7 @@ export default function PhoneNumberInp({
             fontSize: 16,
           },
           divider: {
-            backgroundColor: "#E5E7EB",
+            backgroundColor: "#D1D5DB", // Slightly darkened to stand out against the gray background
           },
           input: {
             color: "#111827",

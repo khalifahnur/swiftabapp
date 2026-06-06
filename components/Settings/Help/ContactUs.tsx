@@ -1,13 +1,13 @@
+import { Feather } from "@expo/vector-icons";
+import React, { useState } from "react";
 import {
-    Image,
+  Image,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useState } from "react";
-import { Feather } from "@expo/vector-icons";
 
 export default function ContactUs() {
   const [activeSection, setActiveSection] = useState<string | null>(null);
@@ -19,16 +19,32 @@ export default function ContactUs() {
   const sections = [
     {
       name: "Customer Service",
-      icon: require('@/assets/images/socials/customer.png'),
-      details: "Call our support at +254890756.",
+      icon: require("@/assets/images/socials/customer.png"),
+      details: "support@swiftab.co.ke",
     },
-    { name: "WhatsApp", icon: require('@/assets/images/socials/whatsapp.png'), details: "+254890756" },
-    { name: "Website", icon: require('@/assets/images/socials/browser.png'), details: "Visit https://example.com" },
-    { name: "Facebook", icon: require('@/assets/images/socials/fb.png'), details: "Follow us on Facebook!" },
-    { name: "X", icon:require('@/assets/images/socials/x.png'), details: "Check us on X!" },
+    {
+      name: "WhatsApp",
+      icon: require("@/assets/images/socials/whatsapp.png"),
+      details: "whatsapp",
+    },
+    {
+      name: "Website",
+      icon: require("@/assets/images/socials/browser.png"),
+      details: "Visit https://www.swiftab.co.ke/",
+    },
+    {
+      name: "Facebook",
+      icon: require("@/assets/images/socials/fb.png"),
+      details: "Follow us on Facebook!",
+    },
+    {
+      name: "X",
+      icon: require("@/assets/images/socials/x.png"),
+      details: "Check us on X!",
+    },
     {
       name: "Instagram",
-      icon: require('@/assets/images/socials/ig.png'),
+      icon: require("@/assets/images/socials/ig.png"),
       details: "Follow us on Instagram!",
     },
   ];
@@ -42,7 +58,7 @@ export default function ContactUs() {
           style={styles.section}
         >
           <View style={styles.sectionHeader}>
-            <Image source={icon} style={{width:30,height:30}}/>
+            <Image source={icon} style={{ width: 30, height: 30 }} />
             <Text style={styles.sectionTitle}>{name}</Text>
             <Feather
               name={activeSection === name ? "chevron-up" : "chevron-down"}
@@ -61,8 +77,7 @@ export default function ContactUs() {
 
 const styles = StyleSheet.create({
   section: {
-    
-    padding:20,
+    padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: "#e0e0e0",
   },

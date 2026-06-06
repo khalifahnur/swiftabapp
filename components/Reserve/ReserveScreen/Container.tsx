@@ -32,7 +32,7 @@ export default function Container() {
   const fetchActiveTableMutation = useFetchActiveTableMutation();
   const { selectedDate, selectedStartTime, selectedEndTime, selectedTableId } =
     useStore();
-
+  const isFormComplete = selectedDate && selectedStartTime && selectedEndTime;
   const startDateTime =
     selectedDate && selectedStartTime
       ? moment(`${selectedDate}T${selectedStartTime}`).format()
@@ -97,7 +97,6 @@ export default function Container() {
 
   return (
     <View className="flex-1 bg-gray-50">
-      {/* Header */}
       <View className="flex-row items-center px-6 py-4 bg-gray-50 z-10">
         <TouchableOpacity
           onPress={() => router.back()}
@@ -105,6 +104,7 @@ export default function Container() {
         >
           <Ionicons name="arrow-back" size={20} color="#111827" />
         </TouchableOpacity>
+
         <Text className="flex-1 text-center font-bold text-xl text-gray-900 mr-10">
           Book a Table
         </Text>
@@ -145,44 +145,45 @@ export default function Container() {
           />
         )}
       </ScrollView>
-
-      <View
-        className="absolute bottom-0 w-full bg-white border-t border-gray-100 px-6 pt-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]"
-        style={{ paddingBottom: Math.max(insets.bottom, 20) }}
-      >
-        {selectedTab === "Table" ? (
-          <View className="flex-row gap-3">
+      {(isFormComplete || selectedTab === "Table") && (
+        <View
+          className="absolute bottom-0 w-full bg-white border-t border-gray-100 px-6 pt-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]"
+          style={{ paddingBottom: Math.max(insets.bottom, 20) }}
+        >
+          {selectedTab === "Table" ? (
+            <View className="flex-row gap-3">
+              <TouchableOpacity
+                className="flex-1 bg-gray-100 py-4 rounded-xl items-center"
+                onPress={() => setSelectedTab("Date")}
+              >
+                <Text className="text-gray-900 font-bold text-base">Back</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className={`flex-1 py-4 rounded-xl items-center ${selectedTableId ? "bg-teal-600" : "bg-teal-600/50"}`}
+                disabled={!selectedTableId}
+                onPress={() =>
+                  router.replace({
+                    pathname: "/screens/confirm",
+                    params: restaurantInfo,
+                  })
+                }
+              >
+                <Text className="text-white font-bold text-base">Confirm</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
             <TouchableOpacity
-              className="flex-1 bg-gray-100 py-4 rounded-xl items-center"
-              onPress={() => setSelectedTab("Date")}
+              className="w-full bg-teal-600 py-4 rounded-xl items-center flex-row justify-center"
+              onPress={handleNext}
             >
-              <Text className="text-gray-900 font-bold text-base">Back</Text>
+              <Text className="text-white font-bold text-lg mr-2">
+                Find Tables
+              </Text>
+              <Ionicons name="arrow-forward" size={20} color="white" />
             </TouchableOpacity>
-            <TouchableOpacity
-              className={`flex-1 py-4 rounded-xl items-center ${selectedTableId ? "bg-teal-600" : "bg-teal-600/50"}`}
-              disabled={!selectedTableId}
-              onPress={() =>
-                router.replace({
-                  pathname: "/screens/confirm",
-                  params: restaurantInfo,
-                })
-              }
-            >
-              <Text className="text-white font-bold text-base">Confirm</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <TouchableOpacity
-            className="w-full bg-teal-600 py-4 rounded-xl items-center flex-row justify-center"
-            onPress={handleNext}
-          >
-            <Text className="text-white font-bold text-lg mr-2">
-              Find Tables
-            </Text>
-            <Ionicons name="arrow-forward" size={20} color="white" />
-          </TouchableOpacity>
-        )}
-      </View>
+          )}
+        </View>
+      )}
     </View>
   );
 }

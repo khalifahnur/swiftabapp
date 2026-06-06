@@ -26,7 +26,6 @@ export default function Card({
   location,
   handlePress,
 }: CardProps) {
-  // Animation Value for the "Press" effect
   const scaleValue = useRef(new Animated.Value(1)).current;
 
   const onPressIn = () => {
@@ -53,18 +52,15 @@ export default function Card({
     >
       <Animated.View
         style={{ transform: [{ scale: scaleValue }] }}
-        className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100"
+        className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100"
       >
-        {/* Fixed Width for Horizontal Scrolling */}
-        <View style={{ width: width * 0.75 }}>
-          {/* Image Section */}
+        <View style={{ width: width * 0.65 }}>
           <View className="relative h-44 w-full bg-gray-200">
             <Image
               source={{ uri: image }}
               className="w-full h-full"
               resizeMode="cover"
             />
-            {/* Rating Badge floating over the image */}
             <View className="absolute top-3 left-3 bg-white/90 rounded-full flex-row items-center px-2.5 py-1 shadow-sm">
               <Text className="text-gray-900 text-xs font-bold mr-1">
                 {rate}
@@ -72,13 +68,11 @@ export default function Card({
               <Ionicons name="star" size={12} color="#f5a623" />
             </View>
 
-            {/* Favorite Icon (Visual Only) */}
             <View className="absolute top-3 right-3 w-8 h-8 bg-white/90 rounded-full items-center justify-center shadow-sm">
               <Ionicons name="heart-outline" size={18} color="#4B5563" />
             </View>
           </View>
 
-          {/* Info Section */}
           <View className="p-4">
             <Text
               className="text-lg font-bold text-gray-900 mb-1"
@@ -97,16 +91,15 @@ export default function Card({
               </Text>
             </View>
 
-            {/* Delivery/Time metadata mock (adds to the Glovo feel) */}
             <View className="flex-row items-center mt-3 pt-3 border-t border-gray-100">
               <Ionicons name="time-outline" size={14} color="#6B7280" />
               <Text className="text-xs text-gray-500 ml-1 font-medium mr-4">
                 15-20 min
               </Text>
-              <Ionicons name="bicycle-outline" size={16} color="#6B7280" />
+              {/* <Ionicons name="bicycle-outline" size={16} color="#6B7280" />
               <Text className="text-xs text-gray-500 ml-1 font-medium">
                 Free delivery
-              </Text>
+              </Text> */}
             </View>
           </View>
         </View>

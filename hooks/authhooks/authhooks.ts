@@ -6,11 +6,11 @@ import {
   verifyCode,
 } from "@/api/api";
 import { useAuthStore } from "@/lib/authStore";
+import { useToast } from "@/lib/ToastContext";
 import { AuthData, AuthResponse, ErrorResponse } from "@/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useMutation, UseMutationResult } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import Toast from "react-native-toast-message";
 
 export function useLogin(): UseMutationResult<
   AuthResponse,
@@ -61,14 +61,12 @@ type VerifyCodeResponse = {
 
 export function useVerifyCode() {
   const router = useRouter();
+  const { showToast } = useToast();
+
   return useMutation<VerifyCodeResponse, ErrorResponse, VerifyCodeVariables>({
     mutationFn: verifyCode,
     onSuccess: (data) => {
-      Toast.show({
-        type: "success",
-        text1: "Verification Successful",
-        text2: "You can now reset your password.",
-      });
+      showToast("success", "You can now reset your password.");
       router.push({
         pathname: "/(auth)/newpassword",
         params: { email: data.email },
@@ -82,11 +80,10 @@ export function useVerifyCode() {
       // }
     },
     onError: () => {
-      Toast.show({
-        type: "error",
-        text1: "Verification Failed",
-        text2: "An error occurred while verifying the code. Please try again.",
-      });
+      showToast(
+        "error",
+        "An error occurred while verifying the code. Please try again.",
+      );
     },
   });
 }
@@ -104,20 +101,16 @@ type newPsswdResponse = {
 
 export function useNewPassword() {
   const router = useRouter();
+  const { showToast } = useToast();
+
   return useMutation<newPsswdResponse, ErrorResponse, passwordParams>({
     mutationFn: newPassword,
     onSuccess: () => {
-      Toast.show({
-        type: "success",
-        text1: "Password Changed",
-      });
+      showToast("success", "Password Changed ");
       router.push("/(auth)");
     },
     onError: () => {
-      Toast.show({
-        type: "error",
-        text2: "Password changed error : Please try again.",
-      });
+      showToast("error", "Password changed error : Please try again.");
     },
   });
 }

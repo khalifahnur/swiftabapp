@@ -1,4 +1,5 @@
 import { createReservation, userCancelReservation } from "@/api/api";
+import { useToast } from "@/lib/ToastContext";
 import {
   Reservation,
   ReservationResponse,
@@ -39,6 +40,7 @@ export const useCreateReservation = (options?: UseCreateReservationOptions) => {
 };
 
 export function userCancellationReservation() {
+  const { showToast } = useToast();
   return useMutation({
     mutationFn: ({
       id,
@@ -52,13 +54,11 @@ export function userCancellationReservation() {
         type: "success",
         text1: "Reservation cancelled",
       });
+      showToast("success", "Reservation cancelled");
       AsyncStorage.removeItem("reservationData");
     },
     onError: () => {
-      Toast.show({
-        type: "error",
-        text2: "Please try again.",
-      });
+      showToast("error", "Please try again.");
     },
   });
 }

@@ -69,7 +69,7 @@ export default function HomeScreen() {
         </Text>
         <TouchableOpacity
           className="bg-teal-600 px-6 py-3 rounded-lg"
-          onPress={() => onRefresh}
+          onPress={onRefresh}
         >
           <Text className="text-white font-bold">Refresh</Text>
         </TouchableOpacity>

@@ -13,10 +13,10 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Toast from "react-native-toast-message";
 
 import PhoneNumberInp from "@/components/Auth/PhoneNumberInp";
 import { useSignUp } from "@/hooks/authhooks/authhooks";
+import { useToast } from "@/lib/ToastContext";
 import { signUpSchema } from "@/validation/auth/ValidationSchema";
 
 const SignUpScreen = () => {
@@ -26,6 +26,7 @@ const SignUpScreen = () => {
 
   const router = useRouter();
   const signUpMutation = useSignUp();
+  const { showToast } = useToast();
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -44,33 +45,36 @@ const SignUpScreen = () => {
 
   useEffect(() => {
     if (signUpMutation.isSuccess) {
-      Toast.show({
-        type: "success",
-        text1: "Sign-up Successful!",
-        text2: "Welcome! Your account has been created successfully.",
-      });
-
+      showToast(
+        "success",
+        "Welcome! Your account has been created successfully.",
+      );
       setTimeout(() => {
         router.navigate("/(auth)");
       }, 500);
     } else if (signUpMutation.isError) {
-      Toast.show({
-        type: "error",
-        text1: signUpMutation.error.message,
-      });
+      showToast("error", signUpMutation.error.message);
     }
   }, [signUpMutation, router]);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView className="flex-1 bg-gray-50">
+      <SafeAreaView className="flex-1 bg-white">
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ padding: 24, paddingBottom: 40 }}
+          contentContainerStyle={{
+            paddingHorizontal: 24,
+            paddingTop: 20,
+            flexGrow: 1,
+          }}
         >
-          <View className="flex-row items-center justify-center mb-8 mt-2">
-            <Text className="text-2xl font-bold text-gray-900 tracking-tight">
+          {/* Header Section */}
+          <View className="mb-8 items-center mt-4">
+            <Text className="text-3xl font-bold text-gray-900 tracking-tight mb-2">
               Create Account
+            </Text>
+            <Text className="text-sm text-gray-500 font-medium">
+              Join us to start exploring amazing restaurants
             </Text>
           </View>
 
@@ -96,19 +100,21 @@ const SignUpScreen = () => {
               touched,
             }) => (
               <View className="space-y-4">
+                {/* Full Name */}
                 <View>
-                  <Text className="text-sm font-medium text-gray-700 mb-1.5">
+                  <Text className="text-sm font-semibold text-gray-800 mb-2">
                     Full Name
                   </Text>
                   <TextInput
+                    placeholder="John Doe"
                     placeholderTextColor="#9CA3AF"
                     value={values.name}
                     onChangeText={handleChange("name")}
                     onBlur={handleBlur("name")}
-                    className={`bg-white border rounded-xl p-4 text-base text-gray-900 ${
+                    className={`bg-gray-100 rounded-2xl px-4 h-14 text-base text-gray-900 border ${
                       errors.name && touched.name
                         ? "border-red-500"
-                        : "border-gray-200"
+                        : "border-transparent"
                     }`}
                   />
                   {errors.name && touched.name && (
@@ -117,21 +123,24 @@ const SignUpScreen = () => {
                     </Text>
                   )}
                 </View>
+
+                {/* Email */}
                 <View>
-                  <Text className="text-sm font-medium text-gray-700 mb-1.5">
+                  <Text className="text-sm font-semibold text-gray-800 mb-2">
                     Email
                   </Text>
                   <TextInput
+                    placeholder="example@gmail.com"
                     placeholderTextColor="#9CA3AF"
                     value={values.email}
                     onChangeText={handleChange("email")}
                     onBlur={handleBlur("email")}
                     keyboardType="email-address"
                     autoCapitalize="none"
-                    className={`bg-white border rounded-xl p-4 text-base text-gray-900 ${
+                    className={`bg-gray-100 rounded-2xl px-4 h-14 text-base text-gray-900 border ${
                       errors.email && touched.email
                         ? "border-red-500"
-                        : "border-gray-200"
+                        : "border-transparent"
                     }`}
                   />
                   {errors.email && touched.email && (
@@ -141,15 +150,16 @@ const SignUpScreen = () => {
                   )}
                 </View>
 
+                {/* Phone Number */}
                 <View>
-                  <Text className="text-sm font-medium text-gray-700 mb-1.5">
+                  <Text className="text-sm font-semibold text-gray-800 mb-2">
                     Phone Number
                   </Text>
                   <View
-                    className={`bg-white border rounded-xl overflow-hidden ${
+                    className={`bg-gray-100 rounded-2xl overflow-hidden h-14 justify-center border ${
                       errors.phoneNumber && touched.phoneNumber
                         ? "border-red-500"
-                        : "border-gray-200"
+                        : "border-transparent"
                     }`}
                   >
                     <PhoneNumberInp
@@ -163,24 +173,26 @@ const SignUpScreen = () => {
                   )}
                 </View>
 
+                {/* Password */}
                 <View>
-                  <Text className="text-sm font-medium text-gray-700 mb-1.5">
+                  <Text className="text-sm font-semibold text-gray-800 mb-2">
                     Password
                   </Text>
                   <View
-                    className={`flex-row items-center bg-white border rounded-xl pr-4 ${
+                    className={`flex-row items-center bg-gray-100 rounded-2xl pr-4 h-14 border ${
                       errors.password && touched.password
                         ? "border-red-500"
-                        : "border-gray-200"
+                        : "border-transparent"
                     }`}
                   >
                     <TextInput
+                      placeholder="••••••••••••••••"
                       placeholderTextColor="#9CA3AF"
                       value={values.password}
                       onChangeText={handleChange("password")}
                       onBlur={handleBlur("password")}
                       secureTextEntry={!showPassword}
-                      className="flex-1 p-4 text-base text-gray-900"
+                      className="flex-1 px-4 h-full text-base text-gray-900"
                     />
                     <TouchableOpacity
                       onPress={() => setShowPassword(!showPassword)}
@@ -199,24 +211,27 @@ const SignUpScreen = () => {
                     </Text>
                   )}
                 </View>
+
+                {/* Confirm Password */}
                 <View>
-                  <Text className="text-sm font-medium text-gray-700 mb-1.5">
+                  <Text className="text-sm font-semibold text-gray-800 mb-2">
                     Confirm Password
                   </Text>
                   <View
-                    className={`flex-row items-center bg-white border rounded-xl pr-4 ${
+                    className={`flex-row items-center bg-gray-100 rounded-2xl pr-4 h-14 border ${
                       errors.confirmPassword && touched.confirmPassword
                         ? "border-red-500"
-                        : "border-gray-200"
+                        : "border-transparent"
                     }`}
                   >
                     <TextInput
+                      placeholder="••••••••••••••••"
                       placeholderTextColor="#9CA3AF"
                       value={values.confirmPassword}
                       onChangeText={handleChange("confirmPassword")}
                       onBlur={handleBlur("confirmPassword")}
                       secureTextEntry={!showConfirmPassword}
-                      className="flex-1 p-4 text-base text-gray-900"
+                      className="flex-1 px-4 h-full text-base text-gray-900"
                     />
                     <TouchableOpacity
                       onPress={() =>
@@ -242,9 +257,9 @@ const SignUpScreen = () => {
                   )}
                 </View>
 
-                {/* Updated Button to Teal */}
+                {/* Submit Button */}
                 <TouchableOpacity
-                  className={`rounded-xl p-4 items-center mt-6 shadow-sm ${
+                  className={`rounded-full h-14 justify-center items-center shadow-sm mt-6 ${
                     signUpMutation.status === "pending"
                       ? "bg-teal-400"
                       : "bg-teal-600"
@@ -255,7 +270,7 @@ const SignUpScreen = () => {
                   {signUpMutation.status === "pending" ? (
                     <ActivityIndicator color="#FFF" />
                   ) : (
-                    <Text className="text-white text-base font-semibold">
+                    <Text className="text-white text-lg font-semibold">
                       Create Account
                     </Text>
                   )}
@@ -264,12 +279,15 @@ const SignUpScreen = () => {
             )}
           </Formik>
 
-          <View className="flex-row justify-center items-center mt-8 pb-6">
-            <Text className="text-gray-600 font-medium text-base">
+          {/* Bottom Log In Link */}
+          <View className="flex-row justify-center items-center mt-auto pb-8 pt-6">
+            <Text className="text-gray-600 font-medium text-sm">
               Already have an account?{" "}
             </Text>
             <TouchableOpacity onPress={() => router.navigate("/(auth)")}>
-              <Text className="text-teal-600 font-bold text-base">Log In</Text>
+              <Text className="text-teal-600 font-bold text-sm underline">
+                Log In
+              </Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

@@ -141,12 +141,12 @@ export default function Container() {
             source={require("@/assets/images/lottie/emptywishlist.json")}
             autoPlay
             loop
-            style={{ width: 180, height: 180 }}
+            style={{ width: 100, height: 100 }}
           />
-          <Text className="text-xl font-bold text-gray-900 mt-6 mb-2">
+          <Text className="text-lg font-bold text-gray-900 mt-6 mb-2">
             No favourites yet
           </Text>
-          <Text className="text-base font-medium text-gray-500 text-center px-4 leading-6">
+          <Text className="text-sm font-medium text-gray-500 text-center px-4 leading-6">
             Tap the heart icon on any restaurant to save it here for quick
             access later.
           </Text>

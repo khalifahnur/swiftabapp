@@ -114,19 +114,19 @@ export default function IndexTab() {
           source={require("@/assets/images/lottie/empty.json")}
           autoPlay
           loop
-          style={{ width: 180, height: 180 }}
+          style={{ width: 100, height: 100 }}
         />
-        <Text className="text-xl font-bold text-gray-900 mt-6 mb-2 text-center">
+        <Text className="text-lg font-bold text-gray-900 mt-6 mb-2 text-center">
           No Active Reservations
         </Text>
-        <Text className="text-base font-medium text-gray-500 text-center px-4 leading-6">
+        <Text className="text-sm font-medium text-gray-500 text-center px-4 leading-6">
           When you book a table or pre-order food, your upcoming reservations
           will appear here.
         </Text>
 
         <TouchableOpacity
           className="mt-8 bg-teal-600 px-8 py-4 rounded-lg shadow-sm"
-          onPress={() => router.navigate("/")}
+          onPress={() => router.navigate("/(tabs)")}
         >
           <Text className="text-white font-bold text-base">
             Find a Restaurant

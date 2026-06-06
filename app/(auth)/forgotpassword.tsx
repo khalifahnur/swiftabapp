@@ -1,5 +1,6 @@
 import { color } from "@/constants/Colors";
 import { useForgotPassword } from "@/hooks/authhooks/authhooks";
+import { useToast } from "@/lib/ToastContext";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -10,7 +11,6 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Toast from "react-native-toast-message";
 
 const ForgotScreen = () => {
   const [email, setEmail] = useState("");
@@ -19,6 +19,7 @@ const ForgotScreen = () => {
   const [isDisabled, setIsDisabled] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [error, setError] = useState("");
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (countdown > 0) {
@@ -49,20 +50,13 @@ const ForgotScreen = () => {
 
       await forgotPsswdMutation.mutateAsync(email);
 
-      Toast.show({
-        type: "success",
-        text1: "Verification Code Sent!",
-        text2: "Please check your email for the verification code.",
-      });
-
+      showToast(
+        "success",
+        "Please check your email for the verification code.",
+      );
       router.push({ pathname: "/(auth)/codeverify", params: { email } });
     } catch (error) {
-      Toast.show({
-        type: "error",
-        text1: "Failed to Send Verification Code",
-        text2: error instanceof Error ? error.message : "An error occurred.",
-      });
-
+      showToast("error", "Failed to Send Verification Code");
       setIsDisabled(false);
     }
   };

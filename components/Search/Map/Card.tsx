@@ -1,100 +1,57 @@
-import {
-    Image,
-    StyleSheet,
-    Text,
-    View,
-    ImageSourcePropType,
-    TouchableOpacity,
-  } from "react-native";
-  import React from "react";
-  import { Ionicons } from "@expo/vector-icons";
-  import { color, primary } from "@/constants/Colors";
-  
-  type cardProps = {
-    image: ImageSourcePropType;
-    restaurantName: string;
-    rate: number;
-    location: string;
-    handlePress: () => void;
-    cardWidth?:number | 220
-  };
-  export default function Card({
-    image,
-    restaurantName,
-    rate,
-    location,
-    handlePress,
-    cardWidth
-  }: cardProps) {
-    return (
-      <TouchableOpacity onPress={handlePress} style={[styles.card,{width:cardWidth}]}>
-        <Image source={{uri:image}} style={styles.restaurantImage} />
-        <View style={styles.detailsContainer}>
-          <View style={styles.detail}>
-            <Text style={styles.restaurantName}>{restaurantName}</Text>
-            <View style={styles.ratingContainer}>
-              <Text style={styles.ratingText}>{rate}</Text>
-              <Ionicons name="star" size={13} color="gold" />
-            </View>
-          </View>
-  
-          <View style={styles.locationContainer}>
-            <Ionicons name="location-sharp" size={16} color="gray" />
-            <Text style={styles.locationText}>{location}</Text>
+import { Ionicons } from "@expo/vector-icons";
+import React from "react";
+import { Image, Text, TouchableOpacity, View } from "react-native";
+
+type CardProps = {
+  image: string;
+  restaurantName: string;
+  rate: number;
+  location: string;
+  handlePress: () => void;
+  cardWidth?: number;
+};
+
+export default function Card({
+  image,
+  restaurantName,
+  rate,
+  location,
+  handlePress,
+  cardWidth = 280,
+}: CardProps) {
+  return (
+    <TouchableOpacity
+      onPress={handlePress}
+      style={{ width: cardWidth }}
+      activeOpacity={0.9}
+      className="bg-white shadow-sm shadow-gray-300 rounded-xl mx-2 mb-2 overflow-hidden border border-gray-100"
+    >
+      <Image
+        source={{ uri: image }}
+        className="w-full h-32"
+        resizeMode="cover"
+      />
+      <View className="p-3">
+        <View className="flex-row justify-between items-center mb-1">
+          <Text
+            className="text-gray-900 text-base font-bold flex-1 mr-2"
+            numberOfLines={1}
+          >
+            {restaurantName}
+          </Text>
+          <View className="flex-row items-center bg-teal-50 px-2 py-1 rounded-full">
+            <Text className="text-teal-700 text-xs font-bold mr-1">{rate}</Text>
+            <Ionicons name="star" size={12} color="#14b8a6" />
           </View>
         </View>
-      </TouchableOpacity>
-    );
-  }
-  
-  const styles = StyleSheet.create({
-    card: {
-      backgroundColor: color.white,
-      shadowColor: "#000",
-      shadowOffset: { width: 1, height: 2 },
-      shadowOpacity: 0.9,
-      shadowRadius: 5,
-      elevation: 1,
-      borderRadius: 10,
-      marginHorizontal: 10,
-      marginBottom: 5,
-    },
-    restaurantImage: {
-      width: "100%",
-      height: 100,
-      borderTopLeftRadius: 10,
-      borderTopRightRadius: 10,
-    },
-    detailsContainer: {
-      padding: 10,
-    },
-    detail: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-    },
-    restaurantName: {
-      fontSize: 13,
-      fontWeight: "500",
-    },
-    locationContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-      marginTop: 4,
-    },
-    locationText: {
-      fontSize: 12,
-      color: "gray",
-      marginLeft: 4,
-    },
-    ratingContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-      marginTop: 4,
-    },
-    ratingText: {
-      fontSize: 13,
-      color: "gray",
-      marginRight: 4,
-    },
-  });
+
+        <View className="flex-row items-center mt-1">
+          <Ionicons name="location" size={14} color="#9ca3af" />
+          <Text className="text-gray-500 text-xs ml-1 flex-1" numberOfLines={1}>
+            {location}
+          </Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+}

@@ -21,7 +21,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
 
   return (
     <View
-      className="absolute left-0 right-0 flex-row items-center justify-center px-4 mb-5"
+      className="absolute left-0 right-0 flex-row items-center justify-center px-4 mb-2"
       style={{ bottom: bottomPadding, backgroundColor: "transparent" }}
     >
       <View
@@ -31,8 +31,8 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
             flex: 1,
             flexDirection: "row",
             backgroundColor: "#FFFFFF",
-            borderRadius: 999,
-            padding: 8,
+            borderRadius: 12,
+            padding: 6,
             alignItems: "center",
             justifyContent: "space-between",
             borderWidth: 1,
@@ -104,7 +104,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={() => router.navigate("/Order")}
-        className="w-14 h-14 rounded-full bg-teal-600 items-center justify-center border-2 border-white"
+        className="w-14 h-14 rounded-xl bg-teal-600 items-center justify-center border-2 border-white"
         style={styles.shadowPremium}
       >
         {/* {cart?.length > 0 && (

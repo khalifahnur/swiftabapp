@@ -1,12 +1,7 @@
 import { RestaurantData } from "@/types";
 import { useRouter } from "expo-router";
 import React from "react";
-import {
-  ScrollView,
-  Text,
-  useWindowDimensions,
-  View
-} from "react-native";
+import { ScrollView, Text, useWindowDimensions, View } from "react-native";
 import Card from "../Card";
 
 interface Section {
@@ -32,7 +27,7 @@ export default function Restaurants({
   };
 
   return (
-    <View className="mt-6">
+    <View className="mt-3">
       <View className="flex-row justify-between items-end px-6 mb-4">
         <Text className="text-xl font-bold text-gray-900 tracking-tight">
           {title}

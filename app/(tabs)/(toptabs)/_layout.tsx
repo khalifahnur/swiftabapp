@@ -11,7 +11,7 @@ const TopTabLayout = () => {
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }} edges={["top"]}>
       <MaterialTopTabs
         screenOptions={{
-          animationEnabled: true,
+          animationEnabled: false, // ✅ fix flickering indicator
           lazy: false,
           tabBarStyle: {
             backgroundColor: "#fff",

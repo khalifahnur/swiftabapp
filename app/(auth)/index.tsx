@@ -14,23 +14,20 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Toast from "react-native-toast-message";
 
 import { useLogin } from "@/hooks/authhooks/authhooks";
+import { useToast } from "@/lib/ToastContext";
 import { loginSchema } from "@/validation/auth/ValidationSchema";
 
 const LoginScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const signInMutation = useLogin();
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (signInMutation.isSuccess) {
-      Toast.show({
-        type: "success",
-        text1: "Sign-in Successful!",
-        text2: "Welcome back to Swiftab.",
-      });
+      showToast("success", "Successfully logged in!");
 
       const handleLogin = async () => {
         if (signInMutation.data) {
@@ -46,10 +43,7 @@ const LoginScreen = () => {
         handleLogin();
       }, 1000);
     } else if (signInMutation.isError) {
-      Toast.show({
-        type: "error",
-        text1: signInMutation.error.message,
-      });
+      showToast("error", signInMutation.error.message);
     }
   }, [
     signInMutation.isSuccess,
@@ -60,21 +54,26 @@ const LoginScreen = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView className="flex-1 bg-gray-50">
+      <SafeAreaView className="flex-1 bg-white">
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{
-            padding: 24,
+            paddingHorizontal: 24,
+            paddingTop: 40,
             flexGrow: 1,
-            justifyContent: "center",
           }}
         >
-          <View className="mb-10 mt-4">
-            <Text className="text-3xl font-bold text-gray-900 tracking-tight text-center">
-              Welcome Back
+          {/* Header Section */}
+          <View className="mb-10 items-center mt-8">
+            <Text className="text-3xl font-bold text-gray-900 tracking-tight mb-3">
+              Sign In
+            </Text>
+            <Text className="text-sm text-gray-500 font-medium">
+              Hi! Welcome back, you've been missed
             </Text>
           </View>
 
+          {/* Form Section */}
           <Formik
             initialValues={{ email: "", password: "" }}
             validationSchema={loginSchema}
@@ -90,12 +89,14 @@ const LoginScreen = () => {
               errors,
               touched,
             }) => (
-              <View className="space-y-4">
+              <View className="space-y-5">
+                {/* Email Input */}
                 <View>
-                  <Text className="text-sm font-medium text-gray-700 mb-1.5">
+                  <Text className="text-sm font-semibold text-gray-800 mb-2">
                     Email
                   </Text>
                   <TextInput
+                    placeholder="example@gmail.com"
                     placeholderTextColor="#9CA3AF"
                     value={values.email}
                     onChangeText={handleChange("email")}
@@ -103,10 +104,10 @@ const LoginScreen = () => {
                     keyboardType="email-address"
                     autoCapitalize="none"
                     autoCorrect={false}
-                    className={`bg-white border rounded-xl p-4 text-base text-gray-900 ${
+                    className={`bg-gray-100 rounded-2xl px-4 h-14 text-base text-gray-900 border ${
                       errors.email && touched.email
                         ? "border-red-500"
-                        : "border-gray-200"
+                        : "border-transparent"
                     }`}
                   />
                   {errors.email && touched.email && (
@@ -116,24 +117,26 @@ const LoginScreen = () => {
                   )}
                 </View>
 
+                {/* Password Input */}
                 <View>
-                  <Text className="text-sm font-medium text-gray-700 mb-1.5">
+                  <Text className="text-sm font-semibold text-gray-800 mb-2">
                     Password
                   </Text>
                   <View
-                    className={`flex-row items-center bg-white border rounded-xl pr-4 ${
+                    className={`flex-row items-center bg-gray-100 rounded-2xl pr-4 h-14 border ${
                       errors.password && touched.password
                         ? "border-red-500"
-                        : "border-gray-200"
+                        : "border-transparent"
                     }`}
                   >
                     <TextInput
+                      placeholder="••••••••••••••••"
                       placeholderTextColor="#9CA3AF"
                       value={values.password}
                       onChangeText={handleChange("password")}
                       onBlur={handleBlur("password")}
                       secureTextEntry={!showPassword}
-                      className="flex-1 p-4 text-base text-gray-900"
+                      className="flex-1 px-4 h-full text-base text-gray-900"
                     />
                     <TouchableOpacity
                       onPress={() => setShowPassword(!showPassword)}
@@ -153,17 +156,19 @@ const LoginScreen = () => {
                   )}
                 </View>
 
+                {/* Forgot Password */}
                 <TouchableOpacity
                   onPress={() => router.push("/(auth)/forgotpassword")}
-                  className="mt-2"
+                  className="mt-1 mb-2"
                 >
-                  <Text className="text-right text-teal-600 font-medium text-sm">
-                    Forgot password?
+                  <Text className="text-right text-teal-600 font-semibold text-sm underline">
+                    Forgot Password?
                   </Text>
                 </TouchableOpacity>
 
+                {/* Submit Button */}
                 <TouchableOpacity
-                  className={`rounded-xl p-4 items-center mt-4 shadow-sm ${
+                  className={`rounded-full h-14 justify-center items-center shadow-sm mt-2 ${
                     signInMutation.isPending ? "bg-teal-400" : "bg-teal-600"
                   }`}
                   onPress={() => handleSubmit()}
@@ -172,8 +177,8 @@ const LoginScreen = () => {
                   {signInMutation.isPending ? (
                     <ActivityIndicator color="#FFF" />
                   ) : (
-                    <Text className="text-white text-base font-semibold">
-                      Log in
+                    <Text className="text-white text-lg font-semibold">
+                      Sign In
                     </Text>
                   )}
                 </TouchableOpacity>
@@ -181,12 +186,15 @@ const LoginScreen = () => {
             )}
           </Formik>
 
-          <View className="flex-row justify-center items-center mt-auto pb-6">
-            <Text className="text-gray-600 font-medium text-base">
+          {/* Bottom Sign Up Link */}
+          <View className="flex-row justify-center items-center mt-auto pb-8 pt-10">
+            <Text className="text-gray-600 font-medium text-sm">
               Don't have an account?{" "}
             </Text>
             <TouchableOpacity onPress={() => router.navigate("/(auth)/signup")}>
-              <Text className="text-teal-600 font-bold text-base">Sign up</Text>
+              <Text className="text-teal-600 font-bold text-sm underline">
+                Sign Up
+              </Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

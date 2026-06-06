@@ -133,7 +133,6 @@ export default function Setting() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={["top"]}>
-      {/* Safely hide the header using expo-router */}
       <Stack.Screen options={{ headerShown: false }} />
       <StatusBar barStyle="dark-content" backgroundColor="#f9fafb" />
 
@@ -141,14 +140,12 @@ export default function Setting() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
       >
-        {/* Profile Section */}
         <View className="items-center mt-6 mb-8">
           <View className="relative shadow-sm">
             <Image
               source={require("@/assets/images/user.jpeg")}
               className="w-24 h-24 rounded-full bg-gray-200"
             />
-            {/* Small edit badge */}
             <View className="absolute bottom-0 right-0 bg-teal-600 w-8 h-8 rounded-full items-center justify-center border-2 border-gray-50">
               <Ionicons name="pencil" size={14} color="#fff" />
             </View>
@@ -228,10 +225,6 @@ export default function Setting() {
               Log Out
             </Text>
           </TouchableOpacity>
-
-          <Text className="text-center text-gray-400 text-xs font-medium">
-            Swiftab App v1.0.0
-          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>

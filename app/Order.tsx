@@ -103,12 +103,12 @@ export default function OrderScreen() {
             source={require("@/assets/images/lottie/emptycart.json")}
             autoPlay
             loop
-            style={{ width: 110, height: 110 }}
+            style={{ width: 100, height: 100 }}
           />
-          <Text className="text-xl font-bold text-gray-900 mt-2 mb-2">
+          <Text className="text-lg font-bold text-gray-900 mt-2 mb-2">
             Your Order is Empty
           </Text>
-          <Text className="text-base font-medium text-gray-500 text-center px-4 leading-6">
+          <Text className="text-sm font-medium text-gray-500 text-center px-4 leading-6">
             Looks like you haven't added any delicious meals yet.
           </Text>
         </View>

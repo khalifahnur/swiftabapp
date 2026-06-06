@@ -32,12 +32,11 @@ const Container = ({
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#0d9488" // Teal color for the spinner
+            tintColor="#0d9488"
             colors={["#0d9488"]}
           />
         }
       >
-        {/* You can map over allRestaurants dynamically if titles vary */}
         <Restaurants title="New Arrivals" data={allRestaurants} />
         <Restaurants title="Recommended For You" data={allRestaurants} />
       </ScrollView>

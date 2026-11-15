@@ -1,15 +1,7 @@
-import { RESULTS } from "react-native-permissions";
-
-export type TUsePermissionsReturnType = {
-  isError?: boolean;
-  type: (typeof RESULTS)[keyof typeof RESULTS];
-  errorMessage?: string;
-};
-
-export interface ICameraScannerProps {
-  setIsCameraShown: (value: boolean) => void;
-  onReadCode: (value: string) => void;
-}
+/**
+ * Shapes exchanged with the Swiftab API (see swiftab-server). Fields added
+ * after the first release are optional so older data still renders.
+ */
 
 export interface AuthData {
   name?: string;
@@ -18,66 +10,124 @@ export interface AuthData {
   password: string;
 }
 
+export interface AuthUser {
+  userId: string;
+  name: string;
+  email: string;
+  phoneNumber: string;
+}
+
 export interface AuthResponse {
   token?: string;
-  user: {
-    userId?: string;
-    name?: string;
-    email?: string;
-    phoneNumber?: string;
-  };
+  user: AuthUser;
 }
 
-export interface ErrorResponse {
-  message: string;
+// --- Restaurants -------------------------------------------------------------
+
+export interface OpeningHour {
+  /** "Monday" … "Sunday". */
+  day: string;
+  open: boolean;
+  /** 24-hour "HH:MM". Empty when closed. */
+  from: string;
+  to: string;
 }
 
-export type Restaurant = {
+export interface About {
+  description: string;
+  averagePrice: number;
+  hrsOfOperation: string;
+  phone: string;
+  email: string;
+}
+
+export interface MenuItem {
   _id: string;
-  title: string;
-  data: RestaurantData[];
-  __v: number;
-};
+  image?: string;
+  name: string;
+  description?: string;
+  cost: number;
+  rate?: number;
+  quantity?: number;
+  /** Missing on older dishes, which are available. */
+  available?: boolean;
+  tags?: string[];
+  /** Minutes. */
+  prepTime?: number;
+  note?: string;
+}
 
-export type RestaurantData = {
+export interface MenuCategory {
+  key: string;
+  label: string;
+}
+
+export interface MenuSection extends MenuCategory {
+  items: MenuItem[];
+}
+
+export interface Review {
+  userId?: string;
+  name: string;
+  image?: string;
+  reviewTxt: string;
+  rating: number;
+  createdAt?: string;
+}
+
+/** A restaurant as the API stores it: a document wrapping one profile. */
+export interface RestaurantData {
   image: string;
+  logo?: string;
   restaurantName: string;
   location: string;
   latitude: number;
   longitude: number;
   rate: number;
-  about: {
-    description: string;
-    averagePrice: number;
-    hrsOfOperation: string;
-    phone: string;
-    email: string;
-  }[];
-  menu: {
-    _id: string;
-    breakfast: MenuItem[];
-    lunch: MenuItem[];
-    dinner: MenuItem[];
-  };
-  _id: string;
-  review: any[];
-};
+  cuisines?: string[];
+  amenities?: string[];
+  paymentMethods?: string[];
+  openingHours?: OpeningHour[];
+  acceptingReservations?: boolean;
+  about: About[];
+  menu: Record<string, MenuItem[]>;
+  menuCategories?: MenuCategory[];
+  review: Review[];
+}
 
-export type MenuItem = {
-  image: string;
-  name: string;
+export interface RestaurantDoc {
+  _id: string;
+  title?: string;
+  data: RestaurantData[];
+  distanceKm?: number;
+}
+
+/** A restaurant flattened for the screens: one object, id included. */
+export interface Restaurant extends RestaurantData {
+  id: string;
+  distanceKm?: number;
+}
+
+export interface Promotion {
+  _id: string;
+  restaurantId: string;
+  title: string;
   description: string;
-  cost: number;
-  rate: number;
-  _id: string;
-};
+  type: string;
+  discountPercentage?: number;
+  paymentMethod?: string;
+  startDate: string;
+  endDate: string;
+  isActive: boolean;
+  termsAndConditions?: string;
+  image?: string;
+}
 
-export interface RestaurantTable {
-  restauranId: string;
-  diningAreas: string;
-  totalTables: number;
-  totalCapacity: number;
-  tablePosition: Table[];
+// --- Floor plan --------------------------------------------------------------
+
+export interface Floor {
+  id: string;
+  name: string;
 }
 
 export interface Chair {
@@ -85,187 +135,127 @@ export interface Chair {
   position: string;
 }
 
-export interface Table {
+export type TableShape = "round" | "square" | "rectangle" | string;
+
+export interface FloorTable {
   id: string;
   name: string;
-  status: string;
-  position: {
-    x: number;
-    y: number;
-  };
-  rotation: number;
-  shape: string;
-  size: {
-    width: number;
-    height: number;
-  };
+  floorId: string;
+  shape: TableShape;
+  position: { x: number; y: number };
+  rotation?: number;
+  size: { width: number; height: number };
   chairs: Chair[];
+}
+
+export interface Layout {
+  floors: Floor[];
+  tables: FloorTable[];
+}
+
+export interface TableAvailability {
+  tableNumber: string;
+  isAvailable: boolean;
+  seats: number;
   floorId: string;
 }
 
-interface RestaurantInfo {
-  restaurantId: string;
-  restaurantName: string;
-  image?: string;
-  location: string;
-  longitude: string;
-  latitude: string;
-  rate: string;
-}
+// --- Reservations ------------------------------------------------------------
 
-interface ReservationInfo {
-  userId: string;
+export type ReservationStatus = "active" | "seated" | "completed" | "cancelled" | "no_show";
+
+export interface ReservationRequest {
   name: string;
   email: string;
   phoneNumber: string;
-  bookingDate: string;
+  /** ISO timestamps. */
   bookingFor: string;
   endTime: string;
   guests: number;
-  tableNumber: string | null;
+  tableNumber: string;
   diningArea: string;
   restaurantName: string;
+  notes?: string;
+}
+
+export interface ReservationCreated {
+  id: string;
+  reservationId: string;
+  date: string;
+  time: string;
+  bookingFor: string;
+  endTime: string;
+  duration?: string;
+  guests: number;
+  tableNumber: string;
+  floor?: string;
+  restaurantId: string;
 }
 
 export interface Reservation {
-  reservationInfo: ReservationInfo;
-  status?: "active" | "cancelled" | "completed";
-}
-
-export interface ReservationResponse {
-  name: string;
-  date: Date;
-  time: Date;
-  duration: Date;
-  guest: number;
-  tableNumber: string;
+  id: string;
   reservationId: string;
-}
-
-export interface ActiveReservation {
+  status: ReservationStatus;
   date: string;
-  time: number;
-  location: string;
-  rate: string;
-  image: string;
+  timeLabel?: string;
+  /** ISO timestamps. */
+  bookingFor: string;
+  endTime: string;
+  guests: number;
+  table: string;
+  diningArea?: string;
   restaurantName: string;
-  reservationId: string;
-  restaurantId: string;
-  id: string;
-}
-
-// param (detailScreen) @types
-export interface About {
-  description: string;
-  averagePrice: number;
-  hrsOfOperation: string;
-  phone: string;
-  email: string;
-  _id: string;
-}
-
-export interface MenuParam {
   image: string;
-  name: string;
-  description: string;
-  cost: number;
-  rate: number;
-  _id: string;
-}
-
-export interface Menu {
-  _id: string;
-  breakfast: MenuParam[];
-  lunch: MenuParam[];
-  dinner: MenuParam[];
-}
-
-export interface RestaurantParam {
-  image: string;
-  restaurantName: string;
   location: string;
-  latitude: number;
-  longitude: number;
-  rate: number;
-  about: About[];
-  menu: Menu;
-  _id: string;
-  review: any[];
+  latitude?: number;
+  longitude?: number;
+  rate?: number;
   restaurantId: string;
+  hasOrder?: boolean;
 }
 
-export interface RootData {
-  data: string;
-}
+// --- Orders ------------------------------------------------------------------
 
-export interface ParsedRootData {
-  data: RestaurantParam;
-}
+export type OrderStatus = "placed" | "served" | "ready_to_pay" | "completed" | "cancelled";
 
-export interface NearbyRestaurantsResponse {
-  _id: string;
-  title: string;
-  data: RestaurantData[];
-  __v: number;
-}
+export type PaymentMethod = "mpesa" | "cash" | "card" | "airtel_money";
 
-export interface paymentVariables {
-  phone: string;
-  amount: number;
-  email: string;
-}
-
-export interface userCancelReservationParams {
-  id: string;
-  userId: string;
-  restaurantId: string;
-  reservationId: string;
-}
-
-export interface orderItem {
+export interface OrderLine {
   _id: string;
   name: string;
   cost: number;
   quantity: number;
+  image?: string;
+  note?: string;
+}
+
+export interface Order {
+  _id: string;
+  orderId?: string;
+  reservationId?: string;
+  tableNumber: string;
+  menu: OrderLine[];
+  status: OrderStatus;
+  paid?: string;
+  paymentStatus?: string;
+  paymentMethod?: PaymentMethod | "";
+  totalAmount: number;
+  createdAt: string;
+  updatedAt?: string;
+  servedAt?: string;
+  paidAt?: string;
+  takenBy?: string;
+  restaurantName: string;
+  restaurantImage?: string;
+  restaurantLocation?: string;
+  restaurantId: string;
 }
 
 export interface CreateOrder {
-  menu: orderItem[];
+  menu: { _id: string; quantity: number; note?: string }[];
   userId: string;
   restaurantId: string;
   reservationId: string;
-  restaurantName: string;
   tableNumber: string;
-}
-
-export interface OrderResponse {
-  message: string;
-}
-
-export interface FetchOrder {
-  __v: number;
-  _id: string;
-  createdAt: string;
-  menu: MenuItem[];
-  orderId: string;
-  paid: "Paid" | "Unpaid";
-  reservationId: string;
-  restaurantId: string;
-  status: "placed" | "served" | "ready_to_pay" | "completed" | "cancelled";
-  tableNumber: string;
-  takenBy: string;
-  userId: string;
   restaurantName: string;
-  totalAmount: number;
-}
-
-export interface MenuResponse {
-  breakfast: MenuItem[];
-  lunch: MenuItem[];
-  dinner: MenuItem[];
-}
-
-export interface CompleteOrder {
-  status: string;
-  paymentMethod: string;
 }

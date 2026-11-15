@@ -1,156 +1,155 @@
 import { Ionicons } from "@expo/vector-icons";
+import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { Tabs, useRouter } from "expo-router";
 import React from "react";
-import {
-  Platform,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-// import { useCartStore } from "@/store/useOrderStore";
+import { tapFeedback } from "@/components/ui/Button";
+import { Txt } from "@/components/ui/Txt";
+import { palette, shadow } from "@/constants/theme";
+import { useOrders } from "@/hooks/queries";
+import { isOpenOrder } from "@/lib/format";
 
-const CustomTabBar = ({ state, descriptors, navigation }: any) => {
+type IconName = keyof typeof Ionicons.glyphMap;
+
+const TABS: Record<string, { label: string; icon: IconName; active: IconName }> = {
+  index: { label: "Home", icon: "home-outline", active: "home" },
+  bookings: { label: "Bookings", icon: "calendar-outline", active: "calendar" },
+  wishlist: { label: "Saved", icon: "heart-outline", active: "heart" },
+  settings: { label: "Profile", icon: "person-outline", active: "person" },
+};
+
+/** A floating pill of tabs with a raised button in the middle for orders. */
+function PillTabBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  // const cart = useCartStore((state) => state.items);
+  const { data: orders } = useOrders();
+  const openOrders = orders?.filter((o) => isOpenOrder(o.status)).length ?? 0;
 
-  const bottomPadding = Math.max(insets.bottom, 16);
+  const tab = (routeIndex: number) => {
+    const route = state.routes[routeIndex];
+    const meta = TABS[route.name];
+    if (!meta) return null;
+    const focused = state.index === routeIndex;
+    return (
+      <Pressable
+        key={route.key}
+        testID={`tab-${route.name}`}
+        accessibilityRole="tab"
+        accessibilityState={{ selected: focused }}
+        accessibilityLabel={meta.label}
+        onPress={() => {
+          tapFeedback();
+          const event = navigation.emit({ type: "tabPress", target: route.key, canPreventDefault: true });
+          if (!focused && !event.defaultPrevented) navigation.navigate(route.name);
+        }}
+        style={{ flex: 1, alignItems: "center", justifyContent: "center", height: 60 }}
+      >
+        <View
+          style={{
+            width: 46,
+            height: 46,
+            borderRadius: 23,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: focused ? palette.brandTint : "transparent",
+          }}
+        >
+          <Ionicons name={focused ? meta.active : meta.icon} size={22} color={focused ? palette.pine : palette.faint} />
+        </View>
+      </Pressable>
+    );
+  };
 
   return (
     <View
-      className="absolute left-0 right-0 flex-row items-center justify-center px-4 mb-2"
-      style={{ bottom: bottomPadding, backgroundColor: "transparent" }}
+      pointerEvents="box-none"
+      style={{ position: "absolute", left: 20, right: 20, bottom: Math.max(insets.bottom, 12) + 6 }}
     >
       <View
         style={[
-          styles.shadowPremium,
+          shadow.raised,
           {
-            flex: 1,
+            height: 68,
+            borderRadius: 34,
+            backgroundColor: palette.surface,
             flexDirection: "row",
-            backgroundColor: "#FFFFFF",
-            borderRadius: 12,
-            padding: 6,
             alignItems: "center",
-            justifyContent: "space-between",
+            paddingHorizontal: 8,
             borderWidth: 1,
-            borderColor: "#F3F4F6",
-            marginRight: 16,
+            borderColor: palette.line,
           },
         ]}
       >
-        {state.routes.map((route: any, index: number) => {
-          const { options } = descriptors[route.key];
-          const isFocused = state.index === index;
-
-          const onPress = () => {
-            const event = navigation.emit({
-              type: "tabPress",
-              target: route.key,
-              canPreventDefault: true,
-            });
-
-            if (!isFocused && !event.defaultPrevented) {
-              navigation.navigate(route.name);
-            }
-          };
-
-          let iconName: keyof typeof Ionicons.glyphMap = "home";
-          let label = "";
-
-          if (route.name === "index") {
-            iconName = isFocused ? "home" : "home-outline";
-            label = "Home";
-          } else if (route.name === "(toptabs)") {
-            iconName = isFocused ? "calendar" : "calendar-outline";
-            label = "Bookings";
-          } else if (route.name === "wishlist") {
-            iconName = isFocused ? "heart" : "heart-outline";
-            label = "Saved";
-          } else if (route.name === "settings") {
-            iconName = isFocused ? "person" : "person-outline";
-            label = "Profile";
-          }
-
-          return (
-            <TouchableOpacity
-              key={route.key}
-              accessibilityRole="button"
-              accessibilityState={isFocused ? { selected: true } : {}}
-              accessibilityLabel={options.tabBarAccessibilityLabel}
-              onPress={onPress}
-              activeOpacity={0.8}
-              className={`flex-row items-center justify-center rounded-full px-3 py-2.5 ${
-                isFocused ? "bg-teal-50" : "bg-transparent"
-              }`}
-            >
-              <Ionicons
-                name={iconName}
-                size={22}
-                color={isFocused ? "#0d9488" : "#9CA3AF"}
-              />
-              {isFocused && (
-                <Text className="ml-1.5 font-bold text-xs text-teal-700">
-                  {label}
-                </Text>
-              )}
-            </TouchableOpacity>
-          );
-        })}
+        {tab(0)}
+        {tab(1)}
+        <View style={{ width: 72 }} />
+        {tab(2)}
+        {tab(3)}
       </View>
 
-      <TouchableOpacity
-        activeOpacity={0.8}
-        onPress={() => router.navigate("/Order")}
-        className="w-14 h-14 rounded-xl bg-teal-600 items-center justify-center border-2 border-white"
-        style={styles.shadowPremium}
+      <Pressable
+        testID="tab-orders"
+        accessibilityRole="button"
+        accessibilityLabel={openOrders ? `Orders, ${openOrders} in progress` : "Orders"}
+        onPress={() => {
+          tapFeedback();
+          router.push("/Order");
+        }}
+        style={({ pressed }) => [
+          shadow.raised,
+          {
+            position: "absolute",
+            alignSelf: "center",
+            top: -14,
+            width: 64,
+            height: 64,
+            borderRadius: 32,
+            backgroundColor: palette.pine,
+            alignItems: "center",
+            justifyContent: "center",
+            borderWidth: 4,
+            borderColor: palette.canvas,
+            transform: [{ scale: pressed ? 0.95 : 1 }],
+          },
+        ]}
       >
-        {/* {cart?.length > 0 && (
-          <View className="absolute -top-1 -right-1 bg-red-500 h-5 min-w-[20px] rounded-full items-center justify-center px-1 border border-white z-10">
-            <Text className="text-white text-[10px] font-bold leading-none">
-              {cart.length > 9 ? "9+" : cart.length}
-            </Text>
+        <Ionicons name="receipt-outline" size={24} color={palette.white} />
+        {openOrders > 0 && (
+          <View
+            style={{
+              position: "absolute",
+              top: -2,
+              right: -2,
+              minWidth: 20,
+              height: 20,
+              borderRadius: 10,
+              paddingHorizontal: 5,
+              backgroundColor: palette.amber,
+              borderWidth: 2,
+              borderColor: palette.canvas,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Txt w="bold" size={10} color={palette.ink} style={{ lineHeight: 13 }}>
+              {openOrders > 9 ? "9+" : openOrders}
+            </Txt>
           </View>
-        )} */}
-        <Ionicons
-          name="cart"
-          size={24}
-          color="#FFFFFF"
-          style={{ marginLeft: -2 }}
-        />
-      </TouchableOpacity>
+        )}
+      </Pressable>
     </View>
   );
-};
+}
 
 export default function TabLayout() {
   return (
-    <Tabs
-      tabBar={(props) => <CustomTabBar {...props} />}
-      screenOptions={{ headerShown: false }}
-    >
+    <Tabs tabBar={(props) => <PillTabBar {...props} />} screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: palette.canvas } }}>
       <Tabs.Screen name="index" options={{ title: "Home" }} />
-      <Tabs.Screen name="(toptabs)" options={{ title: "Bookings" }} />
+      <Tabs.Screen name="bookings" options={{ title: "Bookings" }} />
       <Tabs.Screen name="wishlist" options={{ title: "Saved" }} />
       <Tabs.Screen name="settings" options={{ title: "Profile" }} />
     </Tabs>
   );
 }
-
-const styles = StyleSheet.create({
-  shadowPremium: {
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.12,
-        shadowRadius: 12,
-      },
-      android: {
-        elevation: 8,
-      },
-    }),
-  },
-});

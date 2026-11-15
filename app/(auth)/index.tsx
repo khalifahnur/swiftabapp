@@ -1,206 +1,107 @@
-import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Formik } from "formik";
-import React, { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Keyboard,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React from "react";
+import { Pressable, View } from "react-native";
 
-import { useLogin } from "@/hooks/authhooks/authhooks";
+import { loginUser } from "@/api/api";
+import { errorMessage } from "@/api/client";
+import AuthShell from "@/components/Auth/AuthShell";
+import { Button } from "@/components/ui/Button";
+import { Field } from "@/components/ui/Field";
+import { Txt } from "@/components/ui/Txt";
+import { palette } from "@/constants/theme";
+import { useAuthStore } from "@/lib/authStore";
+import { firstName } from "@/lib/format";
 import { useToast } from "@/lib/ToastContext";
 import { loginSchema } from "@/validation/auth/ValidationSchema";
 
-const LoginScreen = () => {
-  const [showPassword, setShowPassword] = useState(false);
+export default function LoginScreen() {
   const router = useRouter();
-  const signInMutation = useLogin();
   const { showToast } = useToast();
+  const signIn = useAuthStore((s) => s.signIn);
 
-  useEffect(() => {
-    if (signInMutation.isSuccess) {
-      showToast("success", "Successfully logged in!");
-
-      const handleLogin = async () => {
-        if (signInMutation.data) {
-          await AsyncStorage.setItem(
-            "userObj",
-            JSON.stringify(signInMutation.data),
-          );
-          router.replace("/(tabs)");
-        }
-      };
-
-      setTimeout(() => {
-        handleLogin();
-      }, 1000);
-    } else if (signInMutation.isError) {
-      showToast("error", signInMutation.error.message);
-    }
-  }, [
-    signInMutation.isSuccess,
-    signInMutation.isError,
-    signInMutation.data,
-    router,
-  ]);
+  const login = useMutation({
+    mutationFn: loginUser,
+    onSuccess: (data) => {
+      if (!data?.user?.userId) {
+        showToast("error", "We could not sign you in. Please try again.");
+        return;
+      }
+      // The signed-in screens replace this one as soon as the session exists.
+      signIn({ token: data.token, user: data.user });
+      showToast("success", `Welcome back, ${firstName(data.user.name)}`);
+    },
+    onError: (error) => showToast("error", errorMessage(error, "We could not sign you in.")),
+  });
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView className="flex-1 bg-white">
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            paddingHorizontal: 24,
-            paddingTop: 40,
-            flexGrow: 1,
-          }}
-        >
-          {/* Header Section */}
-          <View className="mb-10 items-center mt-8">
-            <Text className="text-3xl font-bold text-gray-900 tracking-tight mb-3">
-              Sign In
-            </Text>
-            <Text className="text-sm text-gray-500 font-medium">
-              Hi! Welcome back, you've been missed
-            </Text>
+    <AuthShell
+      title={"Welcome back"}
+      subtitle="Sign in to see your bookings and order ahead."
+      footer={
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Txt color={palette.muted}>New to Swiftab? </Txt>
+          <Pressable accessibilityRole="link" hitSlop={8} onPress={() => router.push("/(auth)/signup")}>
+            <Txt w="bold" color={palette.brandDark}>
+              Create an account
+            </Txt>
+          </Pressable>
+        </View>
+      }
+    >
+      <Formik
+        initialValues={{ email: "", password: "" }}
+        validationSchema={loginSchema}
+        onSubmit={(values) => login.mutate(values)}
+      >
+        {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+          <View>
+            <Field
+              label="Email"
+              icon="mail-outline"
+              placeholder="you@example.com"
+              value={values.email}
+              onChangeText={handleChange("email")}
+              onBlur={handleBlur("email")}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoComplete="email"
+              textContentType="emailAddress"
+              returnKeyType="next"
+              error={touched.email && errors.email}
+              testID="login-email"
+            />
+            <Field
+              label="Password"
+              icon="lock-closed-outline"
+              placeholder="Your password"
+              value={values.password}
+              onChangeText={handleChange("password")}
+              onBlur={handleBlur("password")}
+              password
+              autoCapitalize="none"
+              autoComplete="current-password"
+              textContentType="password"
+              returnKeyType="go"
+              onSubmitEditing={() => handleSubmit()}
+              error={touched.password && errors.password}
+              testID="login-password"
+            />
+            <Pressable
+              accessibilityRole="link"
+              hitSlop={8}
+              onPress={() => router.push("/(auth)/forgotpassword")}
+              style={{ alignSelf: "flex-end", marginTop: -4, marginBottom: 22 }}
+            >
+              <Txt w="semibold" size={13} color={palette.brandDark}>
+                Forgot password?
+              </Txt>
+            </Pressable>
+            <Button label="Sign in" loading={login.isPending} onPress={() => handleSubmit()} testID="login-submit" />
           </View>
-
-          {/* Form Section */}
-          <Formik
-            initialValues={{ email: "", password: "" }}
-            validationSchema={loginSchema}
-            onSubmit={(values) => {
-              signInMutation.mutate(values);
-            }}
-          >
-            {({
-              handleChange,
-              handleBlur,
-              handleSubmit,
-              values,
-              errors,
-              touched,
-            }) => (
-              <View className="space-y-5">
-                {/* Email Input */}
-                <View>
-                  <Text className="text-sm font-semibold text-gray-800 mb-2">
-                    Email
-                  </Text>
-                  <TextInput
-                    placeholder="example@gmail.com"
-                    placeholderTextColor="#9CA3AF"
-                    value={values.email}
-                    onChangeText={handleChange("email")}
-                    onBlur={handleBlur("email")}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    className={`bg-gray-100 rounded-2xl px-4 h-14 text-base text-gray-900 border ${
-                      errors.email && touched.email
-                        ? "border-red-500"
-                        : "border-transparent"
-                    }`}
-                  />
-                  {errors.email && touched.email && (
-                    <Text className="text-red-500 text-xs mt-1.5 ml-1">
-                      {errors.email}
-                    </Text>
-                  )}
-                </View>
-
-                {/* Password Input */}
-                <View>
-                  <Text className="text-sm font-semibold text-gray-800 mb-2">
-                    Password
-                  </Text>
-                  <View
-                    className={`flex-row items-center bg-gray-100 rounded-2xl pr-4 h-14 border ${
-                      errors.password && touched.password
-                        ? "border-red-500"
-                        : "border-transparent"
-                    }`}
-                  >
-                    <TextInput
-                      placeholder="••••••••••••••••"
-                      placeholderTextColor="#9CA3AF"
-                      value={values.password}
-                      onChangeText={handleChange("password")}
-                      onBlur={handleBlur("password")}
-                      secureTextEntry={!showPassword}
-                      className="flex-1 px-4 h-full text-base text-gray-900"
-                    />
-                    <TouchableOpacity
-                      onPress={() => setShowPassword(!showPassword)}
-                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                    >
-                      <Ionicons
-                        name={showPassword ? "eye-outline" : "eye-off-outline"}
-                        size={22}
-                        color="#6B7280"
-                      />
-                    </TouchableOpacity>
-                  </View>
-                  {errors.password && touched.password && (
-                    <Text className="text-red-500 text-xs mt-1.5 ml-1">
-                      {errors.password}
-                    </Text>
-                  )}
-                </View>
-
-                {/* Forgot Password */}
-                <TouchableOpacity
-                  onPress={() => router.push("/(auth)/forgotpassword")}
-                  className="mt-1 mb-2"
-                >
-                  <Text className="text-right text-teal-600 font-semibold text-sm underline">
-                    Forgot Password?
-                  </Text>
-                </TouchableOpacity>
-
-                {/* Submit Button */}
-                <TouchableOpacity
-                  className={`rounded-full h-14 justify-center items-center shadow-sm mt-2 ${
-                    signInMutation.isPending ? "bg-teal-400" : "bg-teal-600"
-                  }`}
-                  onPress={() => handleSubmit()}
-                  disabled={signInMutation.isPending}
-                >
-                  {signInMutation.isPending ? (
-                    <ActivityIndicator color="#FFF" />
-                  ) : (
-                    <Text className="text-white text-lg font-semibold">
-                      Sign In
-                    </Text>
-                  )}
-                </TouchableOpacity>
-              </View>
-            )}
-          </Formik>
-
-          {/* Bottom Sign Up Link */}
-          <View className="flex-row justify-center items-center mt-auto pb-8 pt-10">
-            <Text className="text-gray-600 font-medium text-sm">
-              Don't have an account?{" "}
-            </Text>
-            <TouchableOpacity onPress={() => router.navigate("/(auth)/signup")}>
-              <Text className="text-teal-600 font-bold text-sm underline">
-                Sign Up
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </TouchableWithoutFeedback>
+        )}
+      </Formik>
+    </AuthShell>
   );
-};
-
-export default LoginScreen;
+}

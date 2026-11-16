@@ -73,7 +73,8 @@ export default function PaymentSheet({ order, onClose }: { order: Order | null; 
               key={option.key}
               testID={`pay-${option.key}`}
               accessibilityRole="radio"
-              accessibilityState={{ selected }}
+              accessibilityState={{ checked: selected }}
+              aria-checked={selected}
               accessibilityLabel={option.label}
               onPress={() => {
                 tapFeedback();

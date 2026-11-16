@@ -2,54 +2,46 @@ import React, { useState } from "react";
 import { View } from "react-native";
 import PhoneInput, { ICountry } from "react-native-international-phone-number";
 
-interface PhoneNumberInpProps {
-  onPhoneNumberChange: (phoneNumber: string) => void;
-}
+import { fonts, palette } from "@/constants/theme";
 
-export default function PhoneNumberInp({
-  onPhoneNumberChange,
-}: PhoneNumberInpProps) {
-  const [selectedCountry, setSelectedCountry] = useState<null | ICountry>(null);
-  const [inputValue, setInputValue] = useState<string>("");
+/**
+ * Phone entry with a country picker. Reports the number in international
+ * form ("+254712345678") so the restaurant can call it as written.
+ */
+export default function PhoneNumberInp({ onPhoneNumberChange }: { onPhoneNumberChange: (phoneNumber: string) => void }) {
+  const [country, setCountry] = useState<ICountry | null>(null);
+  const [value, setValue] = useState("");
 
-  function handleInputValue(phoneNumber: string) {
-    setInputValue(phoneNumber);
-    onPhoneNumberChange(phoneNumber);
-  }
-
-  function handleSelectedCountry(country: ICountry) {
-    setSelectedCountry(country);
-  }
+  const report = (local: string, selected: ICountry | null) => {
+    const digits = local.replace(/\D/g, "").replace(/^0+/, "");
+    // The library splits a dial code into a root and suffixes ("+2" and "54").
+    const idd = selected?.idd;
+    const code = idd ? `${idd.root}${idd.suffixes?.length === 1 ? idd.suffixes[0] : ""}` : "+254";
+    onPhoneNumberChange(digits ? `${code}${digits}` : "");
+  };
 
   return (
-    <View>
+    <View style={{ flex: 1 }}>
       <PhoneInput
-        value={inputValue}
-        onChangePhoneNumber={handleInputValue}
-        selectedCountry={selectedCountry}
-        onChangeSelectedCountry={handleSelectedCountry}
+        value={value}
+        onChangePhoneNumber={(next) => {
+          setValue(next);
+          report(next, country);
+        }}
+        selectedCountry={country}
+        onChangeSelectedCountry={(next) => {
+          setCountry(next);
+          report(value, next);
+        }}
         defaultCountry="KE"
+        placeholder="712 345 678"
         phoneInputStyles={{
-          container: {
-            borderWidth: 0,
-            backgroundColor: "transparent", // Ensures it uses the gray background from the parent
-            height: 52, // Sized slightly under the parent's 56px (h-14) to prevent overlap
-          },
-          flagContainer: {
-            backgroundColor: "transparent",
-            justifyContent: "center",
-          },
-          caret: {
-            color: "#6B7280",
-            fontSize: 16,
-          },
-          divider: {
-            backgroundColor: "#D1D5DB", // Slightly darkened to stand out against the gray background
-          },
-          input: {
-            color: "#111827",
-            fontSize: 16,
-          },
+          container: { borderWidth: 0, backgroundColor: "transparent", height: 50 },
+          flagContainer: { backgroundColor: "transparent", justifyContent: "center", paddingLeft: 0 },
+          caret: { color: palette.muted, fontSize: 14 },
+          divider: { backgroundColor: palette.line },
+          callingCode: { fontFamily: fonts.medium, fontSize: 15, color: palette.ink },
+          input: { fontFamily: fonts.medium, fontSize: 15, color: palette.ink },
         }}
       />
     </View>

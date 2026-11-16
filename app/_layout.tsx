@@ -1,124 +1,146 @@
-import NetworkStatus from "@/components/NetworkStatus";
-import { color } from "@/constants/Colors";
-import { useAppPermissions } from "@/hooks/usePermissionHook";
-import { useAuthStore } from "@/lib/authStore";
-import { ToastProvider } from "@/lib/ToastContext";
-import { Store } from "@/redux/store/Store";
 import {
   PlusJakartaSans_400Regular,
   PlusJakartaSans_500Medium,
   PlusJakartaSans_600SemiBold,
   PlusJakartaSans_700Bold,
+  PlusJakartaSans_800ExtraBold,
   useFonts,
 } from "@expo-google-fonts/plus-jakarta-sans";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Stack } from "expo-router";
+import NetInfo from "@react-native-community/netinfo";
+import { focusManager, onlineManager, QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
-import { View } from "react-native";
+import { AppState, Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Provider } from "react-redux";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+
+import { setSessionExpiredHandler } from "@/api/client";
+import NetworkStatus from "@/components/NetworkStatus";
+import { palette } from "@/constants/theme";
+import { useOrderWatcher } from "@/hooks/useOrderWatcher";
+import { useAuthStore } from "@/lib/authStore";
+import { listenForNotifications, NotificationTarget, registerForPush } from "@/lib/notifications";
+import { toast, ToastProvider } from "@/lib/ToastContext";
+import { usePrefs } from "@/store/usePrefs";
+
 import "../global.css";
 
-SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync().catch(() => undefined);
+
+// Refetch when the app comes back to the foreground or the network returns.
+focusManager.setEventListener((setFocused) => {
+  const subscription = AppState.addEventListener("change", (state) => {
+    if (Platform.OS !== "web") setFocused(state === "active");
+  });
+  return () => subscription.remove();
+});
+onlineManager.setEventListener((setOnline) =>
+  NetInfo.addEventListener((state) => setOnline(state.isConnected !== false)),
+);
+
+/** Work that only makes sense for a signed-in diner: push, deep links, live order updates. */
+function SignedInServices() {
+  const router = useRouter();
+  const client = useQueryClient();
+  const userId = useAuthStore((s) => s.user?.userId);
+  const pushEnabled = usePrefs((s) => s.pushEnabled);
+
+  useOrderWatcher();
+
+  useEffect(() => {
+    if (userId && pushEnabled) registerForPush(userId);
+  }, [userId, pushEnabled]);
+
+  useEffect(() => {
+    const refresh = (target: NotificationTarget) => {
+      if (target.type === "order") client.invalidateQueries({ queryKey: ["orders"] });
+      if (target.type === "reservation") client.invalidateQueries({ queryKey: ["reservations"] });
+    };
+    return listenForNotifications({
+      onReceive: refresh,
+      onOpen: (target) => {
+        refresh(target);
+        if (target.type === "order" && target.orderId) {
+          router.push({ pathname: "/screens/order", params: { id: target.orderId } });
+        } else if (target.type === "order") {
+          router.push("/Order");
+        } else if (target.type === "reservation" || target.type === "reminder") {
+          router.push("/(tabs)/bookings");
+        }
+      },
+    });
+  }, [client, router]);
+
+  return null;
+}
 
 export default function RootLayout() {
-  const [client] = useState(() => new QueryClient());
-  const { isLoggedIn, hasCompletedOnboarding, _hasHydrated } = useAuthStore();
-  const insets = useSafeAreaInsets();
+  const [client] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: { retry: 1, staleTime: 30 * 1000, gcTime: 30 * 60 * 1000 },
+          mutations: { retry: 0 },
+        },
+      }),
+  );
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
+  const hasCompletedOnboarding = useAuthStore((s) => s.hasCompletedOnboarding);
+  const hydrated = useAuthStore((s) => s._hasHydrated);
+
   const [fontsLoaded, fontError] = useFonts({
     "Jakarta-Regular": PlusJakartaSans_400Regular,
     "Jakarta-Medium": PlusJakartaSans_500Medium,
     "Jakarta-SemiBold": PlusJakartaSans_600SemiBold,
     "Jakarta-Bold": PlusJakartaSans_700Bold,
+    "Jakarta-ExtraBold": PlusJakartaSans_800ExtraBold,
   });
+  const ready = hydrated && (fontsLoaded || Boolean(fontError));
 
   useEffect(() => {
-    if (_hasHydrated || fontsLoaded || fontError) {
-      SplashScreen.hideAsync();
-    }
-  }, [_hasHydrated, fontsLoaded, fontError]);
+    if (ready) SplashScreen.hideAsync().catch(() => undefined);
+  }, [ready]);
 
-  if (!_hasHydrated && !fontsLoaded && !fontError) {
-    return null;
-  }
+  // When the API no longer accepts the session, return to sign-in once.
+  useEffect(() => {
+    setSessionExpiredHandler(() => {
+      if (!useAuthStore.getState().isLoggedIn) return;
+      useAuthStore.getState().logOut();
+      client.clear();
+      toast.info("Your session has ended. Please sign in again.");
+    });
+    return () => setSessionExpiredHandler(null);
+  }, [client]);
 
-  useAppPermissions();
+  if (!ready) return null;
 
   return (
-    <Provider store={Store}>
-      <QueryClientProvider client={client}>
-        <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: palette.canvas }}>
+      <SafeAreaProvider>
+        <QueryClientProvider client={client}>
           <ToastProvider>
-            <>
-              <View
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: insets.top,
-                  backgroundColor: color.green,
-                  zIndex: 9999,
-                }}
-              />
-
-              <View style={{ flex: 1 }}>
-                <Stack>
-                  <Stack.Protected guard={!hasCompletedOnboarding}>
-                    <Stack.Screen
-                      name="OnboardScreen"
-                      options={{ headerShown: false }}
-                    />
-                  </Stack.Protected>
-                  <Stack.Protected guard={isLoggedIn}>
-                    <Stack.Screen
-                      name="(tabs)"
-                      options={{ headerShown: false }}
-                    />
-                    <Stack.Screen
-                      name="screens"
-                      options={{ headerShown: false }}
-                    />
-                    <Stack.Screen
-                      name="modal"
-                      options={{
-                        presentation: "modal",
-                        title: "Pre-Order",
-                        headerShown: false,
-                      }}
-                    />
-                    <Stack.Screen
-                      name="Order"
-                      options={{
-                        // presentation: "modal",
-                        title: "Orders",
-                        headerShown: false,
-                      }}
-                    />
-                  </Stack.Protected>
-                  <Stack.Protected
-                    guard={!isLoggedIn && hasCompletedOnboarding}
-                  >
-                    <Stack.Screen
-                      name="(auth)"
-                      options={{ headerShown: false }}
-                    />
-                  </Stack.Protected>
-                </Stack>
-                <StatusBar
-                  style="light"
-                  translucent={false}
-                  backgroundColor={color.green}
-                />
-                <NetworkStatus />
-              </View>
-            </>
+            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: palette.canvas } }}>
+              <Stack.Protected guard={!hasCompletedOnboarding}>
+                <Stack.Screen name="OnboardScreen" options={{ animation: "fade" }} />
+              </Stack.Protected>
+              <Stack.Protected guard={isLoggedIn && hasCompletedOnboarding}>
+                <Stack.Screen name="(tabs)" />
+                <Stack.Screen name="screens" />
+                <Stack.Screen name="modal" options={{ presentation: "modal", animation: "slide_from_bottom" }} />
+                <Stack.Screen name="Order" />
+              </Stack.Protected>
+              <Stack.Protected guard={!isLoggedIn && hasCompletedOnboarding}>
+                <Stack.Screen name="(auth)" options={{ animation: "fade" }} />
+              </Stack.Protected>
+            </Stack>
+            {isLoggedIn && <SignedInServices />}
+            <NetworkStatus />
+            <StatusBar style="dark" />
           </ToastProvider>
-        </GestureHandlerRootView>
-      </QueryClientProvider>
-    </Provider>
+        </QueryClientProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }

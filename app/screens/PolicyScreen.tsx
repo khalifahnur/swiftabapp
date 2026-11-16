@@ -1,18 +1,14 @@
-import { color } from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useMemo } from "react";
-import {
-  Alert,
-  Linking,
-  ScrollView,
-  StatusBar,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useLocalSearchParams } from "expo-router";
+import React, { useState } from "react";
+import { Linking, ScrollView, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { Card, ScreenHeader } from "@/components/ui/Bits";
+import { Button } from "@/components/ui/Button";
+import { ConfirmDialog } from "@/components/ui/Sheet";
+import { Txt } from "@/components/ui/Txt";
+import { palette } from "@/constants/theme";
 
 const policies = {
   privacy: `Swiftab values your privacy and is committed to protecting your personal data.\n\n**1. Information We Collect**\n- Name, email, phone number, and payment details (if applicable).\n- Interaction with the app, device information, and location data (if enabled).\n\n**2. How We Use Your Information**\n- To process and manage reservations.\n- To improve app functionality and user experience.\n- To send notifications and updates.\n- To ensure security and prevent fraud.\n\n**3. Sharing of Information**\n- We do not sell or rent your data but may share it with service providers for payments and support.\n- Law enforcement when required by law.\n\n**4. Data Security**\n- Encryption and secure protocols protect your data.\n\n**5. User Rights**\n- Access, update, or request deletion of your information.\n- Opt out of certain data processing.\n\n**6. Account Deletion**\n- You have the right to permanently delete your Swiftab account and associated personal data at any time.\n- To initiate this process, use the deletion option below. Please note that certain transactional data may be retained temporarily for legal and compliance reasons.\n\n**7. Changes to Privacy Policy**\n- Updates will be communicated via the app.`,
@@ -22,157 +18,96 @@ const policies = {
   about: `Swiftab is a modern reservation platform designed to streamline bookings for various services.\n\nOur mission is to provide users with a seamless experience in scheduling and managing reservations while ensuring reliability and convenience.`,
 };
 
+const TITLES: Record<string, { title: string; lead: string }> = {
+  privacy: { title: "Privacy Policy", lead: "Our commitment to your privacy" },
+  terms: { title: "Terms & Conditions", lead: "Terms of service agreement" },
+  about: { title: "About Swiftab", lead: "About our service" },
+};
+
+/** Renders the simple markup the policies are written in: **headings**, - bullets and paragraphs. */
+function PolicyText({ content }: { content: string }) {
+  return (
+    <View>
+      {content.split("\n").map((line, index) => {
+        if (line.startsWith("**")) {
+          return (
+            <Txt key={index} w="bold" size={15} style={{ marginTop: 10, marginBottom: 8 }}>
+              {line.replace(/\*\*/g, "")}
+            </Txt>
+          );
+        }
+        if (line.startsWith("-")) {
+          return (
+            <View key={index} style={{ flexDirection: "row", marginBottom: 6, paddingLeft: 4 }}>
+              <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: palette.brand, marginTop: 8, marginRight: 10 }} />
+              <Txt size={14} color={palette.body} style={{ flex: 1, lineHeight: 21 }}>
+                {line.substring(2)}
+              </Txt>
+            </View>
+          );
+        }
+        if (line.trim() === "") return <View key={index} style={{ height: 8 }} />;
+        return (
+          <Txt key={index} size={14} color={palette.body} style={{ lineHeight: 21, marginBottom: 6 }}>
+            {line}
+          </Txt>
+        );
+      })}
+    </View>
+  );
+}
+
 export default function PolicyScreen() {
   const { type } = useLocalSearchParams<{ type: string }>();
-  const router = useRouter();
-  const content = policies[type as keyof typeof policies] || "Policy not found";
-
-  const formattedContent = useMemo(() => {
-    const lines = content.split("\n");
-    const formatted: JSX.Element[] = [];
-
-    lines.forEach((line, index) => {
-      if (line.startsWith("**")) {
-        const title = line.replace(/\*\*/g, "");
-        formatted.push(
-          <Text
-            key={`title-${index}`}
-            className="text-base font-bold text-gray-800 mb-3 mt-2"
-          >
-            {title}
-          </Text>,
-        );
-      } else if (line.startsWith("-")) {
-        const bulletText = line.substring(2);
-        formatted.push(
-          <View
-            key={`bullet-${index}`}
-            className="flex-row items-start mb-2 pl-2"
-          >
-            <View className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-2 mr-3" />
-            <Text className="flex-1 text-[15px] leading-relaxed text-gray-600">
-              {bulletText}
-            </Text>
-          </View>,
-        );
-      } else if (line.trim() !== "") {
-        formatted.push(
-          <Text
-            key={`para-${index}`}
-            className="text-[15px] leading-relaxed text-gray-600 mb-2"
-          >
-            {line}
-          </Text>,
-        );
-      } else if (line.trim() === "") {
-        formatted.push(<View key={`space-${index}`} className="h-3" />);
-      }
-    });
-
-    return formatted;
-  }, [content]);
-
-  const getPageColor = () => {
-    const baseColor = color.green || "#2ecc71";
-    return [baseColor, `${baseColor}E6`];
-  };
-
-  const handleDeleteRequest = () => {
-    Alert.alert(
-      "Delete Account",
-      "Are you sure you want to delete your account? You will be redirected to our web portal to complete this request.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Proceed",
-          style: "destructive",
-          onPress: () =>
-            Linking.openURL("https://www.swiftab.co.ke/data-deletion"),
-        },
-      ],
-    );
-  };
-
-  const primaryColor = getPageColor()[0];
+  const insets = useSafeAreaInsets();
+  const [asking, setAsking] = useState(false);
+  const key = type && type in policies ? (type as keyof typeof policies) : "about";
+  const meta = TITLES[key];
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <StatusBar barStyle="light-content" backgroundColor={primaryColor} />
+    <View style={{ flex: 1, backgroundColor: palette.canvas }}>
+      <ScreenHeader title={meta.title} />
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 32, gap: 16 }}>
+        <Card>
+          <Txt w="bold" size={16} color={palette.brandDark} style={{ marginBottom: 10 }}>
+            {meta.lead}
+          </Txt>
+          <PolicyText content={policies[key]} />
+          <Txt size={12} color={palette.muted} style={{ marginTop: 14 }}>
+            Last updated: January 25, 2026
+          </Txt>
+        </Card>
 
-      <LinearGradient
-        colors={getPageColor()}
-        className="pt-4 pb-6 px-5 rounded-b-[24px] flex-row items-center justify-between"
-      >
-        <TouchableOpacity
-          className="p-2 rounded-xl bg-white/20"
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={22} color="#fff" />
-        </TouchableOpacity>
-
-        <View className="flex-row items-center">
-          <Text className="text-xl font-bold text-white">
-            {type === "privacy"
-              ? "Privacy Policy"
-              : type === "terms"
-                ? "Terms & Conditions"
-                : "About Swiftab"}
-          </Text>
-        </View>
-
-        <View className="w-[38px]" />
-      </LinearGradient>
-
-      <ScrollView className="flex-1 p-5" showsVerticalScrollIndicator={false}>
-        <View className="bg-white rounded-2xl shadow-sm mb-6 elevation-md">
-          <View className="flex-row items-center p-5">
-            <Text
-              className="text-[17px] font-semibold ml-3"
-              style={{ color: primaryColor }}
-            >
-              {type === "privacy"
-                ? "Our Commitment to Your Privacy"
-                : type === "terms"
-                  ? "Terms of Service Agreement"
-                  : "About Our Service"}
-            </Text>
+        <Card style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+          <Ionicons name="mail-outline" size={20} color={palette.brand} />
+          <View style={{ flex: 1 }}>
+            <Txt w="semibold" size={14}>
+              Have questions?
+            </Txt>
+            <Txt size={13} color={palette.muted}>
+              support@swiftab.co.ke
+            </Txt>
           </View>
+        </Card>
 
-          <View className="h-px bg-gray-100 mx-5" />
-
-          <View className="p-5">{formattedContent}</View>
-
-          <View className="p-4 border-t border-gray-50 items-center">
-            <Text className="text-[13px] text-gray-400">
-              Last updated: January 25, 2026
-            </Text>
-          </View>
-        </View>
-
-        <View className="items-center mb-10 space-y-4">
-          <View className="items-center">
-            <Text className="text-base font-semibold text-gray-500 mb-3">
-              Have Questions? support@swiftab.co.ke
-            </Text>
-          </View>
-          {type === "privacy" && (
-            <View className="items-center w-full mt-6 pt-6 border-t border-gray-200">
-              <Text className="text-sm font-semibold text-gray-500 mb-3">
-                Data Management
-              </Text>
-              <TouchableOpacity
-                onPress={handleDeleteRequest}
-                className="flex-row items-center py-3 px-5 rounded-xl bg-red-50 border border-red-200 w-[80%] justify-center"
-              >
-                <Ionicons name="trash-outline" size={18} color="#ef4444" />
-                <Text className="text-red-500 text-sm font-semibold ml-2">
-                  Request Account Deletion
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
+        {key === "privacy" && (
+          <Button label="Request account deletion" variant="danger" icon="trash-outline" onPress={() => setAsking(true)} />
+        )}
       </ScrollView>
-    </SafeAreaView>
+
+      <ConfirmDialog
+        visible={asking}
+        title="Delete your account?"
+        message="You will be taken to our website to complete this request."
+        confirmLabel="Continue"
+        cancelLabel="Not now"
+        destructive
+        onConfirm={() => {
+          setAsking(false);
+          Linking.openURL("https://www.swiftab.co.ke/data-deletion").catch(() => undefined);
+        }}
+        onCancel={() => setAsking(false)}
+      />
+    </View>
   );
 }

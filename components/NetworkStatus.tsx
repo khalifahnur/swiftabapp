@@ -1,59 +1,49 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import NetInfo from "@react-native-community/netinfo";
 import React, { useEffect, useState } from "react";
-import LottieView from "lottie-react-native";
-import {
-  setupOnlineManager,
-  useOnlineManager,
-} from "@/hooks/tanhooks/useOnlineManager";
+import { View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { palette } from "@/constants/theme";
+
+import { Txt } from "./ui/Txt";
+
+/** A slim banner while the phone is offline. The app stays usable with what it has cached. */
 export default function NetworkStatus() {
-  const [isOffline, setIsOffline] = useState(false);
+  const insets = useSafeAreaInsets();
+  const [offline, setOffline] = useState(false);
 
-  useEffect(() => {
-    setupOnlineManager();
-  }, []);
+  useEffect(
+    () =>
+      NetInfo.addEventListener((state) => {
+        setOffline(state.isConnected === false || state.isInternetReachable === false);
+      }),
+    [],
+  );
 
-  const isOnline = useOnlineManager()
-  
-  useEffect(() => {
-    setIsOffline(!isOnline);
-  }, [isOnline]);
-
-  if (!isOffline) return null;
-
+  if (!offline) return null;
   return (
-    <View style={styles.container}>
-      <LottieView
-        source={require("@/assets/images/lottie/nowifi.json")}
-        autoPlay
-        loop
-        style={styles.animation}
-      />
-      <Text style={styles.text}>No Internet Connection</Text>
+    <View
+      accessibilityRole="alert"
+      style={{
+        position: "absolute",
+        left: 16,
+        right: 16,
+        bottom: insets.bottom + 110,
+        zIndex: 999,
+        backgroundColor: palette.ink,
+        borderRadius: 16,
+        paddingVertical: 12,
+        paddingHorizontal: 14,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+      }}
+    >
+      <Ionicons name="cloud-offline" size={18} color={palette.amber} />
+      <Txt w="medium" size={13} color={palette.white} style={{ flex: 1 }}>
+        You are offline. Showing what was loaded earlier.
+      </Txt>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    bottom: 0,
-    right:0,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    padding: 10,
-    zIndex: 999,
-  },
-  animation: {
-    width: 100,
-    height: 100,
-  },
-  text: {
-    marginTop: 10,
-    color: "#d32f2f",
-    fontWeight: "bold",
-  },
-});

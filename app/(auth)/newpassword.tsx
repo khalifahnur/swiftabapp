@@ -1,107 +1,73 @@
-import { color } from "@/constants/Colors";
-import { useNewPassword } from "@/hooks/authhooks/authhooks";
-import { useLocalSearchParams } from "expo-router";
-import React, { useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useMutation } from "@tanstack/react-query";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { Formik } from "formik";
+import React from "react";
+import { View } from "react-native";
 
-const NewPsswdScreen = () => {
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+import { resetPassword } from "@/api/api";
+import { errorMessage } from "@/api/client";
+import AuthShell from "@/components/Auth/AuthShell";
+import { Button } from "@/components/ui/Button";
+import { Field } from "@/components/ui/Field";
+import { useToast } from "@/lib/ToastContext";
+import { newPasswordSchema } from "@/validation/auth/ValidationSchema";
 
-  const newPassword = useNewPassword()
+export default function NewPasswordScreen() {
+  const router = useRouter();
+  const { showToast } = useToast();
+  const { resetToken } = useLocalSearchParams<{ resetToken: string }>();
 
-  const params = useLocalSearchParams();
-    const email = Array.isArray(params.email) ? params.email[0] : params.email;
-
-  const handleResetPsswd = () => {
-    if (email && password) {
-      newPassword.mutate({ email, newPassword: password });
-    }
-  };
+  const reset = useMutation({
+    mutationFn: resetPassword,
+    onSuccess: () => {
+      showToast("success", "Password changed. Sign in with your new password.");
+      router.dismissTo("/(auth)");
+    },
+    onError: (error) => showToast("error", errorMessage(error, "We could not change your password.")),
+  });
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Reset Password</Text>
-      <View style={styles.inputContainer}>
-        <Text style={{textAlign:'center'}}>Please enter your new password</Text>
-        <View>
-          <Text style={styles.labelTxt}>Password</Text>
-          <View style={styles.passwordContainer}>
-            <TextInput
-              placeholder="Must be 8 characters"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-              style={styles.passwordInput}
+    <AuthShell back title="Choose a new password" subtitle="Pick something you have not used here before.">
+      <Formik
+        initialValues={{ password: "", confirmPassword: "" }}
+        validationSchema={newPasswordSchema}
+        onSubmit={({ password }) => {
+          if (!resetToken) {
+            showToast("error", "Your reset session has expired. Request a new code.");
+            return;
+          }
+          reset.mutate({ resetToken, newPassword: password });
+        }}
+      >
+        {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+          <View>
+            <Field
+              label="New password"
+              icon="lock-closed-outline"
+              placeholder="At least 6 characters"
+              value={values.password}
+              onChangeText={handleChange("password")}
+              onBlur={handleBlur("password")}
+              password
+              autoCapitalize="none"
+              autoComplete="new-password"
+              error={touched.password && errors.password}
             />
-            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-              <Text style={styles.eyeIcon}>{showPassword ? "👁" : "👁‍🗨"}</Text>
-            </TouchableOpacity>
+            <Field
+              label="Confirm password"
+              icon="lock-closed-outline"
+              placeholder="Type it again"
+              value={values.confirmPassword}
+              onChangeText={handleChange("confirmPassword")}
+              onBlur={handleBlur("confirmPassword")}
+              password
+              autoCapitalize="none"
+              error={touched.confirmPassword && errors.confirmPassword}
+            />
+            <Button label="Save password" loading={reset.isPending} onPress={() => handleSubmit()} style={{ marginTop: 6 }} />
           </View>
-        </View>
-      </View>
-
-      <TouchableOpacity style={styles.loginButton} onPress={handleResetPsswd}>
-        <Text style={styles.loginButtonText}>Reset Password</Text>
-      </TouchableOpacity>
-
-    </SafeAreaView>
+        )}
+      </Formik>
+    </AuthShell>
   );
-};
-
-export default NewPsswdScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "transparent",
-    padding: 24,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginTop:25,
-  },
-  labelTxt:{
-    fontSize:14,
-    fontWeight:'500',
-    paddingVertical:10,
-  },
-  inputContainer: {
-    marginBottom: 16,
-  },
-  passwordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#D1D5DB",
-    borderRadius: 8,
-  },
-  passwordInput: {
-    flex: 1,
-    padding: 16,
-  },
-  eyeIcon: {
-    paddingRight: 16,
-    fontSize: 20,
-  },
- 
-  loginButton: {
-    backgroundColor: color.green,
-    borderRadius: 8,
-    padding: 16,
-    alignItems: "center",
-  },
-  loginButtonText: {
-    color: "#FFF",
-    fontWeight: "600",
-  },
-});
+}

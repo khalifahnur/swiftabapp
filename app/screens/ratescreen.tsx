@@ -1,226 +1,76 @@
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  TextInput,
-  ScrollView,
-  Alert,
-} from "react-native";
-import Icon from "react-native-vector-icons/Ionicons";
-import { color } from "@/constants/Colors";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-interface RatingScreenProps {
-  restaurantName: string;
-  onSubmitRating: (rating: RestaurantRating) => void;
-  onCancel?: () => void;
-}
+import { errorMessage } from "@/api/client";
+import { ScreenHeader, Stars } from "@/components/ui/Bits";
+import { Button } from "@/components/ui/Button";
+import { Field } from "@/components/ui/Field";
+import { Txt } from "@/components/ui/Txt";
+import { palette, radius } from "@/constants/theme";
+import { useAddReview } from "@/hooks/queries";
+import { useToast } from "@/lib/ToastContext";
 
-interface RestaurantRating {
-  overallRating: number;
-  foodQuality: number;
-  serviceRating: number;
-  ambianceRating: number;
-  comments?: string;
-}
+const WORDS = ["", "Poor", "Fair", "Good", "Very good", "Excellent"];
 
-const RatingScreen: React.FC<RatingScreenProps> = ({
-  restaurantName,
-  onSubmitRating,
-  onCancel,
-}) => {
-  const [overallRating, setOverallRating] = useState(0);
-  const [foodQuality, setFoodQuality] = useState(0);
-  const [serviceRating, setServiceRating] = useState(0);
-  const [ambianceRating, setAmbianceRating] = useState(0);
-  const [comments, setComments] = useState("");
+/** Leave a star rating and a few words about a restaurant. */
+export default function RateScreen() {
+  const { restaurantId, restaurantName } = useLocalSearchParams<{ restaurantId: string; restaurantName: string }>();
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { showToast } = useToast();
+  const review = useAddReview(restaurantId ?? "");
+  const [rating, setRating] = useState(0);
+  const [text, setText] = useState("");
 
-  const renderStars = (rating: number, setRating: (value: number) => void) => {
-    return [1, 2, 3, 4, 5].map((star) => (
-      <TouchableOpacity key={star} onPress={() => setRating(star)}>
-        <Icon
-          name={star <= rating ? "star" : "star-outline"}
-          size={30}
-          color={star <= rating ? "yellow" : color.gray}
-        />
-      </TouchableOpacity>
-    ));
-  };
-
-  const handleSubmit = () => {
-    // Validate that all ratings are filled
-    if (
-      overallRating === 0 ||
-      foodQuality === 0 ||
-      serviceRating === 0 ||
-      ambianceRating === 0
-    ) {
-      Alert.alert(
-        "Incomplete Rating",
-        "Please provide ratings for all categories before submitting."
-      );
-      return;
-    }
-
-    const ratingData: RestaurantRating = {
-      overallRating,
-      foodQuality,
-      serviceRating,
-      ambianceRating,
-      comments: comments.trim() || undefined,
-    };
-
-    onSubmitRating(ratingData);
+  const submit = () => {
+    if (!restaurantId || rating === 0) return;
+    review.mutate(
+      { rating, reviewTxt: text.trim() },
+      {
+        onSuccess: () => {
+          showToast("success", "Thanks! Your review has been posted.");
+          router.back();
+        },
+        onError: (error) => showToast("error", errorMessage(error, "We could not post your review.")),
+      },
+    );
   };
 
   return (
-    
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.contentContainer}
-      >
-        <SafeAreaView>
-        <Text style={styles.title}>
-          Rate Your Experience at {restaurantName}
-        </Text>
-
-        <View style={styles.ratingSection}>
-          <Text style={styles.sectionTitle}>Overall Experience</Text>
-          <View style={styles.starContainer}>
-            {renderStars(overallRating, setOverallRating)}
+    <View style={{ flex: 1, backgroundColor: palette.canvas }}>
+      <ScreenHeader title="Rate your visit" />
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
+        <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 32 }}>
+          <View style={{ alignItems: "center", backgroundColor: palette.surface, borderRadius: radius.xl, padding: 24, borderWidth: 1, borderColor: palette.line, marginBottom: 18 }}>
+            <Txt size={13.5} color={palette.muted}>
+              How was
+            </Txt>
+            <Txt w="extrabold" size={22} center style={{ marginTop: 2, marginBottom: 18 }}>
+              {restaurantName || "the restaurant"}?
+            </Txt>
+            <Stars value={rating} size={40} onChange={setRating} />
+            <Txt w="semibold" size={14} color={rating ? palette.brandDark : palette.muted} style={{ marginTop: 12 }}>
+              {rating ? WORDS[rating] : "Tap a star to rate"}
+            </Txt>
           </View>
-        </View>
 
-        <View style={styles.ratingSection}>
-          <Text style={styles.sectionTitle}>Food Quality</Text>
-          <View style={styles.starContainer}>
-            {renderStars(foodQuality, setFoodQuality)}
-          </View>
-        </View>
-
-        <View style={styles.ratingSection}>
-          <Text style={styles.sectionTitle}>Service</Text>
-          <View style={styles.starContainer}>
-            {renderStars(serviceRating, setServiceRating)}
-          </View>
-        </View>
-
-        <View style={styles.ratingSection}>
-          <Text style={styles.sectionTitle}>Ambiance</Text>
-          <View style={styles.starContainer}>
-            {renderStars(ambianceRating, setAmbianceRating)}
-          </View>
-        </View>
-
-        <View style={styles.ratingSection}>
-          <Text style={styles.sectionTitle}>Additional Comments</Text>
-          <TextInput
-            style={styles.commentInput}
-            placeholder="Share your detailed experience (optional)"
+          <Field
+            label="Tell others about it (optional)"
+            placeholder="What stood out? Food, service, atmosphere…"
+            value={text}
+            onChangeText={(value) => setText(value.slice(0, 500))}
             multiline
-            numberOfLines={4}
-            value={comments}
-            onChangeText={setComments}
+            autoCapitalize="sentences"
+            autoCorrect
+            hint={`${text.length}/500`}
+            testID="review-text"
           />
-        </View>
 
-        <View style={styles.buttonContainer}>
-          {onCancel && (
-            <TouchableOpacity
-              style={[styles.button, styles.cancelButton]}
-              onPress={onCancel}
-            >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-          )}
-          <TouchableOpacity
-            style={[styles.button, styles.submitButton]}
-            onPress={handleSubmit}
-          >
-            <Text style={styles.submitButtonText}>Submit Rating</Text>
-          </TouchableOpacity>
-        </View>
-        </SafeAreaView>
-      </ScrollView>
-    
+          <Button label="Post review" disabled={rating === 0} loading={review.isPending} onPress={submit} testID="review-submit" />
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f9f9f9",
-  },
-  contentContainer: {
-    padding: 20,
-    paddingBottom: 40,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
-    color: "#333",
-  },
-  ratingSection: {
-    marginBottom: 20,
-    backgroundColor: "white",
-    borderRadius: 10,
-    padding: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 10,
-    color: "#333",
-  },
-  starContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  commentInput: {
-    backgroundColor: "#f5f5f5",
-    borderRadius: 10,
-    padding: 10,
-    minHeight: 100,
-    textAlignVertical: "top",
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 20,
-  },
-  button: {
-    flex: 1,
-    padding: 15,
-    borderRadius: 10,
-    alignItems: "center",
-    marginHorizontal: 5,
-  },
-  submitButton: {
-    backgroundColor: color.green,
-  },
-  cancelButton: {
-    backgroundColor: color.gray,
-  },
-  submitButtonText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  cancelButtonText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-});
-
-export default RatingScreen;
+}

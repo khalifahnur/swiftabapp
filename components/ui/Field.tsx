@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Icon, type IconName } from "@/components/ui/Icon";
 import React, { useState } from "react";
 import { Pressable, TextInput, TextInputProps, View } from "react-native";
 
@@ -9,7 +9,7 @@ import { Txt } from "./Txt";
 interface FieldProps extends TextInputProps {
   label?: string;
   error?: string | false | null;
-  icon?: keyof typeof Ionicons.glyphMap;
+  icon?: IconName;
   /** Adds a show/hide toggle. */
   password?: boolean;
   hint?: string;
@@ -30,7 +30,7 @@ export function Field({ label, error, icon, password, hint, children, style, ...
       ) : null}
       <View
         style={{
-          minHeight: 54,
+          minHeight: 48,
           borderRadius: radius.md,
           backgroundColor: palette.surface,
           borderWidth: 1.5,
@@ -40,7 +40,7 @@ export function Field({ label, error, icon, password, hint, children, style, ...
           paddingHorizontal: 14,
         }}
       >
-        {icon && <Ionicons name={icon} size={18} color={palette.muted} style={{ marginRight: 10, marginTop: input.multiline ? 16 : 0 }} />}
+        {icon && <Icon name={icon} size={18} color={palette.muted} style={{ marginRight: 10, marginTop: input.multiline ? 16 : 0 }} />}
         {children ?? (
           <TextInput
             placeholderTextColor={palette.faint}
@@ -59,10 +59,10 @@ export function Field({ label, error, icon, password, hint, children, style, ...
               {
                 flex: 1,
                 fontFamily: fonts.medium,
-                fontSize: 15,
+                fontSize: 14,
                 color: palette.ink,
                 paddingVertical: input.multiline ? 14 : 0,
-                minHeight: input.multiline ? 96 : 50,
+                minHeight: input.multiline ? 88 : 44,
                 textAlignVertical: input.multiline ? "top" : "center",
               },
               style,
@@ -76,7 +76,7 @@ export function Field({ label, error, icon, password, hint, children, style, ...
             hitSlop={10}
             onPress={() => setHidden((v) => !v)}
           >
-            <Ionicons name={hidden ? "eye-off-outline" : "eye-outline"} size={20} color={palette.muted} />
+            <Icon name={hidden ? "eye-off-outline" : "eye-outline"} size={20} color={palette.muted} />
           </Pressable>
         )}
       </View>

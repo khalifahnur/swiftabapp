@@ -1,9 +1,10 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Icon, type IconName } from "@/components/ui/Icon";
 import React, { useState } from "react";
 import { Pressable, View } from "react-native";
 
 import MiniMap from "@/components/Map/MiniMap";
 import { tapFeedback } from "@/components/ui/Button";
+import { Tap } from "@/components/ui/Tap";
 import { Txt } from "@/components/ui/Txt";
 import { palette, radius } from "@/constants/theme";
 import { paymentLabel } from "@/lib/format";
@@ -23,24 +24,25 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function Action({ icon, label, onPress }: { icon: keyof typeof Ionicons.glyphMap; label: string; onPress: () => void }) {
+function Action({ icon, label, onPress }: { icon: IconName; label: string; onPress: () => void }) {
   return (
-    <Pressable
+    <Tap
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={() => {
         tapFeedback();
         onPress();
       }}
-      style={({ pressed }) => ({ flex: 1, alignItems: "center", opacity: pressed ? 0.7 : 1 })}
+      pressedStyle={{ opacity: 0.7 }}
+      style={{ flex: 1, alignItems: "center" }}
     >
       <View style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: palette.brandTint, alignItems: "center", justifyContent: "center" }}>
-        <Ionicons name={icon} size={21} color={palette.pine} />
+        <Icon name={icon} size={21} color={palette.pine} />
       </View>
       <Txt w="medium" size={12} color={palette.body} style={{ marginTop: 6 }}>
         {label}
       </Txt>
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -99,7 +101,7 @@ export default function Overview({ restaurant, promotions }: { restaurant: Resta
                 style={{ flexDirection: "row", gap: 12, padding: 14, borderRadius: radius.lg, backgroundColor: palette.amberTint, alignItems: "center" }}
               >
                 <View style={{ width: 42, height: 42, borderRadius: 21, backgroundColor: palette.amber, alignItems: "center", justifyContent: "center" }}>
-                  <Ionicons name="pricetag" size={18} color={palette.ink} />
+                  <Icon name="pricetag" size={18} color={palette.ink} />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Txt w="bold" size={14.5}>
@@ -178,7 +180,7 @@ export default function Overview({ restaurant, promotions }: { restaurant: Resta
           onPress={() => openDirections(restaurant)}
           style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: 12 }}
         >
-          <Ionicons name="location-outline" size={18} color={palette.brand} />
+          <Icon name="location-outline" size={18} color={palette.brand} />
           <Txt size={14} color={palette.body} style={{ flex: 1 }}>
             {restaurant.location}
           </Txt>

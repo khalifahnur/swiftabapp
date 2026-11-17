@@ -1,4 +1,5 @@
-import { Ionicons } from "@expo/vector-icons";
+import { pushOnce } from "@/lib/nav";
+import { Icon, type IconName } from "@/components/ui/Icon";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Platform, Pressable, View } from "react-native";
@@ -20,10 +21,10 @@ import { useCart } from "@/store/useCart";
 import { usePrefs } from "@/store/usePrefs";
 import type { Reservation } from "@/types";
 
-function Meta({ icon, text }: { icon: keyof typeof Ionicons.glyphMap; text: string }) {
+function Meta({ icon, text }: { icon: IconName; text: string }) {
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-      <Ionicons name={icon} size={14} color={palette.muted} />
+      <Icon name={icon} size={14} color={palette.muted} />
       <Txt size={12.5} color={palette.body}>
         {text}
       </Txt>
@@ -31,7 +32,7 @@ function Meta({ icon, text }: { icon: keyof typeof Ionicons.glyphMap; text: stri
   );
 }
 
-function Quick({ icon, label, onPress, active, testID }: { icon: keyof typeof Ionicons.glyphMap; label: string; onPress: () => void; active?: boolean; testID?: string }) {
+function Quick({ icon, label, onPress, active, testID }: { icon: IconName; label: string; onPress: () => void; active?: boolean; testID?: string }) {
   return (
     <Pressable
       testID={testID}
@@ -54,7 +55,7 @@ function Quick({ icon, label, onPress, active, testID }: { icon: keyof typeof Io
         borderColor: active ? palette.brand : palette.line,
       }}
     >
-      <Ionicons name={icon} size={15} color={active ? palette.brandDark : palette.body} />
+      <Icon name={icon} size={15} color={active ? palette.brandDark : palette.body} />
       <Txt w="semibold" size={12.5} color={active ? palette.brandDark : palette.body}>
         {label}
       </Txt>
@@ -115,7 +116,7 @@ export default function BookingCard({ booking, kind }: { booking: Reservation; k
       reservationId: booking.reservationId,
       tableNumber: booking.table,
     });
-    router.push({ pathname: "/modal", params: { restaurantId: booking.restaurantId } });
+    pushOnce(router, { pathname: "/modal", params: { restaurantId: booking.restaurantId } });
   };
 
   const confirmCancel = () => {
@@ -149,7 +150,7 @@ export default function BookingCard({ booking, kind }: { booking: Reservation; k
             <Pill label={tone.label} fg={tone.fg} bg={tone.bg} />
           </View>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 5, marginTop: 3 }}>
-            <Ionicons name="location-outline" size={13} color={palette.muted} />
+            <Icon name="location-outline" size={13} color={palette.muted} />
             <Txt size={12.5} color={palette.muted} numberOfLines={1} style={{ flex: 1 }}>
               {booking.location}
             </Txt>
@@ -171,7 +172,7 @@ export default function BookingCard({ booking, kind }: { booking: Reservation; k
           backgroundColor: upcoming ? palette.brandTint : palette.canvas,
         }}
       >
-        <Ionicons name="calendar" size={18} color={upcoming ? palette.pine : palette.muted} />
+        <Icon name="calendar" size={18} color={upcoming ? palette.pine : palette.muted} />
         <View style={{ flex: 1, marginLeft: 10 }}>
           <Txt w="bold" size={14} color={upcoming ? palette.pine : palette.ink}>
             {when.format("ddd, D MMM YYYY")}
@@ -200,7 +201,7 @@ export default function BookingCard({ booking, kind }: { booking: Reservation; k
               />
             )}
             <Quick icon="navigate-outline" label="Directions" onPress={() => openDirections(booking)} />
-            {booking.hasOrder && <Quick icon="receipt-outline" label="Track order" onPress={() => router.push("/Order")} testID="track-order" />}
+            {booking.hasOrder && <Quick icon="receipt-outline" label="Track order" onPress={() => pushOnce(router, "/Order")} testID="track-order" />}
           </View>
           <View style={{ flexDirection: "row", gap: 10, marginTop: 12 }}>
             <Button
@@ -225,7 +226,7 @@ export default function BookingCard({ booking, kind }: { booking: Reservation; k
               icon="star-outline"
               style={{ flex: 1 }}
               onPress={() =>
-                router.push({
+                pushOnce(router, {
                   pathname: "/screens/ratescreen",
                   params: { restaurantId: booking.restaurantId, restaurantName: booking.restaurantName },
                 })

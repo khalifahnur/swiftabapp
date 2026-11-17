@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Icon } from "@/components/ui/Icon";
 import * as Haptics from "expo-haptics";
 import React, { useEffect, useState } from "react";
 import { LayoutChangeEvent, Platform, Pressable, View } from "react-native";
@@ -31,7 +31,7 @@ function Chevron({ index, pulse }: { index: number; pulse: SharedValue<number> }
   });
   return (
     <Animated.View style={[style, { marginLeft: index === 0 ? 0 : -9 }]}>
-      <Ionicons name="chevron-forward" size={20} color={palette.white} />
+      <Icon name="chevron-forward" size={20} color={palette.white} />
     </Animated.View>
   );
 }
@@ -141,7 +141,7 @@ export default function SwipeToStart({ label, onComplete }: { label: string; onC
               justifyContent: "center",
             }}
           >
-            <Ionicons name="arrow-forward" size={24} color={palette.pine} />
+            <Icon name="arrow-forward" size={24} color={palette.pine} />
           </Pressable>
         </Animated.View>
       </GestureDetector>

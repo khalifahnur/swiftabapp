@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Icon, type IconName } from "@/components/ui/Icon";
 import * as Haptics from "expo-haptics";
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { Animated, Platform, Pressable, View } from "react-native";
@@ -52,7 +52,7 @@ export const useToast = () => {
   return context;
 };
 
-const LOOK: Record<ToastType, { icon: keyof typeof Ionicons.glyphMap; tint: string }> = {
+const LOOK: Record<ToastType, { icon: IconName; tint: string }> = {
   success: { icon: "checkmark-circle", tint: "#4ADE9B" },
   error: { icon: "alert-circle", tint: "#FF8A8A" },
   info: { icon: "notifications", tint: "#8FD3FF" },
@@ -137,7 +137,7 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
               elevation: 12,
             }}
           >
-            <Ionicons name={look.icon} size={22} color={look.tint} />
+            <Icon name={look.icon} size={22} color={look.tint} />
             <Txt w="medium" size={14} color={palette.white} style={{ flex: 1, marginHorizontal: 10 }}>
               {current.message}
             </Txt>

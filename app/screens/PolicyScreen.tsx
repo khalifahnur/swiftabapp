@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Icon } from "@/components/ui/Icon";
 import { useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import { Linking, ScrollView, View } from "react-native";
@@ -79,7 +79,7 @@ export default function PolicyScreen() {
         </Card>
 
         <Card style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-          <Ionicons name="mail-outline" size={20} color={palette.brand} />
+          <Icon name="mail-outline" size={20} color={palette.brand} />
           <View style={{ flex: 1 }}>
             <Txt w="semibold" size={14}>
               Have questions?

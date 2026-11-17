@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Icon, type IconName } from "@/components/ui/Icon";
 import React, { useEffect, useState } from "react";
 import { Pressable, View } from "react-native";
 
@@ -91,7 +91,7 @@ export default function PaymentSheet({ order, onClose }: { order: Order | null; 
               }}
             >
               <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: `${option.color}1F`, alignItems: "center", justifyContent: "center" }}>
-                <Ionicons name={option.icon as keyof typeof Ionicons.glyphMap} size={20} color={option.color} />
+                <Icon name={option.icon as IconName} size={20} color={option.color} />
               </View>
               <View style={{ flex: 1, marginLeft: 12 }}>
                 <Txt w="bold" size={15}>
@@ -101,14 +101,14 @@ export default function PaymentSheet({ order, onClose }: { order: Order | null; 
                   {option.hint}
                 </Txt>
               </View>
-              <Ionicons name={selected ? "radio-button-on" : "radio-button-off"} size={22} color={selected ? palette.pine : palette.faint} />
+              <Icon name={selected ? "radio-button-on" : "radio-button-off"} size={22} color={selected ? palette.pine : palette.faint} />
             </Pressable>
           );
         })}
       </View>
       {problem ? (
         <View style={{ flexDirection: "row", gap: 8, alignItems: "center", marginTop: 12, padding: 12, borderRadius: radius.md, backgroundColor: palette.dangerTint }}>
-          <Ionicons name="alert-circle" size={18} color={palette.danger} />
+          <Icon name="alert-circle" size={18} color={palette.danger} />
           <Txt size={12.5} color={palette.danger} style={{ flex: 1 }}>
             {problem}
           </Txt>

@@ -1,4 +1,5 @@
-import { Ionicons } from "@expo/vector-icons";
+import { pushOnce } from "@/lib/nav";
+import { Icon } from "@/components/ui/Icon";
 import { useRouter } from "expo-router";
 import moment from "moment";
 import React, { useMemo, useState } from "react";
@@ -100,13 +101,13 @@ export default function HomeScreen() {
           label={unread ? `Notifications, ${unread} unread` : "Notifications"}
           bordered
           badge={unread > 0 ? unread : false}
-          onPress={() => router.push("/screens/notifications")}
+          onPress={() => pushOnce(router, "/screens/notifications")}
           testID="open-notifications"
         />
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Your profile"
-          onPress={() => router.push("/(tabs)/settings")}
+          onPress={() => pushOnce(router, "/(tabs)/settings")}
           style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: palette.pine, alignItems: "center", justifyContent: "center", marginLeft: 10 }}
         >
           <Txt w="bold" size={15} color={palette.white}>
@@ -122,13 +123,13 @@ export default function HomeScreen() {
         onPress={() => location.load(true)}
         style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 20, marginTop: 10 }}
       >
-        <Ionicons name="location" size={15} color={palette.brand} />
+        <Icon name="location" size={15} color={palette.brand} />
         <Txt w="medium" size={13} color={palette.body} numberOfLines={1} style={{ flexShrink: 1 }}>
           {location.status === "loading"
             ? "Finding where you are…"
             : location.label || (location.status === "denied" ? "Turn on location to see what is near you" : "Nairobi, Kenya")}
         </Txt>
-        <Ionicons name="chevron-down" size={13} color={palette.muted} />
+        <Icon name="chevron-down" size={13} color={palette.muted} />
       </Pressable>
 
       {/* Search and filters */}
@@ -137,10 +138,10 @@ export default function HomeScreen() {
           testID="open-search"
           accessibilityRole="search"
           accessibilityLabel="Search restaurants"
-          onPress={() => router.push("/screens/search")}
+          onPress={() => pushOnce(router, "/screens/search")}
           style={{
             flex: 1,
-            height: 54,
+            height: 48,
             borderRadius: radius.pill,
             backgroundColor: palette.surface,
             borderWidth: 1,
@@ -151,7 +152,7 @@ export default function HomeScreen() {
             gap: 10,
           }}
         >
-          <Ionicons name="search" size={19} color={palette.muted} />
+          <Icon name="search" size={19} color={palette.muted} />
           <Txt size={14.5} color={palette.faint} numberOfLines={1} style={{ flex: 1 }}>
             Search restaurants
           </Txt>
@@ -162,7 +163,7 @@ export default function HomeScreen() {
           accessibilityLabel={filterCount ? `Filters, ${filterCount} active` : "Filters"}
           onPress={() => setFiltersOpen(true)}
           style={{
-            height: 54,
+            height: 48,
             paddingHorizontal: 18,
             borderRadius: radius.pill,
             backgroundColor: filterCount ? palette.pine : palette.surface,
@@ -173,7 +174,7 @@ export default function HomeScreen() {
             gap: 7,
           }}
         >
-          <Ionicons name="options-outline" size={18} color={filterCount ? palette.white : palette.ink} />
+          <Icon name="options-outline" size={18} color={filterCount ? palette.white : palette.ink} />
           <Txt w="semibold" size={13.5} color={filterCount ? palette.white : palette.ink}>
             {filterCount ? `Filters · ${filterCount}` : "Filters"}
           </Txt>
@@ -186,7 +187,7 @@ export default function HomeScreen() {
           testID="next-booking"
           accessibilityRole="button"
           accessibilityLabel={`Your next booking at ${nextBooking.restaurantName}`}
-          onPress={() => router.push("/(tabs)/bookings")}
+          onPress={() => pushOnce(router, "/(tabs)/bookings")}
           style={[
             shadow.card,
             {
@@ -201,7 +202,7 @@ export default function HomeScreen() {
           ]}
         >
           <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: "rgba(255,255,255,0.14)", alignItems: "center", justifyContent: "center" }}>
-            <Ionicons name="calendar" size={20} color={palette.white} />
+            <Icon name="calendar" size={20} color={palette.white} />
           </View>
           <View style={{ flex: 1, marginHorizontal: 12 }}>
             <Txt w="bold" size={14.5} color={palette.white} numberOfLines={1}>
@@ -211,7 +212,7 @@ export default function HomeScreen() {
               {formatDayTime(nextBooking.bookingFor)} · Table {nextBooking.table}
             </Txt>
           </View>
-          <Ionicons name="chevron-forward" size={18} color={palette.white} />
+          <Icon name="chevron-forward" size={18} color={palette.white} />
         </Pressable>
       )}
 
@@ -237,7 +238,7 @@ export default function HomeScreen() {
                   {r.restaurantName}
                 </Txt>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                  <Ionicons name="star" size={11} color={palette.amber} />
+                  <Icon name="star" size={11} color={palette.amber} />
                   <Txt size={12} color={palette.muted}>
                     {r.rate > 0 ? r.rate.toFixed(1) : "New"}
                   </Txt>

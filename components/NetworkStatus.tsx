@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Icon } from "@/components/ui/Icon";
 import NetInfo from "@react-native-community/netinfo";
 import React, { useEffect, useState } from "react";
 import { View } from "react-native";
@@ -40,7 +40,7 @@ export default function NetworkStatus() {
         gap: 10,
       }}
     >
-      <Ionicons name="cloud-offline" size={18} color={palette.amber} />
+      <Icon name="cloud-offline" size={18} color={palette.amber} />
       <Txt w="medium" size={13} color={palette.white} style={{ flex: 1 }}>
         You are offline. Showing what was loaded earlier.
       </Txt>

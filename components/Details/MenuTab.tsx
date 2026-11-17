@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Icon } from "@/components/ui/Icon";
 import React, { useState } from "react";
 import { ScrollView, View } from "react-native";
 
@@ -44,7 +44,7 @@ export function DishRow({ item, right }: { item: MenuItem; right?: React.ReactNo
             </Txt>
           ) : item.prepTime ? (
             <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
-              <Ionicons name="time-outline" size={12} color={palette.muted} />
+              <Icon name="time-outline" size={12} color={palette.muted} />
               <Txt size={11.5} color={palette.muted}>
                 {item.prepTime} min
               </Txt>
@@ -103,7 +103,7 @@ export default function MenuTab({ restaurantId }: { restaurantId: string }) {
         ))}
       </View>
       <View style={{ flexDirection: "row", gap: 8, alignItems: "center", marginTop: 16, padding: 12, borderRadius: radius.md, backgroundColor: palette.brandTint }}>
-        <Ionicons name="information-circle-outline" size={18} color={palette.brandDark} />
+        <Icon name="information-circle-outline" size={18} color={palette.brandDark} />
         <Txt size={12.5} color={palette.brandDark} style={{ flex: 1 }}>
           Book a table first, then order ahead from your booking so food is ready when you sit down.
         </Txt>

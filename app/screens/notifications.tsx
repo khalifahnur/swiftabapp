@@ -1,4 +1,5 @@
-import { Ionicons } from "@expo/vector-icons";
+import { pushOnce } from "@/lib/nav";
+import { Icon, type IconName } from "@/components/ui/Icon";
 import { useFocusEffect, useRouter } from "expo-router";
 import moment from "moment";
 import React, { useCallback } from "react";
@@ -10,7 +11,7 @@ import { Txt } from "@/components/ui/Txt";
 import { palette, radius } from "@/constants/theme";
 import { InboxItem, useInbox } from "@/store/useInbox";
 
-const ICONS: Record<string, { icon: keyof typeof Ionicons.glyphMap; fg: string; bg: string }> = {
+const ICONS: Record<string, { icon: IconName; fg: string; bg: string }> = {
   order: { icon: "receipt-outline", fg: palette.info, bg: palette.infoTint },
   reservation: { icon: "calendar-outline", fg: palette.brandDark, bg: palette.brandTint },
   reminder: { icon: "alarm-outline", fg: "#B26A00", bg: palette.amberTint },
@@ -31,8 +32,8 @@ export default function NotificationsScreen() {
   );
 
   const open = (item: InboxItem) => {
-    if (item.kind === "order" && item.orderId) router.push({ pathname: "/screens/order", params: { id: item.orderId } });
-    else if (item.kind === "order") router.push("/Order");
+    if (item.kind === "order" && item.orderId) pushOnce(router, { pathname: "/screens/order", params: { id: item.orderId } });
+    else if (item.kind === "order") pushOnce(router, "/Order");
     else if (item.kind === "reservation" || item.kind === "reminder") router.navigate("/(tabs)/bookings");
   };
 
@@ -72,7 +73,7 @@ export default function NotificationsScreen() {
               }}
             >
               <View style={{ width: 42, height: 42, borderRadius: 21, backgroundColor: look.bg, alignItems: "center", justifyContent: "center" }}>
-                <Ionicons name={look.icon} size={19} color={look.fg} />
+                <Icon name={look.icon} size={19} color={look.fg} />
               </View>
               <View style={{ flex: 1, marginLeft: 12 }}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>

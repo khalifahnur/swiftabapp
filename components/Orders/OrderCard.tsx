@@ -1,9 +1,11 @@
-import { Ionicons } from "@expo/vector-icons";
+import { pushOnce } from "@/lib/nav";
+import { Icon } from "@/components/ui/Icon";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 
 import { Picture, Pill } from "@/components/ui/Bits";
+import { Tap } from "@/components/ui/Tap";
 import { Button } from "@/components/ui/Button";
 import { Txt } from "@/components/ui/Txt";
 import { palette, radius, shadow } from "@/constants/theme";
@@ -24,12 +26,13 @@ export default function OrderCard({ order, onPay, onCancel }: { order: Order; on
   const itemCount = lines.reduce((sum, line) => sum + (line.quantity || 1), 0);
 
   return (
-    <Pressable
+    <Tap
       testID={`order-${order._id}`}
       accessibilityRole="button"
       accessibilityLabel={`Order at ${order.restaurantName}, ${tone.label}`}
-      onPress={() => router.push({ pathname: "/screens/order", params: { id: order._id } })}
-      style={({ pressed }) => [shadow.card, { backgroundColor: palette.surface, borderRadius: radius.xl, padding: 16, opacity: pressed ? 0.94 : 1 }]}
+      onPress={() => pushOnce(router, { pathname: "/screens/order", params: { id: order._id } })}
+      pressedStyle={{ opacity: 0.94 }}
+      style={[shadow.card, { backgroundColor: palette.surface, borderRadius: radius.xl, padding: 16 }]}
     >
       <View style={{ flexDirection: "row", alignItems: "center" }}>
         <Picture uri={order.restaurantImage} style={{ width: 48, height: 48, borderRadius: 14 }} />
@@ -48,7 +51,7 @@ export default function OrderCard({ order, onPay, onCancel }: { order: Order; on
         <View style={{ marginTop: 16 }}>
           <TimelineStrip status={order.status} />
           <View style={{ flexDirection: "row", alignItems: "center", gap: 7, marginTop: 10 }}>
-            <Ionicons name="pulse-outline" size={14} color={palette.brand} />
+            <Icon name="pulse-outline" size={14} color={palette.brand} />
             <Txt size={12.5} color={palette.body} style={{ flex: 1 }}>
               {tone.hint}
             </Txt>
@@ -94,10 +97,10 @@ export default function OrderCard({ order, onPay, onCancel }: { order: Order; on
             <Txt w="semibold" size={13} color={palette.brandDark}>
               Receipt
             </Txt>
-            <Ionicons name="chevron-forward" size={14} color={palette.brandDark} />
+            <Icon name="chevron-forward" size={14} color={palette.brandDark} />
           </View>
         )}
       </View>
-    </Pressable>
+    </Tap>
   );
 }

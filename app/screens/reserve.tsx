@@ -1,4 +1,5 @@
-import { Ionicons } from "@expo/vector-icons";
+import { pushOnce } from "@/lib/nav";
+import { Icon } from "@/components/ui/Icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { ScrollView, View } from "react-native";
@@ -75,7 +76,7 @@ export default function ReserveScreen() {
       showToast("error", "Tap a table on the plan to choose it.");
       return;
     }
-    router.push({ pathname: "/screens/confirm", params: { id: restaurant.id } });
+    pushOnce(router, { pathname: "/screens/confirm", params: { id: restaurant.id } });
   };
 
   return (
@@ -132,7 +133,7 @@ export default function ReserveScreen() {
       >
         {step === "table" && (
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 12 }}>
-            <Ionicons name={booking.tableName ? "checkmark-circle" : "hand-left-outline"} size={20} color={booking.tableName ? palette.success : palette.muted} />
+            <Icon name={booking.tableName ? "checkmark-circle" : "hand-left-outline"} size={20} color={booking.tableName ? palette.success : palette.muted} />
             <Txt w={booking.tableName ? "semibold" : "regular"} size={13.5} color={booking.tableName ? palette.ink : palette.muted} style={{ flex: 1 }} testID="table-summary">
               {booking.tableName ? `Table ${booking.tableName} · ${booking.floorName}` : "Tap a table to choose where you will sit"}
             </Txt>

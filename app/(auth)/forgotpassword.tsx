@@ -1,3 +1,4 @@
+import { pushOnce } from "@/lib/nav";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Formik } from "formik";
@@ -20,7 +21,7 @@ export default function ForgotPasswordScreen() {
     mutationFn: forgotPassword,
     onSuccess: (data, email) => {
       showToast("success", "If that address has an account, a 6-digit code is on its way.");
-      router.push({ pathname: "/(auth)/codeverify", params: { email: data?.email || email.trim() } });
+      pushOnce(router, { pathname: "/(auth)/codeverify", params: { email: data?.email || email.trim() } });
     },
     onError: (error) => showToast("error", errorMessage(error, "We could not send the code.")),
   });

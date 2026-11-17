@@ -1,3 +1,4 @@
+import { pushOnce } from "@/lib/nav";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Formik } from "formik";
@@ -42,7 +43,7 @@ export default function LoginScreen() {
       footer={
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <Txt color={palette.muted}>New to Swiftab? </Txt>
-          <Pressable accessibilityRole="link" hitSlop={8} onPress={() => router.push("/(auth)/signup")}>
+          <Pressable accessibilityRole="link" hitSlop={8} onPress={() => pushOnce(router, "/(auth)/signup")}>
             <Txt w="bold" color={palette.brandDark}>
               Create an account
             </Txt>
@@ -91,7 +92,7 @@ export default function LoginScreen() {
             <Pressable
               accessibilityRole="link"
               hitSlop={8}
-              onPress={() => router.push("/(auth)/forgotpassword")}
+              onPress={() => pushOnce(router, "/(auth)/forgotpassword")}
               style={{ alignSelf: "flex-end", marginTop: -4, marginBottom: 22 }}
             >
               <Txt w="semibold" size={13} color={palette.brandDark}>

@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Icon } from "@/components/ui/Icon";
 import React, { useEffect, useRef } from "react";
 import { View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
@@ -65,7 +65,7 @@ export default function RestaurantMap({
                   justifyContent: "center",
                 }}
               >
-                <Ionicons name="restaurant" size={active ? 19 : 15} color={active ? palette.ink : palette.white} />
+                <Icon name="restaurant" size={active ? 19 : 15} color={active ? palette.ink : palette.white} />
               </View>
             </View>
           </Marker>

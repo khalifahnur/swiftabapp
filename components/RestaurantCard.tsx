@@ -1,11 +1,13 @@
-import { Ionicons } from "@expo/vector-icons";
+import { pushOnce } from "@/lib/nav";
+import { Icon } from "@/components/ui/Icon";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Pressable, StyleProp, View, ViewStyle } from "react-native";
+import { StyleProp, View, ViewStyle } from "react-native";
 
 import { IconButton } from "@/components/ui/Button";
 import { Picture } from "@/components/ui/Bits";
+import { Tap } from "@/components/ui/Tap";
 import { Txt } from "@/components/ui/Txt";
 import { palette, radius, shadow } from "@/constants/theme";
 import { averagePrice, distanceLabel, openState, priceLevel, todayHoursLabel } from "@/lib/restaurant";
@@ -14,7 +16,7 @@ import { useIsSaved, useWishlist } from "@/store/useWishlist";
 import type { Restaurant } from "@/types";
 
 export function openRestaurant(router: ReturnType<typeof useRouter>, id: string) {
-  router.push({ pathname: "/screens/restaurantdetails", params: { id } });
+  pushOnce(router, { pathname: "/screens/restaurantdetails", params: { id } });
 }
 
 export function SaveButton({ restaurant, size = 38 }: { restaurant: Restaurant; size?: number }) {
@@ -46,7 +48,7 @@ function RatingBadge({ rate }: { rate: number }) {
         borderRadius: 14,
       }}
     >
-      <Ionicons name="star" size={12} color={palette.amber} />
+      <Icon name="star" size={12} color={palette.amber} />
       <Txt w="bold" size={12.5} style={{ lineHeight: 16 }}>
         {rate > 0 ? rate.toFixed(1) : "New"}
       </Txt>
@@ -64,23 +66,15 @@ export function RestaurantCard({ restaurant, style }: { restaurant: Restaurant; 
   const tags = [...(restaurant.cuisines ?? []).slice(0, 2), price].filter(Boolean);
 
   return (
-    <Pressable
+    <Tap
       testID={`restaurant-${restaurant.id}`}
       accessibilityRole="button"
       accessibilityLabel={`${restaurant.restaurantName}, ${restaurant.location}`}
       onPress={() => openRestaurant(router, restaurant.id)}
-      style={({ pressed }) => [
-        shadow.card,
-        {
-          backgroundColor: palette.surface,
-          borderRadius: radius.xl,
-          overflow: "hidden",
-          transform: [{ scale: pressed ? 0.985 : 1 }],
-        },
-        style,
-      ]}
+      pressedStyle={{ transform: [{ scale: 0.985 }] }}
+      style={[shadow.card, { backgroundColor: palette.surface, borderRadius: radius.xl, overflow: "hidden" }, style]}
     >
-      <View style={{ height: 190 }}>
+      <View style={{ height: 168 }}>
         <Picture uri={restaurant.image} style={{ width: "100%", height: "100%" }} />
         <LinearGradient
           colors={["rgba(0,0,0,0.28)", "transparent", "rgba(0,0,0,0.5)"]}
@@ -129,7 +123,7 @@ export function RestaurantCard({ restaurant, style }: { restaurant: Restaurant; 
             <Txt w="semibold" size={13} color={palette.brandDark}>
               View
             </Txt>
-            <Ionicons name="chevron-forward" size={14} color={palette.brandDark} />
+            <Icon name="chevron-forward" size={14} color={palette.brandDark} />
           </View>
         </View>
 
@@ -148,21 +142,21 @@ export function RestaurantCard({ restaurant, style }: { restaurant: Restaurant; 
         <View style={{ marginTop: 11, gap: 5 }}>
           {hours ? (
             <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}>
-              <Ionicons name="time-outline" size={14} color={palette.muted} />
+              <Icon name="time-outline" size={14} color={palette.muted} />
               <Txt size={13} color={palette.body} numberOfLines={1} style={{ flex: 1 }}>
                 {state.open === false && state.label ? state.label : hours}
               </Txt>
             </View>
           ) : null}
           <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}>
-            <Ionicons name="location-outline" size={14} color={palette.muted} />
+            <Icon name="location-outline" size={14} color={palette.muted} />
             <Txt size={13} color={palette.body} numberOfLines={1} style={{ flex: 1 }}>
               {restaurant.location}
             </Txt>
           </View>
         </View>
       </View>
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -172,12 +166,13 @@ export function RestaurantRow({ restaurant, right }: { restaurant: Pick<Restaura
   const state = restaurant.openingHours ? openState(restaurant as Restaurant) : { open: null, label: "" };
   const distance = distanceLabel(restaurant.distanceKm);
   return (
-    <Pressable
+    <Tap
       testID={`row-${restaurant.id}`}
       accessibilityRole="button"
       accessibilityLabel={restaurant.restaurantName}
       onPress={() => openRestaurant(router, restaurant.id)}
-      style={({ pressed }) => ({
+      pressedStyle={{ opacity: 0.9 }}
+      style={{
         flexDirection: "row",
         alignItems: "center",
         backgroundColor: palette.surface,
@@ -185,8 +180,7 @@ export function RestaurantRow({ restaurant, right }: { restaurant: Pick<Restaura
         padding: 10,
         borderWidth: 1,
         borderColor: palette.line,
-        opacity: pressed ? 0.9 : 1,
-      })}
+      }}
     >
       <Picture uri={restaurant.image} style={{ width: 84, height: 84, borderRadius: 16 }} />
       <View style={{ flex: 1, marginLeft: 12 }}>
@@ -194,7 +188,7 @@ export function RestaurantRow({ restaurant, right }: { restaurant: Pick<Restaura
           {restaurant.restaurantName}
         </Txt>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 4 }}>
-          <Ionicons name="star" size={12} color={palette.amber} />
+          <Icon name="star" size={12} color={palette.amber} />
           <Txt w="semibold" size={12.5}>
             {restaurant.rate > 0 ? restaurant.rate.toFixed(1) : "New"}
           </Txt>
@@ -205,7 +199,7 @@ export function RestaurantRow({ restaurant, right }: { restaurant: Pick<Restaura
           ) : null}
         </View>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 5, marginTop: 5 }}>
-          <Ionicons name="location-outline" size={13} color={palette.muted} />
+          <Icon name="location-outline" size={13} color={palette.muted} />
           <Txt size={12.5} color={palette.muted} numberOfLines={1} style={{ flex: 1 }}>
             {distance ? `${distance} · ` : ""}
             {restaurant.location}
@@ -217,7 +211,7 @@ export function RestaurantRow({ restaurant, right }: { restaurant: Pick<Restaura
           </Txt>
         )}
       </View>
-      {right ?? <Ionicons name="chevron-forward" size={18} color={palette.faint} style={{ marginLeft: 6 }} />}
-    </Pressable>
+      {right ?? <Icon name="chevron-forward" size={18} color={palette.faint} style={{ marginLeft: 6 }} />}
+    </Tap>
   );
 }

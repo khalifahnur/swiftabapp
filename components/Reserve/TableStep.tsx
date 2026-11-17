@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Icon } from "@/components/ui/Icon";
 import React, { useEffect, useMemo, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 
@@ -132,7 +132,7 @@ export default function TableStep({
 
       {availability.isError && (
         <View style={{ flexDirection: "row", gap: 8, alignItems: "center", marginTop: 14, padding: 12, borderRadius: radius.md, backgroundColor: palette.amberTint }}>
-          <Ionicons name="warning-outline" size={18} color="#B26A00" />
+          <Icon name="warning-outline" size={18} color="#B26A00" />
           <Txt size={12.5} color="#7A4A00" style={{ flex: 1 }}>
             We could not check which tables are taken. You can still pick one; we will confirm when you book.
           </Txt>

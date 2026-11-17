@@ -1,10 +1,14 @@
 import React from "react";
-import Svg, { Circle, Defs, G, LinearGradient, Path, Rect, Stop } from "react-native-svg";
+import Svg, {
+  Circle,
+  Defs,
+  G,
+  LinearGradient,
+  Path,
+  Rect,
+  Stop,
+} from "react-native-svg";
 
-/**
- * The welcome illustration: a set table seen from above, with a "reserved"
- * marker. Drawn in code so it stays sharp on every screen.
- */
 export default function TableArt({ size = 300 }: { size?: number }) {
   const chairs = [0, 60, 120, 180, 240, 300];
   return (
@@ -20,14 +24,19 @@ export default function TableArt({ size = 300 }: { size?: number }) {
         </LinearGradient>
       </Defs>
 
-      {/* Soft rings behind the table. */}
       <Circle cx="150" cy="150" r="146" fill="#FFFFFF" opacity={0.04} />
       <Circle cx="150" cy="150" r="118" fill="#FFFFFF" opacity={0.05} />
 
-      {/* Six chairs around the rim. */}
       {chairs.map((angle) => (
         <G key={angle} rotation={angle} origin="150, 150">
-          <Rect x="126" y="34" width="48" height="26" rx="12" fill="url(#chair)" />
+          <Rect
+            x="126"
+            y="34"
+            width="48"
+            height="26"
+            rx="12"
+            fill="url(#chair)"
+          />
           <Rect x="132" y="28" width="36" height="9" rx="4.5" fill="#7FD8C8" />
         </G>
       ))}
@@ -35,12 +44,26 @@ export default function TableArt({ size = 300 }: { size?: number }) {
       {/* Table top. */}
       <Circle cx="150" cy="154" r="84" fill="#062623" opacity={0.35} />
       <Circle cx="150" cy="150" r="84" fill="url(#top)" />
-      <Circle cx="150" cy="150" r="84" fill="none" stroke="#CFE5E0" strokeWidth="2" />
+      <Circle
+        cx="150"
+        cy="150"
+        r="84"
+        fill="none"
+        stroke="#CFE5E0"
+        strokeWidth="2"
+      />
 
       {/* Place settings. */}
       {[30, 150, 270].map((angle) => (
         <G key={angle} rotation={angle} origin="150, 150">
-          <Circle cx="150" cy="96" r="19" fill="#FFFFFF" stroke="#CFE5E0" strokeWidth="2" />
+          <Circle
+            cx="150"
+            cy="96"
+            r="19"
+            fill="#FFFFFF"
+            stroke="#CFE5E0"
+            strokeWidth="2"
+          />
           <Circle cx="150" cy="96" r="11" fill="#F0F7F5" />
           <Rect x="122" y="84" width="3" height="24" rx="1.5" fill="#9CC9C0" />
           <Rect x="175" y="84" width="3" height="24" rx="1.5" fill="#9CC9C0" />
@@ -49,7 +72,14 @@ export default function TableArt({ size = 300 }: { size?: number }) {
 
       {/* The "reserved" marker in the middle. */}
       <Circle cx="150" cy="150" r="27" fill="#0B3B36" />
-      <Path d="M139 150.5l7.5 7.5L162 142.5" stroke="#FFFFFF" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <Path
+        d="M139 150.5l7.5 7.5L162 142.5"
+        stroke="#FFFFFF"
+        strokeWidth="5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
 
       {/* A few sparks. */}
       <Circle cx="252" cy="62" r="5" fill="#F5A623" />

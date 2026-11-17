@@ -65,4 +65,4 @@ export const shadow = {
 } as const;
 
 /** Height the floating tab bar takes at the bottom of tab screens. */
-export const TAB_BAR_SPACE = 104;
+export const TAB_BAR_SPACE = 96;

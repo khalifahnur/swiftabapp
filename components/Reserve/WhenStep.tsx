@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Icon, type IconName } from "@/components/ui/Icon";
 import moment from "moment";
 import React, { useEffect, useMemo } from "react";
 import { Pressable, View } from "react-native";
@@ -18,11 +18,11 @@ const DAY_INDEX: Record<string, number> = { Sunday: 0, Monday: 1, Tuesday: 2, We
 const BOOK_AHEAD_DAYS = 60;
 const MAX_GUESTS = 20;
 
-function Heading({ icon, title, value }: { icon: keyof typeof Ionicons.glyphMap; title: string; value?: string }) {
+function Heading({ icon, title, value }: { icon: IconName; title: string; value?: string }) {
   return (
     <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 14 }}>
       <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: palette.brandTint, alignItems: "center", justifyContent: "center" }}>
-        <Ionicons name={icon} size={17} color={palette.pine} />
+        <Icon name={icon} size={17} color={palette.pine} />
       </View>
       <Txt w="bold" size={16} style={{ marginLeft: 10, flex: 1 }}>
         {title}
@@ -81,7 +81,7 @@ export default function WhenStep({ restaurant }: { restaurant: Restaurant }) {
           markedDates={date ? { [date]: { selected: true, disableTouchEvent: true } } : {}}
           renderArrow={(direction) => (
             <View style={{ width: 34, height: 34, borderRadius: 17, borderWidth: 1, borderColor: palette.line, alignItems: "center", justifyContent: "center" }}>
-              <Ionicons name={direction === "left" ? "chevron-back" : "chevron-forward"} size={16} color={palette.ink} />
+              <Icon name={direction === "left" ? "chevron-back" : "chevron-forward"} size={16} color={palette.ink} />
             </View>
           )}
           theme={{
@@ -176,7 +176,7 @@ export default function WhenStep({ restaurant }: { restaurant: Restaurant }) {
       <Card>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: palette.brandTint, alignItems: "center", justifyContent: "center" }}>
-            <Ionicons name="people-outline" size={17} color={palette.pine} />
+            <Icon name="people-outline" size={17} color={palette.pine} />
           </View>
           <View style={{ flex: 1, marginLeft: 10 }}>
             <Txt w="bold" size={16}>

@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Icon } from "@/components/ui/Icon";
 import React, { useEffect } from "react";
 import { View } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from "react-native-reanimated";
@@ -27,7 +27,7 @@ export default function SuccessMark({ size = 96 }: { size?: number }) {
           circle,
         ]}
       >
-        <Ionicons name="checkmark" size={size * 0.56} color={palette.white} />
+        <Icon name="checkmark" size={size * 0.56} color={palette.white} />
       </Animated.View>
     </View>
   );

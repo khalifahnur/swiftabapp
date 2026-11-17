@@ -11,6 +11,9 @@ export interface TxtProps extends TextProps {
   center?: boolean;
 }
 
+/** One dial for the size of all text in the app. */
+export const TYPE_SCALE = 0.9;
+
 /** Text in the app typeface. Use instead of <Text> so weights render the same on every device. */
 export function Txt({ w = "regular", size = 14, color = palette.ink, center, style, ...rest }: TxtProps) {
   return (
@@ -19,7 +22,7 @@ export function Txt({ w = "regular", size = 14, color = palette.ink, center, sty
       maxFontSizeMultiplier={1.3}
       {...rest}
       style={[
-        { fontFamily: fonts[w], fontSize: size, color, lineHeight: Math.round(size * 1.38) },
+        { fontFamily: fonts[w], fontSize: size * TYPE_SCALE, color, lineHeight: Math.round(size * TYPE_SCALE * 1.38) },
         center && { textAlign: "center" },
         style,
       ]}

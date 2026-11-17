@@ -1,4 +1,5 @@
-import { Ionicons } from "@expo/vector-icons";
+import { pushOnce } from "@/lib/nav";
+import { Icon, type IconName } from "@/components/ui/Icon";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { Tabs, useRouter } from "expo-router";
 import React from "react";
@@ -6,12 +7,12 @@ import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { tapFeedback } from "@/components/ui/Button";
+import { Tap } from "@/components/ui/Tap";
 import { Txt } from "@/components/ui/Txt";
 import { palette, shadow } from "@/constants/theme";
 import { useOrders } from "@/hooks/queries";
 import { isOpenOrder } from "@/lib/format";
 
-type IconName = keyof typeof Ionicons.glyphMap;
 
 const TABS: Record<string, { label: string; icon: IconName; active: IconName }> = {
   index: { label: "Home", icon: "home-outline", active: "home" },
@@ -44,19 +45,19 @@ function PillTabBar({ state, navigation }: BottomTabBarProps) {
           const event = navigation.emit({ type: "tabPress", target: route.key, canPreventDefault: true });
           if (!focused && !event.defaultPrevented) navigation.navigate(route.name);
         }}
-        style={{ flex: 1, alignItems: "center", justifyContent: "center", height: 60 }}
+        style={{ flex: 1, alignItems: "center", justifyContent: "center", height: 56 }}
       >
         <View
           style={{
-            width: 46,
-            height: 46,
-            borderRadius: 23,
+            width: 42,
+            height: 42,
+            borderRadius: 21,
             alignItems: "center",
             justifyContent: "center",
             backgroundColor: focused ? palette.brandTint : "transparent",
           }}
         >
-          <Ionicons name={focused ? meta.active : meta.icon} size={22} color={focused ? palette.pine : palette.faint} />
+          <Icon name={focused ? meta.active : meta.icon} size={21} color={focused ? palette.pine : palette.faint} strokeWidth={focused ? 2.3 : 1.9} />
         </View>
       </Pressable>
     );
@@ -71,8 +72,8 @@ function PillTabBar({ state, navigation }: BottomTabBarProps) {
         style={[
           shadow.raised,
           {
-            height: 68,
-            borderRadius: 34,
+            height: 62,
+            borderRadius: 31,
             backgroundColor: palette.surface,
             flexDirection: "row",
             alignItems: "center",
@@ -84,61 +85,61 @@ function PillTabBar({ state, navigation }: BottomTabBarProps) {
       >
         {tab(0)}
         {tab(1)}
-        <View style={{ width: 72 }} />
+        <View style={{ width: 68 }} />
         {tab(2)}
         {tab(3)}
       </View>
 
-      <Pressable
-        testID="tab-orders"
-        accessibilityRole="button"
-        accessibilityLabel={openOrders ? `Orders, ${openOrders} in progress` : "Orders"}
-        onPress={() => {
-          tapFeedback();
-          router.push("/Order");
-        }}
-        style={({ pressed }) => [
-          shadow.raised,
-          {
-            position: "absolute",
-            alignSelf: "center",
-            top: -14,
-            width: 64,
-            height: 64,
-            borderRadius: 32,
-            backgroundColor: palette.pine,
-            alignItems: "center",
-            justifyContent: "center",
-            borderWidth: 4,
-            borderColor: palette.canvas,
-            transform: [{ scale: pressed ? 0.95 : 1 }],
-          },
-        ]}
-      >
-        <Ionicons name="receipt-outline" size={24} color={palette.white} />
-        {openOrders > 0 && (
-          <View
-            style={{
-              position: "absolute",
-              top: -2,
-              right: -2,
-              minWidth: 20,
-              height: 20,
-              borderRadius: 10,
-              paddingHorizontal: 5,
-              backgroundColor: palette.amber,
-              borderWidth: 2,
-              borderColor: palette.canvas,
+      {/* Centred by a full-width row, so it sits in the middle on every screen size. */}
+      <View pointerEvents="box-none" style={{ position: "absolute", left: 0, right: 0, top: -12, alignItems: "center" }}>
+        <Tap
+          testID="tab-orders"
+          accessibilityRole="button"
+          accessibilityLabel={openOrders ? `Orders, ${openOrders} in progress` : "Orders"}
+          onPress={() => {
+            tapFeedback();
+            pushOnce(router, "/Order");
+          }}
+          pressedStyle={{ transform: [{ scale: 0.94 }] }}
+          style={[
+            shadow.raised,
+            {
+              width: 58,
+              height: 58,
+              borderRadius: 29,
+              backgroundColor: palette.pine,
               alignItems: "center",
               justifyContent: "center",
-            }}
-          >
-            <Txt w="bold" size={10} color={palette.ink} style={{ lineHeight: 13 }}>
-              {openOrders > 9 ? "9+" : openOrders}
-            </Txt>
-          </View>
-        )}
-      </Pressable>
+              borderWidth: 4,
+              borderColor: palette.canvas,
+            },
+          ]}
+        >
+          <Icon name="receipt-outline" size={22} color={palette.white} />
+          {openOrders > 0 && (
+            <View
+              style={{
+                position: "absolute",
+                top: -4,
+                right: -4,
+                minWidth: 20,
+                height: 20,
+                borderRadius: 10,
+                paddingHorizontal: 5,
+                backgroundColor: palette.amber,
+                borderWidth: 2,
+                borderColor: palette.canvas,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Txt w="bold" size={10} color={palette.ink} style={{ lineHeight: 13 }}>
+                {openOrders > 9 ? "9+" : openOrders}
+              </Txt>
+            </View>
+          )}
+        </Tap>
+      </View>
     </View>
   );
 }

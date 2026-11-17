@@ -1,4 +1,5 @@
-import { Ionicons } from "@expo/vector-icons";
+import { pushOnce } from "@/lib/nav";
+import { Icon } from "@/components/ui/Icon";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -84,7 +85,7 @@ export default function RestaurantDetailsScreen() {
 
   const book = () => {
     beginBooking(restaurant.id);
-    router.push({ pathname: "/screens/reserve", params: { id: restaurant.id } });
+    pushOnce(router, { pathname: "/screens/reserve", params: { id: restaurant.id } });
   };
 
   return (
@@ -121,7 +122,7 @@ export default function RestaurantDetailsScreen() {
                 {restaurant.restaurantName}
               </Txt>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 5, marginTop: 6 }}>
-                <Ionicons name="location-outline" size={15} color={palette.muted} />
+                <Icon name="location-outline" size={15} color={palette.muted} />
                 <Txt size={13.5} color={palette.muted} numberOfLines={1} style={{ flex: 1 }}>
                   {restaurant.location}
                 </Txt>
@@ -132,7 +133,7 @@ export default function RestaurantDetailsScreen() {
 
           <View style={{ flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: 10, marginTop: 14 }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-              <Ionicons name="star" size={16} color={palette.amber} />
+              <Icon name="star" size={16} color={palette.amber} />
               <Txt w="bold" size={14.5}>
                 {restaurant.rate > 0 ? restaurant.rate.toFixed(1) : "New"}
               </Txt>

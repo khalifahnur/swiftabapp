@@ -1,4 +1,5 @@
-import { Ionicons } from "@expo/vector-icons";
+import { pushOnce } from "@/lib/nav";
+import { Icon, type IconName } from "@/components/ui/Icon";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -23,11 +24,11 @@ import { useInbox } from "@/store/useInbox";
 import { usePrefs } from "@/store/usePrefs";
 import type { ReservationCreated } from "@/types";
 
-function Row({ icon, label, value }: { icon: keyof typeof Ionicons.glyphMap; label: string; value: string }) {
+function Row({ icon, label, value }: { icon: IconName; label: string; value: string }) {
   return (
     <View style={{ flexDirection: "row", alignItems: "center", paddingVertical: 10 }}>
       <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: palette.brandTint, alignItems: "center", justifyContent: "center" }}>
-        <Ionicons name={icon} size={17} color={palette.pine} />
+        <Icon name={icon} size={17} color={palette.pine} />
       </View>
       <Txt size={13.5} color={palette.muted} style={{ marginLeft: 12, flex: 1 }}>
         {label}
@@ -164,7 +165,7 @@ export default function ConfirmScreen() {
                   tableNumber: done.tableNumber,
                 });
                 router.dismissTo("/(tabs)/bookings");
-                router.push({ pathname: "/modal", params: { restaurantId: restaurant.id } });
+                pushOnce(router, { pathname: "/modal", params: { restaurantId: restaurant.id } });
               })
             }
           />
@@ -190,7 +191,7 @@ export default function ConfirmScreen() {
                 {restaurantName}
               </Txt>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 5, marginTop: 4 }}>
-                <Ionicons name="location-outline" size={13} color={palette.muted} />
+                <Icon name="location-outline" size={13} color={palette.muted} />
                 <Txt size={12.5} color={palette.muted} numberOfLines={2} style={{ flex: 1 }}>
                   {restaurant?.location}
                 </Txt>

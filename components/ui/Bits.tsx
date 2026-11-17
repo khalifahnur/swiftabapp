@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Icon, type IconName } from "@/components/ui/Icon";
 import { Image, ImageProps } from "expo-image";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -63,7 +63,7 @@ export function Chip({
   label: string;
   selected?: boolean;
   onPress?: () => void;
-  icon?: keyof typeof Ionicons.glyphMap;
+  icon?: IconName;
   style?: StyleProp<ViewStyle>;
 }) {
   return (
@@ -77,8 +77,8 @@ export function Chip({
       }}
       style={[
         {
-          height: 40,
-          paddingHorizontal: 16,
+          height: 34,
+          paddingHorizontal: 14,
           borderRadius: radius.pill,
           flexDirection: "row",
           alignItems: "center",
@@ -90,7 +90,7 @@ export function Chip({
         style,
       ]}
     >
-      {icon && <Ionicons name={icon} size={15} color={selected ? palette.white : palette.body} />}
+      {icon && <Icon name={icon} size={15} color={selected ? palette.white : palette.body} />}
       <Txt w="semibold" size={13} color={selected ? palette.white : palette.body}>
         {label}
       </Txt>
@@ -99,7 +99,7 @@ export function Chip({
 }
 
 /** A small rounded label, for statuses and tags. */
-export function Pill({ label, fg, bg, icon }: { label: string; fg: string; bg: string; icon?: keyof typeof Ionicons.glyphMap }) {
+export function Pill({ label, fg, bg, icon }: { label: string; fg: string; bg: string; icon?: IconName }) {
   return (
     <View
       style={{
@@ -113,7 +113,7 @@ export function Pill({ label, fg, bg, icon }: { label: string; fg: string; bg: s
         borderRadius: radius.pill,
       }}
     >
-      {icon && <Ionicons name={icon} size={12} color={fg} />}
+      {icon && <Icon name={icon} size={12} color={fg} />}
       <Txt w="semibold" size={11.5} color={fg} style={{ lineHeight: 15 }}>
         {label}
       </Txt>
@@ -127,7 +127,7 @@ export function EmptyState({
   message,
   action,
 }: {
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: IconName;
   title: string;
   message?: string;
   action?: React.ReactNode;
@@ -145,7 +145,7 @@ export function EmptyState({
           marginBottom: 18,
         }}
       >
-        <Ionicons name={icon} size={32} color={palette.brand} />
+        <Icon name={icon} size={32} color={palette.brand} />
       </View>
       <Txt w="bold" size={18} center>
         {title}
@@ -186,12 +186,12 @@ export function Picture({
   style,
   icon = "restaurant-outline",
   ...rest
-}: Omit<ImageProps, "source"> & { uri?: string | null; icon?: keyof typeof Ionicons.glyphMap }) {
+}: Omit<ImageProps, "source"> & { uri?: string | null; icon?: IconName }) {
   const [failed, setFailed] = useState(false);
   if (!uri || failed) {
     return (
       <View style={[{ backgroundColor: "#E3E9E7", alignItems: "center", justifyContent: "center" }, style as StyleProp<ViewStyle>]}>
-        <Ionicons name={icon} size={24} color={palette.faint} />
+        <Icon name={icon} size={24} color={palette.faint} />
       </View>
     );
   }
@@ -213,7 +213,7 @@ export function Stars({ value, size = 14, onChange }: { value: number; size?: nu
     <View style={{ flexDirection: "row", gap: onChange ? 8 : 2 }}>
       {[1, 2, 3, 4, 5].map((star) => {
         const name = value >= star ? "star" : value >= star - 0.5 ? "star-half" : "star-outline";
-        const icon = <Ionicons name={name} size={size} color={value >= star - 0.5 ? palette.amber : palette.faint} />;
+        const icon = <Icon name={name} size={size} color={value >= star - 0.5 ? palette.amber : palette.faint} />;
         if (!onChange) return <View key={star}>{icon}</View>;
         return (
           <Pressable
@@ -258,7 +258,7 @@ export function Segmented<T extends string>({
             }}
             style={{
               flex: 1,
-              height: 40,
+              height: 36,
               borderRadius: radius.pill,
               alignItems: "center",
               justifyContent: "center",
@@ -309,7 +309,7 @@ export function Stepper({
   max?: number;
   compact?: boolean;
 }) {
-  const size = compact ? 30 : 38;
+  const size = compact ? 28 : 34;
   const button = (icon: "remove" | "add", onPress: () => void, disabled: boolean, filled: boolean, label: string) => (
     <Pressable
       accessibilityRole="button"
@@ -332,7 +332,7 @@ export function Stepper({
         opacity: disabled ? 0.4 : 1,
       }}
     >
-      <Ionicons name={icon} size={compact ? 16 : 18} color={filled ? palette.white : palette.ink} />
+      <Icon name={icon} size={compact ? 16 : 18} color={filled ? palette.white : palette.ink} />
     </Pressable>
   );
   return (

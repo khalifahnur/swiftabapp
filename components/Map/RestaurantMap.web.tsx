@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Icon } from "@/components/ui/Icon";
 import React from "react";
 import { View } from "react-native";
 
@@ -15,7 +15,7 @@ export default function RestaurantMap(_props: {
 }) {
   return (
     <View style={{ flex: 1, backgroundColor: palette.mint, alignItems: "center", justifyContent: "center", padding: 24 }}>
-      <Ionicons name="map-outline" size={40} color={palette.pine} />
+      <Icon name="map-outline" size={40} color={palette.pine} />
       <Txt w="semibold" size={14} color={palette.pine} center style={{ marginTop: 8 }}>
         The map is available in the Swiftab app.
       </Txt>

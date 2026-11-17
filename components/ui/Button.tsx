@@ -1,10 +1,11 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Icon, type IconName } from "@/components/ui/Icon";
 import * as Haptics from "expo-haptics";
 import React from "react";
-import { ActivityIndicator, Platform, Pressable, StyleProp, View, ViewStyle } from "react-native";
+import { ActivityIndicator, Platform, StyleProp, View, ViewStyle } from "react-native";
 
 import { palette, radius } from "@/constants/theme";
 
+import { Tap } from "./Tap";
 import { Txt } from "./Txt";
 
 type Variant = "primary" | "brand" | "soft" | "outline" | "danger" | "ghost";
@@ -15,8 +16,8 @@ interface ButtonProps {
   variant?: Variant;
   loading?: boolean;
   disabled?: boolean;
-  icon?: keyof typeof Ionicons.glyphMap;
-  iconRight?: keyof typeof Ionicons.glyphMap;
+  icon?: IconName;
+  iconRight?: IconName;
   size?: "md" | "lg";
   style?: StyleProp<ViewStyle>;
   testID?: string;
@@ -50,7 +51,7 @@ export function Button({
   const tone = tones[variant];
   const inactive = disabled || loading;
   return (
-    <Pressable
+    <Tap
       testID={testID}
       accessibilityRole="button"
       accessibilityLabel={label}
@@ -60,9 +61,10 @@ export function Button({
         tapFeedback();
         onPress?.();
       }}
-      style={({ pressed }) => [
+      pressedStyle={{ opacity: 0.88, transform: [{ scale: 0.985 }] }}
+      style={[
         {
-          height: size === "lg" ? 56 : 46,
+          height: size === "lg" ? 50 : 40,
           borderRadius: radius.pill,
           backgroundColor: tone.bg,
           borderWidth: tone.border ? 1 : 0,
@@ -71,8 +73,7 @@ export function Button({
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "center",
-          opacity: disabled ? 0.45 : pressed ? 0.88 : 1,
-          transform: [{ scale: pressed ? 0.985 : 1 }],
+          opacity: disabled ? 0.45 : 1,
         },
         style,
       ]}
@@ -81,19 +82,19 @@ export function Button({
         <ActivityIndicator color={tone.fg} />
       ) : (
         <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-          {icon && <Ionicons name={icon} size={18} color={tone.fg} />}
-          <Txt w="semibold" size={size === "lg" ? 16 : 14} color={tone.fg}>
+          {icon && <Icon name={icon} size={18} color={tone.fg} />}
+          <Txt w="semibold" size={size === "lg" ? 15.5 : 14} color={tone.fg}>
             {label}
           </Txt>
-          {iconRight && <Ionicons name={iconRight} size={18} color={tone.fg} />}
+          {iconRight && <Icon name={iconRight} size={18} color={tone.fg} />}
         </View>
       )}
-    </Pressable>
+    </Tap>
   );
 }
 
 interface IconButtonProps {
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: IconName;
   onPress?: () => void;
   label: string;
   size?: number;
@@ -110,7 +111,7 @@ export function IconButton({
   icon,
   onPress,
   label,
-  size = 44,
+  size = 40,
   color = palette.ink,
   background = palette.surface,
   bordered,
@@ -119,7 +120,7 @@ export function IconButton({
   testID,
 }: IconButtonProps) {
   return (
-    <Pressable
+    <Tap
       testID={testID}
       accessibilityRole="button"
       accessibilityLabel={label}
@@ -128,7 +129,8 @@ export function IconButton({
         tapFeedback();
         onPress?.();
       }}
-      style={({ pressed }) => [
+      pressedStyle={{ opacity: 0.7 }}
+      style={[
         {
           width: size,
           height: size,
@@ -138,12 +140,11 @@ export function IconButton({
           justifyContent: "center",
           borderWidth: bordered ? 1 : 0,
           borderColor: palette.line,
-          opacity: pressed ? 0.75 : 1,
         },
         style,
       ]}
     >
-      <Ionicons name={icon} size={Math.round(size * 0.46)} color={color} />
+      <Icon name={icon} size={Math.round(size * 0.46)} color={color} />
       {Boolean(badge) && (
         <View
           style={{
@@ -168,6 +169,6 @@ export function IconButton({
           )}
         </View>
       )}
-    </Pressable>
+    </Tap>
   );
 }

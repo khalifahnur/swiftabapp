@@ -1,4 +1,5 @@
-import { Ionicons } from "@expo/vector-icons";
+import { pushOnce } from "@/lib/nav";
+import { Icon } from "@/components/ui/Icon";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View } from "react-native";
@@ -48,7 +49,7 @@ export default function CartScreen() {
           clear();
           showToast("success", "Order sent to the kitchen. Follow it here.");
           router.dismissAll();
-          router.push("/Order");
+          pushOnce(router, "/Order");
         },
         onError: (error) => showToast("error", errorMessage(error, "We could not place your order.")),
       },
@@ -89,7 +90,7 @@ export default function CartScreen() {
         >
           {context && (
             <View style={{ flexDirection: "row", alignItems: "center", gap: 10, padding: 12, borderRadius: radius.md, backgroundColor: palette.brandTint }}>
-              <Ionicons name="restaurant" size={18} color={palette.pine} />
+              <Icon name="restaurant" size={18} color={palette.pine} />
               <Txt w="semibold" size={13.5} color={palette.pine} style={{ flex: 1 }} numberOfLines={1}>
                 {context.restaurantName} · Table {context.tableNumber}
               </Txt>
@@ -138,13 +139,13 @@ export default function CartScreen() {
 
               <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 10 }}>
                 <Pressable accessibilityRole="button" hitSlop={8} onPress={() => setNoteFor(item._id)} style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-                  <Ionicons name="create-outline" size={14} color={palette.brandDark} />
+                  <Icon name="create-outline" size={14} color={palette.brandDark} />
                   <Txt w="semibold" size={12.5} color={palette.brandDark}>
                     {item.note ? "Edit note" : "Add a note"}
                   </Txt>
                 </Pressable>
                 <Pressable accessibilityRole="button" accessibilityLabel={`Remove ${item.name}`} hitSlop={8} onPress={() => remove(item._id)} style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-                  <Ionicons name="trash-outline" size={14} color={palette.danger} />
+                  <Icon name="trash-outline" size={14} color={palette.danger} />
                   <Txt w="semibold" size={12.5} color={palette.danger}>
                     Remove
                   </Txt>
@@ -154,7 +155,7 @@ export default function CartScreen() {
           ))}
 
           <Pressable accessibilityRole="button" onPress={() => router.back()} style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 10 }}>
-            <Ionicons name="add-circle-outline" size={18} color={palette.brandDark} />
+            <Icon name="add-circle-outline" size={18} color={palette.brandDark} />
             <Txt w="semibold" size={14} color={palette.brandDark}>
               Add more dishes
             </Txt>

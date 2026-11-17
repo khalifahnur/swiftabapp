@@ -1,4 +1,5 @@
-import { Ionicons } from "@expo/vector-icons";
+import { pushOnce } from "@/lib/nav";
+import { Icon } from "@/components/ui/Icon";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { FlatList, Pressable, ScrollView, TextInput, View } from "react-native";
@@ -81,7 +82,7 @@ export default function SearchScreen() {
             gap: 8,
           }}
         >
-          <Ionicons name="search" size={18} color={palette.muted} />
+          <Icon name="search" size={18} color={palette.muted} />
           <TextInput
             testID="search-input"
             autoFocus
@@ -96,11 +97,11 @@ export default function SearchScreen() {
           />
           {text ? (
             <Pressable accessibilityRole="button" accessibilityLabel="Clear search" hitSlop={8} onPress={() => setText("")}>
-              <Ionicons name="close-circle" size={18} color={palette.faint} />
+              <Icon name="close-circle" size={18} color={palette.faint} />
             </Pressable>
           ) : null}
         </View>
-        <IconButton icon="map-outline" label="Show on a map" bordered onPress={() => router.push("/screens/map")} testID="open-map" />
+        <IconButton icon="map-outline" label="Show on a map" bordered onPress={() => pushOnce(router, "/screens/map")} testID="open-map" />
       </View>
 
       <FlatList

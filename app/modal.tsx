@@ -1,4 +1,5 @@
-import { Ionicons } from "@expo/vector-icons";
+import { pushOnce } from "@/lib/nav";
+import { Icon } from "@/components/ui/Icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
 import { Pressable, ScrollView, SectionList, TextInput, View } from "react-native";
@@ -65,7 +66,7 @@ export default function OrderMenuScreen() {
         }}
         style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: palette.pine, alignItems: "center", justifyContent: "center" }}
       >
-        <Ionicons name="add" size={20} color={palette.white} />
+        <Icon name="add" size={20} color={palette.white} />
       </Pressable>
     );
   };
@@ -98,7 +99,7 @@ export default function OrderMenuScreen() {
             gap: 8,
           }}
         >
-          <Ionicons name="search" size={17} color={palette.muted} />
+          <Icon name="search" size={17} color={palette.muted} />
           <TextInput
             testID="menu-search"
             value={query}
@@ -111,7 +112,7 @@ export default function OrderMenuScreen() {
           />
           {query ? (
             <Pressable accessibilityRole="button" accessibilityLabel="Clear search" hitSlop={8} onPress={() => setQuery("")}>
-              <Ionicons name="close-circle" size={18} color={palette.faint} />
+              <Icon name="close-circle" size={18} color={palette.faint} />
             </Pressable>
           ) : null}
         </View>
@@ -169,7 +170,7 @@ export default function OrderMenuScreen() {
           testID="view-cart"
           accessibilityRole="button"
           accessibilityLabel={`View cart, ${count} items, ${formatKes(total)}`}
-          onPress={() => router.push("/screens/cart")}
+          onPress={() => pushOnce(router, "/screens/cart")}
           style={[
             shadow.raised,
             {

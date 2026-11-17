@@ -1,3 +1,4 @@
+import { pushOnce } from "@/lib/nav";
 import {
   PlusJakartaSans_400Regular,
   PlusJakartaSans_500Medium,
@@ -17,6 +18,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { setSessionExpiredHandler } from "@/api/client";
+import AnimatedSplash from "@/components/AnimatedSplash";
 import NetworkStatus from "@/components/NetworkStatus";
 import { palette } from "@/constants/theme";
 import { useOrderWatcher } from "@/hooks/useOrderWatcher";
@@ -63,11 +65,11 @@ function SignedInServices() {
       onOpen: (target) => {
         refresh(target);
         if (target.type === "order" && target.orderId) {
-          router.push({ pathname: "/screens/order", params: { id: target.orderId } });
+          pushOnce(router, { pathname: "/screens/order", params: { id: target.orderId } });
         } else if (target.type === "order") {
-          router.push("/Order");
+          pushOnce(router, "/Order");
         } else if (target.type === "reservation" || target.type === "reminder") {
-          router.push("/(tabs)/bookings");
+          pushOnce(router, "/(tabs)/bookings");
         }
       },
     });
@@ -99,10 +101,6 @@ export default function RootLayout() {
   });
   const ready = hydrated && (fontsLoaded || Boolean(fontError));
 
-  useEffect(() => {
-    if (ready) SplashScreen.hideAsync().catch(() => undefined);
-  }, [ready]);
-
   // When the API no longer accepts the session, return to sign-in once.
   useEffect(() => {
     setSessionExpiredHandler(() => {
@@ -114,12 +112,11 @@ export default function RootLayout() {
     return () => setSessionExpiredHandler(null);
   }, [client]);
 
-  if (!ready) return null;
-
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: palette.canvas }}>
       <SafeAreaProvider>
         <QueryClientProvider client={client}>
+          {ready && (
           <ToastProvider>
             <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: palette.canvas } }}>
               <Stack.Protected guard={!hasCompletedOnboarding}>
@@ -139,6 +136,9 @@ export default function RootLayout() {
             <NetworkStatus />
             <StatusBar style="dark" />
           </ToastProvider>
+          )}
+          {/* Hides the system splash itself, then animates away once the app is ready underneath. */}
+          <AnimatedSplash ready={ready} />
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

@@ -1,4 +1,5 @@
-import { Ionicons } from "@expo/vector-icons";
+import { pushOnce } from "@/lib/nav";
+import { Icon, type IconName } from "@/components/ui/Icon";
 import { useQueryClient } from "@tanstack/react-query";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
@@ -7,6 +8,7 @@ import { Platform, Pressable, ScrollView, Switch, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Chip } from "@/components/ui/Bits";
+import { Tap } from "@/components/ui/Tap";
 import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/Sheet";
 import { Txt } from "@/components/ui/Txt";
@@ -30,7 +32,7 @@ function Row({
   last,
   testID,
 }: {
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: IconName;
   title: string;
   subtitle?: string;
   onPress?: () => void;
@@ -39,23 +41,23 @@ function Row({
   testID?: string;
 }) {
   return (
-    <Pressable
+    <Tap
       testID={testID}
       accessibilityRole={onPress ? "button" : undefined}
       accessibilityLabel={title}
       disabled={!onPress}
       onPress={onPress}
-      style={({ pressed }) => ({
+      pressedStyle={{ opacity: 0.6 }}
+      style={{
         flexDirection: "row",
         alignItems: "center",
-        paddingVertical: 13,
+        paddingVertical: 11,
         borderBottomWidth: last ? 0 : 1,
         borderColor: palette.line,
-        opacity: pressed ? 0.6 : 1,
-      })}
+      }}
     >
-      <View style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: palette.brandTint, alignItems: "center", justifyContent: "center" }}>
-        <Ionicons name={icon} size={18} color={palette.pine} />
+      <View style={{ width: 36, height: 36, borderRadius: 11, backgroundColor: palette.brandTint, alignItems: "center", justifyContent: "center" }}>
+        <Icon name={icon} size={17} color={palette.pine} />
       </View>
       <View style={{ flex: 1, marginHorizontal: 12 }}>
         <Txt w="semibold" size={14.5}>
@@ -67,8 +69,8 @@ function Row({
           </Txt>
         ) : null}
       </View>
-      {right ?? (onPress ? <Ionicons name="chevron-forward" size={18} color={palette.faint} /> : null)}
-    </Pressable>
+      {right ?? (onPress ? <Icon name="chevron-forward" size={18} color={palette.faint} /> : null)}
+    </Tap>
   );
 }
 
@@ -168,7 +170,7 @@ export default function ProfileScreen() {
               testID="edit-profile"
               accessibilityRole="button"
               accessibilityLabel="Edit profile"
-              onPress={() => router.push("/screens/account")}
+              onPress={() => pushOnce(router, "/screens/account")}
               style={{ height: 38, paddingHorizontal: 14, borderRadius: 19, backgroundColor: "rgba(255,255,255,0.16)", justifyContent: "center" }}
             >
               <Txt w="semibold" size={13} color={palette.white}>
@@ -187,8 +189,8 @@ export default function ProfileScreen() {
         <View style={{ paddingHorizontal: 20 }}>
           <Group title="Activity">
             <Row icon="calendar-outline" title="My bookings" subtitle="Upcoming, past and cancelled" onPress={() => router.navigate("/(tabs)/bookings")} />
-            <Row icon="receipt-outline" title="My orders" subtitle="Track food and see receipts" onPress={() => router.push("/Order")} />
-            <Row icon="notifications-outline" title="Notifications" subtitle="Updates you have received" onPress={() => router.push("/screens/notifications")} last />
+            <Row icon="receipt-outline" title="My orders" subtitle="Track food and see receipts" onPress={() => pushOnce(router, "/Order")} />
+            <Row icon="notifications-outline" title="Notifications" subtitle="Updates you have received" onPress={() => pushOnce(router, "/screens/notifications")} last />
           </Group>
 
           {Platform.OS !== "web" && (
@@ -231,10 +233,10 @@ export default function ProfileScreen() {
           )}
 
           <Group title="Support">
-            <Row icon="help-buoy-outline" title="Help centre" subtitle="Answers and ways to reach us" onPress={() => router.push("/screens/help")} />
-            <Row icon="shield-checkmark-outline" title="Privacy policy" onPress={() => router.push({ pathname: "/screens/PolicyScreen", params: { type: "privacy" } })} />
-            <Row icon="document-text-outline" title="Terms & conditions" onPress={() => router.push({ pathname: "/screens/PolicyScreen", params: { type: "terms" } })} />
-            <Row icon="information-circle-outline" title="About Swiftab" onPress={() => router.push({ pathname: "/screens/PolicyScreen", params: { type: "about" } })} last />
+            <Row icon="help-buoy-outline" title="Help centre" subtitle="Answers and ways to reach us" onPress={() => pushOnce(router, "/screens/help")} />
+            <Row icon="shield-checkmark-outline" title="Privacy policy" onPress={() => pushOnce(router, { pathname: "/screens/PolicyScreen", params: { type: "privacy" } })} />
+            <Row icon="document-text-outline" title="Terms & conditions" onPress={() => pushOnce(router, { pathname: "/screens/PolicyScreen", params: { type: "terms" } })} />
+            <Row icon="information-circle-outline" title="About Swiftab" onPress={() => pushOnce(router, { pathname: "/screens/PolicyScreen", params: { type: "about" } })} last />
           </Group>
 
           <Button label="Sign out" variant="danger" icon="log-out-outline" style={{ marginTop: 26 }} onPress={() => setSigningOut(true)} testID="sign-out" />

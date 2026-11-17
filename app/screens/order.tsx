@@ -1,4 +1,5 @@
-import { Ionicons } from "@expo/vector-icons";
+import { pushOnce } from "@/lib/nav";
+import { Icon } from "@/components/ui/Icon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import { RefreshControl, ScrollView, View } from "react-native";
@@ -79,7 +80,7 @@ export default function OrderDetailScreen() {
       reservationId: order.reservationId,
       tableNumber: order.tableNumber,
     });
-    router.push({ pathname: "/modal", params: { restaurantId: order.restaurantId } });
+    pushOnce(router, { pathname: "/modal", params: { restaurantId: order.restaurantId } });
   };
 
   return (
@@ -120,7 +121,7 @@ export default function OrderDetailScreen() {
           <TimelineDetail order={order} />
           {order.takenBy ? (
             <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 14, paddingTop: 12, borderTopWidth: 1, borderColor: palette.line }}>
-              <Ionicons name="person-circle-outline" size={18} color={palette.muted} />
+              <Icon name="person-circle-outline" size={18} color={palette.muted} />
               <Txt size={13} color={palette.body}>
                 Served by {order.takenBy}
               </Txt>
@@ -184,7 +185,7 @@ export default function OrderDetailScreen() {
               variant="soft"
               icon="star-outline"
               onPress={() =>
-                router.push({ pathname: "/screens/ratescreen", params: { restaurantId: order.restaurantId, restaurantName: order.restaurantName } })
+                pushOnce(router, { pathname: "/screens/ratescreen", params: { restaurantId: order.restaurantId, restaurantName: order.restaurantName } })
               }
             />
           )}

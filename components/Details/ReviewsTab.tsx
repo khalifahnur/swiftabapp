@@ -1,3 +1,4 @@
+import { pushOnce } from "@/lib/nav";
 import { useRouter } from "expo-router";
 import moment from "moment";
 import React, { useState } from "react";
@@ -24,7 +25,7 @@ export default function ReviewsTab({ restaurant }: { restaurant: Restaurant }) {
       variant="soft"
       icon="create-outline"
       onPress={() =>
-        router.push({ pathname: "/screens/ratescreen", params: { restaurantId: restaurant.id, restaurantName: restaurant.restaurantName } })
+        pushOnce(router, { pathname: "/screens/ratescreen", params: { restaurantId: restaurant.id, restaurantName: restaurant.restaurantName } })
       }
       testID="write-review"
     />

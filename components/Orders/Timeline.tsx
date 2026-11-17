@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Icon, type IconName } from "@/components/ui/Icon";
 import React from "react";
 import { View } from "react-native";
 
@@ -7,7 +7,7 @@ import { palette } from "@/constants/theme";
 import { formatClock } from "@/lib/time";
 import type { Order } from "@/types";
 
-const STEPS: { key: string; label: string; detail: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+const STEPS: { key: string; label: string; detail: string; icon: IconName }[] = [
   { key: "placed", label: "Received", detail: "The kitchen has your order", icon: "receipt-outline" },
   { key: "served", label: "Served", detail: "Your food is at the table", icon: "restaurant-outline" },
   { key: "ready_to_pay", label: "Bill", detail: "Your waiter is bringing the bill", icon: "card-outline" },
@@ -44,7 +44,7 @@ export function TimelineStrip({ status }: { status: string }) {
                   borderColor: palette.line,
                 }}
               >
-                <Ionicons name={i < progress ? "checkmark" : step.icon} size={13} color={reached ? palette.white : palette.faint} />
+                <Icon name={i < progress ? "checkmark" : step.icon} size={13} color={reached ? palette.white : palette.faint} />
               </View>
               {i < STEPS.length - 1 && (
                 <View style={{ flex: 1, height: 3, marginHorizontal: 4, borderRadius: 2, backgroundColor: i < progress ? palette.pine : palette.line }} />
@@ -79,7 +79,7 @@ export function TimelineDetail({ order }: { order: Order }) {
     return (
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
         <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: palette.dangerTint, alignItems: "center", justifyContent: "center" }}>
-          <Ionicons name="close" size={20} color={palette.danger} />
+          <Icon name="close" size={20} color={palette.danger} />
         </View>
         <View style={{ flex: 1 }}>
           <Txt w="bold" size={15}>
@@ -114,7 +114,7 @@ export function TimelineDetail({ order }: { order: Order }) {
                   borderColor: palette.line,
                 }}
               >
-                <Ionicons name={i < progress ? "checkmark" : step.icon} size={18} color={reached ? palette.white : palette.faint} />
+                <Icon name={i < progress ? "checkmark" : step.icon} size={18} color={reached ? palette.white : palette.faint} />
               </View>
               {!last && <View style={{ width: 3, flex: 1, minHeight: 22, backgroundColor: i < progress ? palette.pine : palette.line, marginVertical: 3, borderRadius: 2 }} />}
             </View>

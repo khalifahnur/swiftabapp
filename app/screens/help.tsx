@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Icon, type IconName } from "@/components/ui/Icon";
 import React, { useState } from "react";
 import { Linking, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -40,7 +40,7 @@ const FAQS = [
   },
 ];
 
-const CONTACTS: { icon: keyof typeof Ionicons.glyphMap; title: string; detail: string; open: () => void }[] = [
+const CONTACTS: { icon: IconName; title: string; detail: string; open: () => void }[] = [
   { icon: "mail-outline", title: "Email support", detail: "support@swiftab.co.ke", open: () => sendEmail("support@swiftab.co.ke") },
   { icon: "globe-outline", title: "Website", detail: "www.swiftab.co.ke", open: () => Linking.openURL("https://www.swiftab.co.ke/").catch(() => undefined) },
 ];
@@ -74,7 +74,7 @@ export default function HelpScreen() {
                   <Txt w="semibold" size={14.5} style={{ flex: 1, paddingRight: 10 }}>
                     {faq.q}
                   </Txt>
-                  <Ionicons name={expanded ? "chevron-up" : "chevron-down"} size={18} color={palette.muted} />
+                  <Icon name={expanded ? "chevron-up" : "chevron-down"} size={18} color={palette.muted} />
                 </View>
                 {expanded && (
                   <Txt size={13.5} color={palette.body} style={{ marginTop: 8, lineHeight: 20 }}>
@@ -99,7 +99,7 @@ export default function HelpScreen() {
               style={{ flexDirection: "row", alignItems: "center", padding: 14, borderRadius: radius.lg, backgroundColor: palette.surface, borderWidth: 1, borderColor: palette.line }}
             >
               <View style={{ width: 42, height: 42, borderRadius: 21, backgroundColor: palette.brandTint, alignItems: "center", justifyContent: "center" }}>
-                <Ionicons name={contact.icon} size={19} color={palette.pine} />
+                <Icon name={contact.icon} size={19} color={palette.pine} />
               </View>
               <View style={{ flex: 1, marginLeft: 12 }}>
                 <Txt w="semibold" size={14.5}>
@@ -109,7 +109,7 @@ export default function HelpScreen() {
                   {contact.detail}
                 </Txt>
               </View>
-              <Ionicons name="open-outline" size={17} color={palette.faint} />
+              <Icon name="open-outline" size={17} color={palette.faint} />
             </Pressable>
           ))}
         </View>

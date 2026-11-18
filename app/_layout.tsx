@@ -57,14 +57,15 @@ function SignedInServices() {
 
   useEffect(() => {
     const refresh = (target: NotificationTarget) => {
-      if (target.type === "order") client.invalidateQueries({ queryKey: ["orders"] });
+      if (target.type === "order" || target.type === "tab") client.invalidateQueries({ queryKey: ["orders"] });
+      if (target.type === "tab") client.invalidateQueries({ queryKey: ["tab"] });
       if (target.type === "reservation") client.invalidateQueries({ queryKey: ["reservations"] });
     };
     return listenForNotifications({
       onReceive: refresh,
       onOpen: (target) => {
         refresh(target);
-        if (target.type === "order" && target.orderId) {
+        if ((target.type === "order" || target.type === "tab") && target.orderId) {
           pushOnce(router, { pathname: "/screens/order", params: { id: target.orderId } });
         } else if (target.type === "order") {
           pushOnce(router, "/Order");

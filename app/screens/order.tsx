@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { errorMessage } from "@/api/client";
 import { orderNumber } from "@/components/Orders/OrderCard";
 import PaymentSheet from "@/components/Orders/PaymentSheet";
+import ShareTabSheet from "@/components/Reserve/ShareTabSheet";
 import { TimelineDetail } from "@/components/Orders/Timeline";
 import { Card, EmptyState, ErrorState, Picture, Pill, ScreenHeader, Skeleton } from "@/components/ui/Bits";
 import { Button } from "@/components/ui/Button";
@@ -31,6 +32,7 @@ export default function OrderDetailScreen() {
   const openCart = useCart((s) => s.open);
   const [paying, setPaying] = useState(false);
   const [asking, setAsking] = useState(false);
+  const [sharing, setSharing] = useState(false);
 
   const order = orders?.find((o) => o._id === id);
 
@@ -71,6 +73,7 @@ export default function OrderDetailScreen() {
   const tone = orderTone(order.status);
   const open = isOpenOrder(order.status);
   const lines = order.menu ?? [];
+  const shared = lines.some((line) => line.addedBy);
 
   const orderMore = () => {
     if (!order.reservationId) return;
@@ -131,7 +134,7 @@ export default function OrderDetailScreen() {
 
         <Card>
           <Txt w="bold" size={16} style={{ marginBottom: 10 }}>
-            Your order
+            {shared ? "Your tab" : "Your order"}
           </Txt>
           {lines.map((line, index) => (
             <View key={`${line._id}-${index}`} style={{ flexDirection: "row", paddingVertical: 8, borderTopWidth: index === 0 ? 0 : 1, borderColor: palette.line }}>
@@ -142,6 +145,16 @@ export default function OrderDetailScreen() {
                 <Txt w="medium" size={13.5}>
                   {line.name}
                 </Txt>
+                {line.addedBy ? (
+                  <View style={{ flexDirection: "row", marginTop: 3 }}>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 7, paddingVertical: 2, borderRadius: 999, backgroundColor: palette.brandTint }}>
+                      <Icon name="person-outline" size={11} color={palette.brandDark} />
+                      <Txt w="semibold" size={11} color={palette.brandDark}>
+                        {line.addedBy}
+                      </Txt>
+                    </View>
+                  </View>
+                ) : null}
                 {line.note ? (
                   <Txt size={12} color={palette.muted}>
                     Note: {line.note}
@@ -178,6 +191,9 @@ export default function OrderDetailScreen() {
         <View style={{ gap: 10 }}>
           {order.status === "served" && <Button label="Request the bill" icon="wallet-outline" onPress={() => setPaying(true)} testID="detail-request-bill" />}
           {open && order.reservationId ? <Button label="Order more" variant="soft" icon="add-circle-outline" onPress={orderMore} /> : null}
+          {open && order.reservationId ? (
+            <Button label="Share menu with friends" variant="outline" icon="person-add-outline" onPress={() => setSharing(true)} testID="detail-share-tab" />
+          ) : null}
           {order.status === "placed" && <Button label="Cancel order" variant="danger" onPress={() => setAsking(true)} testID="detail-cancel" />}
           {order.status === "completed" && (
             <Button
@@ -193,6 +209,9 @@ export default function OrderDetailScreen() {
       </ScrollView>
 
       <PaymentSheet order={paying ? order : null} onClose={() => setPaying(false)} />
+      {order.reservationId ? (
+        <ShareTabSheet visible={sharing} onClose={() => setSharing(false)} reservationId={order.reservationId} restaurantName={order.restaurantName} />
+      ) : null}
       <ConfirmDialog
         visible={asking}
         title="Cancel this order?"

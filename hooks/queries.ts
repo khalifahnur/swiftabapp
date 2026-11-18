@@ -19,6 +19,7 @@ export const keys = {
   orders: (userId: string) => ["orders", userId] as const,
   promotions: (restaurantId = "all") => ["promotions", restaurantId] as const,
   recentlyViewed: (userId: string) => ["recentlyViewed", userId] as const,
+  tab: (userId: string, reservationId: string) => ["tab", userId, reservationId] as const,
 };
 
 const MINUTE = 60 * 1000;
@@ -233,6 +234,36 @@ export function useUpdateProfile() {
     onSuccess: (user) => {
       const current = useAuthStore.getState().user;
       if (current) useAuthStore.getState().setUser({ ...current, ...user, userId: current.userId });
+    },
+  });
+}
+
+// --- Shared tab ----------------------------------------------------------------
+
+/** A booking's shared tab. Polls while shown so friends appear as they join. */
+export function useTab(reservationId: string | undefined, live: boolean) {
+  const user = useUser();
+  return useQuery({
+    queryKey: keys.tab(user?.userId ?? "", reservationId ?? ""),
+    queryFn: () => API.fetchTab(user!.userId, reservationId!),
+    enabled: Boolean(user?.userId && reservationId && live),
+    refetchInterval: (query) => (live && query.state.data?.open ? 15 * 1000 : false),
+  });
+}
+
+/** Starts (open = true) or stops sharing a booking's menu. */
+export function useShareTab(reservationId: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (open: boolean) => {
+      const user = useAuthStore.getState().user;
+      if (!user) throw new Error("Please sign in again.");
+      return open ? API.shareTab(user.userId, reservationId) : API.stopTab(user.userId, reservationId);
+    },
+    onSuccess: (tab) => {
+      const user = useAuthStore.getState().user;
+      if (user) client.setQueryData(keys.tab(user.userId, reservationId), tab);
+      client.invalidateQueries({ queryKey: keys.allReservations });
     },
   });
 }

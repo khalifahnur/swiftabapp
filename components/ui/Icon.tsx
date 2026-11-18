@@ -2,9 +2,9 @@ import {
   Activity, AlarmClock, ArrowRight, Banknote, Bell, CalendarDays, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight,
   ChevronUp, Circle, CircleAlert, CircleCheck, CircleDot, CircleHelp, CirclePlus, CircleUser, CircleX, Clock, CloudOff, CloudSun,
   CreditCard, ExternalLink, Eye, EyeOff, FileText, Globe, Hand, Heart, Hourglass, House, Info, KeyRound, Layers, LayoutGrid,
-  LifeBuoy, Lock, LogOut, type LucideIcon, Mail, Map, MapPin, Megaphone, MessagesSquare, Minus, Moon, Navigation, Phone, Plus,
-  ReceiptText, Search, Share2, ShieldCheck, ShoppingCart, SlidersHorizontal, Smartphone, SquarePen, Star, StarHalf, Sun, Tag,
-  Trash2, TriangleAlert, User, Users, Utensils, UtensilsCrossed, Wallet, X,
+  LifeBuoy, Link2, Lock, LogOut, type LucideIcon, Mail, Map, MapPin, Megaphone, MessagesSquare, Minus, Moon, Navigation, Phone, Plus,
+  QrCode, ReceiptText, Search, Share2, ShieldCheck, ShoppingCart, SlidersHorizontal, Smartphone, SquarePen, Star, StarHalf, Sun, Tag,
+  Trash2, TriangleAlert, User, UserPlus, Users, Utensils, UtensilsCrossed, Wallet, X,
 } from "lucide-react-native";
 import React from "react";
 import type { StyleProp, ViewStyle } from "react-native";
@@ -60,6 +60,7 @@ const ICONS = {
   "information-circle-outline": Info,
   "key-outline": KeyRound,
   "layers-outline": Layers,
+  "link-outline": Link2,
   location: MapPin,
   "location-outline": MapPin,
   "lock-closed-outline": Lock,
@@ -77,10 +78,12 @@ const ICONS = {
   "partly-sunny-outline": CloudSun,
   "people-outline": Users,
   person: User,
+  "person-add-outline": UserPlus,
   "person-circle-outline": CircleUser,
   "person-outline": User,
   "phone-portrait-outline": Smartphone,
   pricetag: Tag,
+  "qr-code-outline": QrCode,
   "pulse-outline": Activity,
   "radio-button-off": Circle,
   "radio-button-on": CircleDot,

@@ -6,6 +6,7 @@ import { Platform, Pressable, View } from "react-native";
 
 import { errorMessage } from "@/api/client";
 import { openRestaurant } from "@/components/RestaurantCard";
+import ShareTabSheet from "@/components/Reserve/ShareTabSheet";
 import { Picture, Pill } from "@/components/ui/Bits";
 import { Button, tapFeedback } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/Sheet";
@@ -72,6 +73,7 @@ export default function BookingCard({ booking, kind }: { booking: Reservation; k
   const lead = usePrefs((s) => s.reminderLeadMinutes);
   const [reminder, setReminder] = useState(false);
   const [asking, setAsking] = useState(false);
+  const [sharing, setSharing] = useState(false);
 
   const upcoming = kind === "active";
   const seated = booking.status === "seated";
@@ -200,6 +202,13 @@ export default function BookingCard({ booking, kind }: { booking: Reservation; k
                 testID="toggle-reminder"
               />
             )}
+            <Quick
+              icon={booking.sharing ? "people-outline" : "person-add-outline"}
+              label={booking.sharing ? `Shared · ${booking.tabGuests ?? 0} joined` : "Share menu"}
+              active={booking.sharing}
+              onPress={() => setSharing(true)}
+              testID="share-tab"
+            />
             <Quick icon="navigate-outline" label="Directions" onPress={() => openDirections(booking)} />
             {booking.hasOrder && <Quick icon="receipt-outline" label="Track order" onPress={() => pushOnce(router, "/Order")} testID="track-order" />}
           </View>
@@ -236,6 +245,9 @@ export default function BookingCard({ booking, kind }: { booking: Reservation; k
         </View>
       )}
 
+      {upcoming && (
+        <ShareTabSheet visible={sharing} onClose={() => setSharing(false)} reservationId={booking.reservationId} restaurantName={booking.restaurantName} />
+      )}
       <ConfirmDialog
         visible={asking}
         title="Cancel this booking?"

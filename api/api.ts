@@ -16,6 +16,7 @@ import type {
   Restaurant,
   RestaurantDoc,
   TableAvailability,
+  TabInfo,
 } from "@/types";
 
 import { api } from "./client";
@@ -207,4 +208,23 @@ export async function requestBill(orderId: string, paymentMethod: PaymentMethod)
 
 export async function cancelOrder(orderId: string): Promise<Message> {
   return (await api.put<Message>(`/users/orders/${orderId}/cancel`)).data;
+}
+
+// --- Shared tab ----------------------------------------------------------------
+
+const tabPath = (userId: string, reservationId: string) => `/users/${userId}/reservations/${encodeURIComponent(reservationId)}/tab`;
+
+/** Whether a booking's menu is shared, its link, and who joined. */
+export async function fetchTab(userId: string, reservationId: string): Promise<TabInfo> {
+  return (await api.get<TabInfo>(tabPath(userId, reservationId))).data;
+}
+
+/** Creates the booking's share link, or returns the one already shared. */
+export async function shareTab(userId: string, reservationId: string): Promise<TabInfo> {
+  return (await api.post<TabInfo>(tabPath(userId, reservationId))).data;
+}
+
+/** Stops sharing. The old link stops working; dishes already ordered stay on the bill. */
+export async function stopTab(userId: string, reservationId: string): Promise<TabInfo> {
+  return (await api.delete<TabInfo>(tabPath(userId, reservationId))).data;
 }

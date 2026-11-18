@@ -212,6 +212,30 @@ export interface Reservation {
   rate?: number;
   restaurantId: string;
   hasOrder?: boolean;
+  /** The menu is shared: friends can add dishes to this booking's bill. */
+  sharing?: boolean;
+  /** Friends who joined the shared tab. */
+  tabGuests?: number;
+}
+
+/** A friend who joined a shared tab, with what they have ordered so far. */
+export interface TabGuest {
+  id: string;
+  name: string;
+  joinedAt: string;
+  items: number;
+  total: number;
+}
+
+/** A booking's share link and who joined through it. */
+export interface TabInfo {
+  open: boolean;
+  canShare: boolean;
+  url?: string;
+  code?: string;
+  openedAt?: string;
+  guests: TabGuest[];
+  maxGuests: number;
 }
 
 // --- Orders ------------------------------------------------------------------
@@ -227,6 +251,8 @@ export interface OrderLine {
   quantity: number;
   image?: string;
   note?: string;
+  /** The friend who ordered this line on your shared tab. */
+  addedBy?: string;
 }
 
 export interface Order {

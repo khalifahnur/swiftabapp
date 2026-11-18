@@ -2,7 +2,7 @@
   "expo": {
     "name": "Swiftab",
     "slug": "swiftabapp",
-    "version": "2.1.9",
+    "version": "3.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "swiftabapp",
